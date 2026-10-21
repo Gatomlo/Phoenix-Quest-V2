@@ -159,10 +159,10 @@ body {
 .hero { margin: 0 auto; }
 #contentImg { margin: 0 auto; }
 .stepImg, #contentImg img.stepImg {
-  display: block; width: 100%; max-height: 46vh; object-fit: cover;
+  /* Image entière (jamais rognée) : une image portrait, comme les règles du jeu, défile avec la page. */
+  display: block; width: 100%; height: auto;
   border-radius: 24px; margin: 0 auto;
 }
-.stepImg.with-hotspots { max-height: none; object-fit: contain; }
 
 /* Texte de l'étape : feuille repliable. */
 .desc {
