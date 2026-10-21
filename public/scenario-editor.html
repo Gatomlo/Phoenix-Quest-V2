@@ -4,19 +4,22 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>Éditeur de scénarios — Les Enquêtes du Phoenix</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amatic+SC:wght@400;700&family=Figtree:wght@400;500;600;700&display=swap">
+	<script src="shell.js"></script>
 	<link rel="stylesheet" href="admin.css">
 	<link rel="stylesheet" href="scenario-editor.css">
 </head>
 <body>
-	<header class="topbar">
-		<h1>Éditeur de scénarios</h1>
-		<a href="/admin/" class="btn btn-secondary">← Tableau de bord</a>
-	</header>
-
+	<div class="app-shell">
+	<aside id="appSide" class="side" data-active="scenarios"></aside>
+	<div class="app-main">
 	<main>
+		<div class="page-head"><h1>Scénarios</h1></div>
 		<section id="scenarioListView">
 			<div class="card">
-				<h2>Scénarios</h2>
+				<h2>Mes scénarios</h2>
 				<ul id="scenarioList" class="session-list"></ul>
 			</div>
 			<div class="card">
@@ -52,7 +55,7 @@
 					</div>
 				</div>
 
-				<details class="scenario-section" open>
+				<details class="scenario-section">
 					<summary>Paramètres généraux</summary>
 					<h4 class="field-group-title">Informations générales</h4>
 					<div class="form-grid">
@@ -235,6 +238,8 @@
 			</div>
 		</section>
 	</main>
+	</div>
+	</div>
 
 	<dialog id="confirmDialog" class="app-dialog">
 		<div class="modal-content">

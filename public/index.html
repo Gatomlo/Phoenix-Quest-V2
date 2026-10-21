@@ -4,9 +4,13 @@
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>Administration — Les Enquêtes du Phoenix</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amatic+SC:wght@400;700&family=Figtree:wght@400;500;600;700&display=swap">
+	<script src="shell.js"></script>
 	<link rel="stylesheet" href="admin.css">
 </head>
-<body>
+<body data-own-logout>
 	<div id="loginView" class="centered-view">
 		<form id="loginForm" class="card login-card">
 			<h1>Administration</h1>
@@ -17,134 +21,192 @@
 		</form>
 	</div>
 
-	<div id="dashboardView" hidden>
-		<header class="topbar">
-			<h1>Administration — Enquêtes du Phoenix</h1>
-			<div class="topbar-actions">
-				<a href="scenario-editor.html" class="btn btn-secondary">Scénarios</a>
-				<button id="logoutButton" class="btn btn-ghost">Déconnexion</button>
+	<div id="dashboardView" class="app-shell" hidden>
+		<aside id="appSide" class="side" data-active="parties"></aside>
+
+		<div class="app-main">
+			<div id="otherSessionBanner" class="other-session-banner" hidden>
+				<span id="otherSessionBannerText"></span>
+				<button id="otherSessionBannerButton" type="button" class="btn btn-sm btn-primary">Voir</button>
+				<button id="otherSessionBannerClose" type="button" class="banner-close-btn" aria-label="Fermer">&times;</button>
 			</div>
-		</header>
-		<div id="otherSessionBanner" class="other-session-banner" hidden>
-			<span id="otherSessionBannerText"></span>
-			<button id="otherSessionBannerButton" type="button" class="btn btn-sm btn-primary">Voir</button>
-			<button id="otherSessionBannerClose" type="button" class="banner-close-btn" aria-label="Fermer">&times;</button>
+
+			<main>
+				<section id="sessionListView">
+					<div class="page-head"><h1>Parties</h1></div>
+					<div class="home-grid">
+						<div class="card">
+							<h2>Nouvelle partie</h2>
+							<form id="createSessionForm" class="new-session-form">
+								<select id="scenarioCodeInput" required>
+									<option value="" disabled selected>Chargement des scénarios…</option>
+								</select>
+								<input type="text" id="sessionNameInput" placeholder="Nom de la partie (facultatif)">
+								<button type="submit" class="btn btn-primary">Lancer la partie</button>
+								<a id="globalLeaderboardLink" href="#" target="_blank" class="btn btn-ghost">Classement général de ce scénario</a>
+							</form>
+							<p class="muted">Un code à 6 caractères est généré pour les joueurs. Les réglages se modifient ensuite depuis la partie.</p>
+						</div>
+						<div class="card">
+							<div id="sessionList" class="session-groups"></div>
+						</div>
+					</div>
+				</section>
+
+				<section id="sessionDetailView" hidden>
+					<button id="backToListButton" class="btn btn-ghost btn-sm back-link">&larr; Toutes les parties</button>
+					<div class="session-head">
+						<div class="session-head-title">
+							<div class="crumb" id="sessionMeta"></div>
+							<h2 id="sessionTitle"></h2>
+						</div>
+						<span id="sessionStatusPill" class="badge"></span>
+						<span id="sessionCode" class="session-code"></span>
+						<div class="session-actions">
+							<a id="leaderboardLink" href="#" target="_blank" class="btn btn-secondary btn-icon-label" aria-label="Classement" title="Classement">
+								<svg class="btn-icon ico" viewBox="0 0 24 24"><path d="M8 4h8v5a4 4 0 01-8 0V4z"/><path d="M8 6H5a3 3 0 003 4M16 6h3a3 3 0 01-3 4M12 13v4M9 20h6"/></svg>
+								<span class="btn-label">Classement</span>
+							</a>
+							<a id="solutionGuideLink" href="#" target="_blank" class="btn btn-secondary btn-icon-label" aria-label="Solution" title="Solution">
+								<svg class="btn-icon ico" viewBox="0 0 24 24"><path d="M12 6c-2-1.3-5-1.6-8-1v13c3-.6 6-.3 8 1 2-1.3 5-1.6 8-1V5c-3-.6-6-.3-8 1zM12 6v13"/></svg>
+								<span class="btn-label">Solution</span>
+							</a>
+							<button id="pauseSessionButton" class="btn btn-primary btn-icon-label" aria-label="Mettre en pause" title="Pause">
+								<svg class="btn-icon ico" viewBox="0 0 24 24"><path d="M9 5v14M15 5v14"/></svg>
+								<span class="btn-label">Pause</span>
+							</button>
+							<button id="resumeSessionButton" class="btn btn-primary btn-icon-label" aria-label="Reprendre" title="Reprendre" hidden>
+								<svg class="btn-icon ico" viewBox="0 0 24 24"><path d="M7 5l12 7-12 7V5z"/></svg>
+								<span class="btn-label">Reprendre</span>
+							</button>
+							<button id="closeSessionButton" class="btn btn-danger btn-icon-label" aria-label="Clôturer la session" title="Clôturer">
+								<svg class="btn-icon ico" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/></svg>
+								<span class="btn-label">Clôturer</span>
+							</button>
+							<button id="reopenSessionButton" class="btn btn-primary btn-icon-label" aria-label="Réactiver la session" title="Réactiver" hidden>
+								<svg class="btn-icon ico" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 017.5-2"/></svg>
+								<span class="btn-label">Réactiver</span>
+							</button>
+							<button id="openMoreActionsButton" type="button" class="btn btn-ghost btn-icon-label" aria-label="Plus d'actions (réglages, sauvegardes)" title="Plus">
+								<svg class="btn-icon ico" viewBox="0 0 24 24"><g fill="currentColor" stroke="none"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></g></svg>
+								<span class="btn-label">Plus</span>
+							</button>
+						</div>
+					</div>
+
+					<div class="strip">
+						<div class="kpi"><small>Temps écoulé</small><b id="kpiElapsed">00:00:00</b></div>
+						<div class="kpi"><small>Équipes</small><b id="kpiTeams">0</b></div>
+						<div class="kpi"><small>Progression moyenne</small><b id="kpiProgress">0 %</b></div>
+						<div class="kpi" id="kpiOfflineBox"><small>Hors ligne</small><b id="kpiOffline">0</b></div>
+						<div class="kpi"><small>Indices donnés</small><b id="kpiHints">0</b></div>
+					</div>
+
+					<div class="session-body">
+						<div class="board">
+							<div id="alertBar" class="alert-bar" hidden>
+								<svg class="ico" viewBox="0 0 24 24"><path d="M12 4l9 16H3L12 4z"/><path d="M12 10v4M12 17h.01"/></svg>
+								<span id="alertText"></span>
+								<button type="button" id="alertGo" class="alert-go">Voir</button>
+							</div>
+							<div class="filters" id="teamFilters">
+								<button type="button" class="fl on" data-filter="all">Toutes</button>
+								<button type="button" class="fl" data-filter="offline">Hors ligne</button>
+								<button type="button" class="fl" data-filter="unread">Messages non lus</button>
+							</div>
+							<div id="teamsGrid" class="teams-grid"></div>
+							<p id="teamsEmpty" class="muted" hidden>Aucune équipe ne correspond.</p>
+						</div>
+						<aside id="teamPanel" class="team-panel" aria-label="Détail de l'équipe">
+							<p id="teamPanelEmpty" class="team-panel-empty">Sélectionnez une équipe pour afficher sa discussion, son historique et ses actions.</p>
+						</aside>
+					</div>
+				</section>
+			</main>
 		</div>
-
-		<main>
-			<section id="sessionListView">
-				<div class="card">
-					<h2>Nouvelle session</h2>
-					<form id="createSessionForm" class="inline-form">
-						<select id="scenarioCodeInput" required>
-							<option value="" disabled selected>Chargement des scénarios…</option>
-						</select>
-						<input type="text" id="sessionNameInput" placeholder="Nom de la session (optionnel)">
-						<button type="submit" class="btn btn-primary">Créer</button>
-						<a id="globalLeaderboardLink" href="#" target="_blank" class="btn btn-secondary">Classement général de ce scénario</a>
-					</form>
-				</div>
-				<div class="card">
-					<h2>Sessions</h2>
-					<div id="sessionList" class="session-groups"></div>
-				</div>
-			</section>
-
-			<section id="sessionDetailView" hidden>
-				<button id="backToListButton" class="btn btn-ghost">&larr; Toutes les sessions</button>
-				<div class="session-header card">
-					<div>
-						<h2 id="sessionTitle"></h2>
-						<p id="sessionMeta" class="muted"></p>
-					</div>
-					<div class="session-actions">
-						<a id="leaderboardLink" href="#" target="_blank" class="btn btn-secondary btn-icon-label" aria-label="Classement public">
-							<svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M2.5.5A.5.5 0 0 1 3 0h10a.5.5 0 0 1 .5.5c0 .538-.012 1.05-.034 1.536a3 3 0 1 1-1.133 5.89c-.79 1.865-1.878 2.777-2.833 3.011v2.173l1.425.356c.194.048.377.135.537.255L13.3 15.1a.5.5 0 0 1-.3.9H3a.5.5 0 0 1-.3-.9l1.838-1.379c.16-.12.343-.207.537-.255L6.5 13.11v-2.173c-.955-.234-2.043-1.146-2.833-3.012a3 3 0 1 1-1.132-5.89A33 33 0 0 1 2.5.5m.099 2.54a2 2 0 0 0 .72 3.935c-.333-1.05-.588-2.346-.72-3.935m10.802 0c-.133 1.59-.388 2.885-.72 3.935a2 2 0 0 0 .72-3.935"/></svg>
-							<span class="btn-label">Classement</span>
-						</a>
-						<a id="solutionGuideLink" href="#" target="_blank" class="btn btn-secondary btn-icon-label" aria-label="Guide de solution (lecture)">
-							<svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M8 3.5c-1.5-1-4.5-1.5-6-.5v9c1.5-1 4.5-.5 6 .5 1.5-1 4.5-1.5 6-.5v-9c-1.5-1-4.5-.5-6 .5m0 0v9"/></svg>
-							<span class="btn-label">Solution</span>
-						</a>
-						<button id="pauseSessionButton" class="btn btn-primary btn-icon-label" aria-label="Mettre en pause">
-							<svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M6 3.5a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0V4a.5.5 0 0 1 .5-.5m4 0a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0V4a.5.5 0 0 1 .5-.5"/></svg>
-							<span class="btn-label">Pause</span>
-						</button>
-						<button id="resumeSessionButton" class="btn btn-primary btn-icon-label" aria-label="Reprendre" hidden>
-							<svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M10.804 8 5 4.633v6.734zm.792-.696a.802.802 0 0 1 0 1.392l-6.363 3.692C4.713 12.69 4 12.345 4 11.692V4.308c0-.653.713-.998 1.233-.696z"/></svg>
-							<span class="btn-label">Reprendre</span>
-						</button>
-						<button id="closeSessionButton" class="btn btn-danger btn-icon-label" aria-label="Clôturer la session">
-							<svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2m3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2"/></svg>
-							<span class="btn-label">Clôturer</span>
-						</button>
-						<button id="reopenSessionButton" class="btn btn-primary btn-icon-label" aria-label="Réactiver la session" hidden>
-							<svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M11 1a2 2 0 0 1 2 2v4a.5.5 0 0 1-1 0V3a1 1 0 0 0-1-1H6a1 1 0 0 0-1 1v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2H5V3a2 2 0 0 1 2-2z"/></svg>
-							<span class="btn-label">Réactiver</span>
-						</button>
-						<button id="openMoreActionsButton" type="button" class="btn btn-secondary btn-icon-label" aria-label="Plus d'actions (réglages, sauvegardes)">
-							<svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M3 9.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3m5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3m5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3"/></svg>
-							<span class="btn-label">Plus</span>
-						</button>
-					</div>
-				</div>
-				<div id="teamsGrid" class="teams-grid"></div>
-			</section>
-		</main>
 	</div>
 
 	<template id="teamCardTemplate">
-		<div class="card team-card">
-			<div class="team-card-header">
-				<h3 class="team-name-row"><span class="presence-dot" title=""></span><span class="team-name"></span><span class="team-unread-dot" title="Message non lu" hidden></span></h3>
-				<span class="team-status badge"></span>
-			</div>
-			<div class="team-transfer-row">
-				<button type="button" class="btn btn-sm btn-secondary btn-icon-label team-transfer-btn" aria-label="Transférer (QR)">
-					<svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M0 .5A.5.5 0 0 1 .5 0h3a.5.5 0 0 1 0 1H1v2.5a.5.5 0 0 1-1 0zm12 0a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 .5.5v3a.5.5 0 0 1-1 0V1h-2.5a.5.5 0 0 1-.5-.5M.5 12a.5.5 0 0 1 .5.5V15h2.5a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5v-3a.5.5 0 0 1 .5-.5m15 0a.5.5 0 0 1 .5.5v3a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1 0-1H15v-2.5a.5.5 0 0 1 .5-.5M4 4h1v1H4z"/><path d="M7 2H2v5h5zM3 3h3v3H3zm2 8H4v1h1z"/><path d="M7 9H2v5h5zm-4 1h3v3H3zm8-6h1v1h-1z"/><path d="M9 2h5v5H9zm1 1v3h3V3zM8 8v2h1v1H8v1h2v-2h1v2h1v-1h2v-1h-3V8zm2 2H9V9h1zm4 2h-1v1h-2v1h3zm-4 2v-1H8v1z"/><path d="M12 9h2V8h-2z"/></svg>
-					<span class="btn-label">Transférer (QR)</span>
-				</button>
-				<button type="button" class="btn btn-sm btn-secondary btn-icon-label team-save-btn" aria-label="Sauvegarder l'état">
-					<svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M11 2H9v3h2z"/><path d="M1.5 0h11.586a1.5 1.5 0 0 1 1.06.44l1.415 1.414A1.5 1.5 0 0 1 16 2.914V14.5a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 0 14.5v-13A1.5 1.5 0 0 1 1.5 0M1 1.5v13a.5.5 0 0 0 .5.5H2v-4.5A1.5 1.5 0 0 1 3.5 9h9a1.5 1.5 0 0 1 1.5 1.5V15h.5a.5.5 0 0 0 .5-.5V2.914a.5.5 0 0 0-.146-.353l-1.415-1.415A.5.5 0 0 0 13.086 1H13v4.5A1.5 1.5 0 0 1 11.5 7h-7A1.5 1.5 0 0 1 3 5.5V1H1.5a.5.5 0 0 0-.5.5m9.5 0v4a.5.5 0 0 1-.5.5h-6a.5.5 0 0 1-.5-.5V1zM3 15h9v-4.5a.5.5 0 0 0-.5-.5h-8a.5.5 0 0 0-.5.5z"/></svg>
-					<span class="btn-label">Sauvegarder l'état</span>
-				</button>
+		<div class="tc team-card" tabindex="0" role="button">
+			<div class="tc-head">
+				<span class="presence-dot" title=""></span>
+				<b class="team-name"></b>
+				<span class="team-unread-dot msgdot" title="Messages non lus" hidden></span>
 			</div>
 			<div class="progress-bar"><div class="progress-bar-fill"></div></div>
 			<dl class="team-stats">
 				<div><dt>Progression</dt><dd class="stat-progress"></dd></div>
 				<div><dt>Temps</dt><dd class="stat-time"></dd></div>
-				<div>
-					<dt>Indices</dt>
-					<dd class="stat-hints-row">
-						<span class="stat-hints"></span>
-						<button type="button" class="hint-adjust-btn hint-minus" title="Retirer un indice">−</button>
-						<button type="button" class="hint-adjust-btn hint-plus" title="Donner un indice">+</button>
-					</dd>
-				</div>
-				<div><dt>Étape</dt><dd class="stat-step"></dd></div>
-				<div><dt>Dernier signal</dt><dd class="stat-lastseen"></dd></div>
+				<div><dt>Indices</dt><dd class="stat-hints"></dd></div>
 			</dl>
-			<form class="unlock-form inline-form">
-				<select class="unlock-step-input">
-					<option value="" disabled selected>Choisir une étape…</option>
-				</select>
-				<button type="submit" class="btn btn-secondary">Ajouter</button>
-			</form>
-			<div class="unlock-step-preview"></div>
-			<details class="history-section" name="admin-accordion">
-				<summary>Historique</summary>
-				<ul class="history-list"></ul>
-			</details>
-			<details class="chat-section" name="admin-accordion" open>
-				<summary>Messagerie<span class="chat-summary-unread-dot" title="Nouveau message" hidden></span></summary>
+			<div class="tc-foot">
+				<span class="tc-step">Étape : <span class="stat-step"></span></span>
+				<span class="team-status badge"></span>
+			</div>
+		</div>
+	</template>
+
+	<template id="teamPanelTemplate">
+		<div class="tp" hidden>
+			<div class="ph">
+				<div class="row">
+					<span class="presence-dot panel-dot"></span>
+					<h4 class="panel-team-name"></h4>
+					<button type="button" class="panel-close" aria-label="Fermer">&times;</button>
+				</div>
+				<small>Dernier signal : <span class="stat-lastseen"></span></small>
+			</div>
+			<div class="tabs" role="tablist">
+				<button type="button" class="tb on" data-tab="chat" role="tab">Discussion<span class="chat-summary-unread-dot" title="Nouveau message" hidden></span></button>
+				<button type="button" class="tb" data-tab="history" role="tab">Historique</button>
+				<button type="button" class="tb" data-tab="actions" role="tab">Actions</button>
+			</div>
+			<div class="pane pane-chat" data-pane="chat">
 				<div class="chat-thread"><p class="chat-empty">Aucun message pour l'instant.</p></div>
 				<form class="chat-form inline-form">
 					<input type="text" class="chat-input" placeholder="Message à l'équipe...">
-					<button type="submit" class="btn btn-primary">Envoyer</button>
+					<button type="submit" class="btn btn-primary" aria-label="Envoyer">Envoyer</button>
 				</form>
-			</details>
+			</div>
+			<div class="pane" data-pane="history" hidden>
+				<ul class="history-list"></ul>
+			</div>
+			<div class="pane" data-pane="actions" hidden>
+				<div class="action-block">
+					<small>Débloquer une étape</small>
+					<form class="unlock-form inline-form">
+						<select class="unlock-step-input">
+							<option value="" disabled selected>Choisir une étape…</option>
+						</select>
+						<button type="submit" class="btn btn-secondary">Ajouter</button>
+					</form>
+					<div class="unlock-step-preview"></div>
+				</div>
+				<div class="action-block">
+					<small>Indices</small>
+					<div class="stat-hints-row">
+						<button type="button" class="hint-adjust-btn hint-minus" title="Retirer un indice" aria-label="Retirer un indice">−</button>
+						<span class="panel-hints">0</span>
+						<button type="button" class="hint-adjust-btn hint-plus" title="Donner un indice" aria-label="Donner un indice">+</button>
+					</div>
+				</div>
+				<div class="action-block">
+					<small>Téléphone</small>
+					<div class="action-row">
+						<button type="button" class="btn btn-sm btn-secondary btn-icon-label team-transfer-btn">
+							<svg class="btn-icon ico" viewBox="0 0 24 24"><path d="M4 8V5a1 1 0 011-1h3M16 4h3a1 1 0 011 1v3M20 16v3a1 1 0 01-1 1h-3M8 20H5a1 1 0 01-1-1v-3"/><path d="M4 12h16"/></svg>
+							<span class="btn-label">Transférer (QR)</span>
+						</button>
+						<button type="button" class="btn btn-sm btn-secondary btn-icon-label team-save-btn">
+							<svg class="btn-icon ico" viewBox="0 0 24 24"><path d="M5 4h11l3 3v13H5V4z"/><path d="M8 4v5h7V4M8 20v-6h8v6"/></svg>
+							<span class="btn-label">Sauvegarder l'état</span>
+						</button>
+					</div>
+				</div>
+			</div>
 		</div>
 	</template>
+
 
 	<dialog id="stepPreviewModal" class="app-dialog">
 		<div class="modal-content">
@@ -226,11 +288,11 @@
 			</div>
 			<div class="modal-body more-actions-menu">
 				<button type="button" id="moreActionsSettingsItem" class="btn btn-secondary btn-icon-label">
-					<svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M9.405 1.05c-.413-1.4-2.397-1.4-2.81 0l-.1.34a1.464 1.464 0 0 1-2.105.872l-.31-.17c-1.283-.698-2.686.705-1.987 1.987l.169.311c.446.82.023 1.841-.872 2.105l-.34.1c-1.4.413-1.4 2.397 0 2.81l.34.1a1.464 1.464 0 0 1 .872 2.105l-.17.31c-.698 1.283.705 2.686 1.987 1.987l.311-.169a1.464 1.464 0 0 1 2.105.872l.1.34c.413 1.4 2.397 1.4 2.81 0l.1-.34a1.464 1.464 0 0 1 2.105-.872l.31.17c1.283.698 2.686-.705 1.987-1.987l-.169-.311a1.464 1.464 0 0 1 .872-2.105l.34-.1c1.4-.413 1.4-2.397 0-2.81l-.34-.1a1.464 1.464 0 0 1-.872-2.105l.17-.31c.698-1.283-.705-2.686-1.987-1.987l-.311.169a1.464 1.464 0 0 1-2.105-.872zM8 10.93a2.929 2.929 0 1 1 0-5.86 2.929 2.929 0 0 1 0 5.858z"/></svg>
+					<svg class="btn-icon ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/></svg>
 					<span class="btn-label">Réglages de cette session</span>
 				</button>
 				<button type="button" id="moreActionsSavesItem" class="btn btn-secondary btn-icon-label">
-					<svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M11 2H9v3h2z"/><path d="M1.5 0h11.586a1.5 1.5 0 0 1 1.06.44l1.415 1.414A1.5 1.5 0 0 1 16 2.914V14.5a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 0 14.5v-13A1.5 1.5 0 0 1 1.5 0M1 1.5v13a.5.5 0 0 0 .5.5H2v-4.5A1.5 1.5 0 0 1 3.5 9h9a1.5 1.5 0 0 1 1.5 1.5V15h.5a.5.5 0 0 0 .5-.5V2.914a.5.5 0 0 0-.146-.353l-1.415-1.415A.5.5 0 0 0 13.086 1H13v4.5A1.5 1.5 0 0 1 11.5 7h-7A1.5 1.5 0 0 1 3 5.5V1H1.5a.5.5 0 0 0-.5.5m9.5 0v4a.5.5 0 0 1-.5.5h-6a.5.5 0 0 1-.5-.5V1zM3 15h9v-4.5a.5.5 0 0 0-.5-.5h-8a.5.5 0 0 0-.5.5z"/></svg>
+					<svg class="btn-icon ico" viewBox="0 0 24 24"><path d="M5 4h11l3 3v13H5V4z"/><path d="M8 4v5h7V4M8 20v-6h8v6"/></svg>
 					<span class="btn-label">Sauvegardes du scénario</span>
 				</button>
 			</div>

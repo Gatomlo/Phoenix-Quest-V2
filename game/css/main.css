@@ -1,807 +1,467 @@
-/* Chat animateur <-> équipe et classement (intégration backend, Phase 5) */
-#chatButton { position: relative; }
-#chatUnreadDot {
-  position: absolute;
-  top: 4px;
-  right: 4px;
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: #d7263d;
-  border: 2px solid #fff;
-}
-.chat-thread {
-  max-height: 50vh;
-  overflow-y: auto;
-  border: 1px solid #e3e5ea;
-  border-radius: .5rem;
-  padding: .5rem;
-  margin-bottom: .75rem;
-  display: flex;
-  flex-direction: column;
-  gap: .4rem;
-}
-.chat-message {
-  padding: .5rem .75rem;
-  border-radius: .75rem;
-  max-width: 85%;
-  word-break: break-word;
-}
-.chat-message.admin { align-self: flex-start; background: #eef0f3; }
-.chat-message.team { align-self: flex-end; background: var(--color2, #ff934f); color: #fff; }
-.chat-empty { align-self: center; color: #6b7280; font-size: .9rem; margin: auto; }
-.chat-form { display: flex; gap: .5rem; }
-.chat-form input { flex: 1; }
+/* Les Enquêtes du Phoenix — interface joueur v2 (smartphone d'abord).
+   Palette « ranch » (cuir, parchemin, braise, feuille). Les couleurs d'un
+   scénario (color1/color2/color3/titleColor, posées sur :root par
+   core/theme via scenario.js) restent prioritaires en mode jour ; le mode nuit
+   garde sa propre palette et ne reprend que la couleur d'accent. */
 
-/* Classement en cartes empilées (une équipe par ligne, ses statistiques en
-   dessous) plutôt qu'un tableau à 6 colonnes : celui-ci ne tenait pas dans
-   la largeur d'une modale sur mobile, forçant un défilement horizontal peu
-   naturel à cet endroit. Cet empilement affiche tout sans glissière, quelle
-   que soit la largeur d'écran. */
-.leaderboard-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: .6rem; }
-.leaderboard-row {
-  padding: .6rem .75rem;
-  border: 1px solid #e3e5ea;
-  border-radius: .5rem;
+:root {
+  --cuir: #2a1d15;
+  --encre: #2b2118;
+  --muted: #7a6a58;
+  --page: var(--color1, #f1e4c8);
+  --carte: var(--color3, #fbf3e2);
+  --chip: #e6d3ae;
+  --line: rgba(43, 33, 24, .14);
+  --soft: rgba(43, 33, 24, .08);
+  --accent: var(--color2, #ff934f);
+  --accent-d: color-mix(in srgb, var(--accent) 78%, #000);
+  --on-accent: #2a1d15;
+  --danger: #d7263d;
+  --ok: #4b967d;
+  --nav-bg: #2a1d15;
+  --nav-ink: #bfa98f;
+  --timer-bg: #2a1d15;
+  --timer-ink: #f1e4c8;
+  --input-bg: #fffdf7;
+  --font-display: "Amatic SC", "Segoe Print", cursive;
+  --font-text: "Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --nav-h: 78px;
+  color-scheme: light;
 }
-.leaderboard-first { border-color: var(--color2, #ff934f); background: color-mix(in srgb, var(--color2, #ff934f) 8%, #fff); }
-.leaderboard-rank-name { display: flex; align-items: baseline; gap: .5rem; margin-bottom: .5rem; flex-wrap: wrap; }
-.leaderboard-rank { font-weight: 700; color: var(--color2, #ff934f); }
-.leaderboard-team { font-weight: 700; }
-.leaderboard-stats {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: .35rem .75rem;
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --cuir: #17100b; --encre: #f1e4c8; --muted: #b09d84;
+    --page: #1b1410; --carte: #261c14; --chip: #33261c;
+    --line: rgba(241, 228, 200, .14); --soft: rgba(241, 228, 200, .08);
+    --nav-bg: #120c08; --timer-bg: #33261c; --input-bg: #1b1410;
+    --danger: #ff6074; color-scheme: dark;
+  }
 }
-.leaderboard-stats > div { display: flex; justify-content: space-between; gap: .5rem; font-size: .92em; }
-.leaderboard-stat-label { color: #6b7280; }
-.leaderboard-stat-value { font-weight: 600; }
+:root[data-theme="dark"] {
+  --cuir: #17100b; --encre: #f1e4c8; --muted: #b09d84;
+  --page: #1b1410; --carte: #261c14; --chip: #33261c;
+  --line: rgba(241, 228, 200, .14); --soft: rgba(241, 228, 200, .08);
+  --nav-bg: #120c08; --timer-bg: #33261c; --input-bg: #1b1410;
+  --danger: #ff6074; color-scheme: dark;
+}
 
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--page);
+  color: var(--encre);
+  font-family: var(--font-text);
+  line-height: 1.5;
+  -webkit-tap-highlight-color: transparent;
+}
+.ico { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+
+/* --- Composants Bootstrap conservés, recolorés ------------------------------ */
+.btn { font-family: var(--font-text); font-weight: 700; border-radius: 14px; min-height: 44px; }
+.btn-primary, .btn-primary:hover, .btn-primary:active, .btn-primary:focus-visible {
+  background-color: var(--accent) !important; border: 1px solid var(--accent) !important; color: var(--on-accent) !important;
+}
+.btn-primary:hover, .btn-primary:active { background-color: var(--accent-d) !important; border-color: var(--accent-d) !important; }
+.btn-secondary { background-color: var(--chip); border-color: var(--chip); color: var(--encre); }
+.btn-secondary:hover { background-color: var(--soft); color: var(--encre); }
+.btn-danger { background-color: var(--danger); border-color: var(--danger); color: #fff; }
+.btn-ghost { background: transparent; border: 1.5px solid var(--line); color: var(--encre); }
+.btn-success { background-color: var(--ok) !important; color: #fff; border: none; }
+.btn-success:hover { filter: brightness(.92); }
+.form-control {
+  background-color: var(--input-bg); color: var(--encre);
+  border: 1.5px solid var(--line); border-radius: 14px;
+  min-height: 48px; font-size: 1rem;
+}
+.form-control:focus { background-color: var(--input-bg); color: var(--encre); border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 28%, transparent); }
+.card {
+  background: var(--carte); color: var(--encre);
+  border: none; border-radius: 20px;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, .05);
+}
+.card-body { background: transparent; }
+.toast { border-radius: 16px; overflow: hidden; }
+.badge.text-bg-primary { background-color: var(--accent) !important; color: var(--on-accent) !important; }
+.muted { color: var(--muted); font-size: .9rem; }
+
+/* --- Écrans plein cadre : chargement, session verrouillée, bandeau de mise à jour --- */
+.loading-screen {
+  position: fixed; inset: 0; z-index: 1000;
+  background: var(--page); color: var(--encre);
+  text-align: center; padding-top: 30vh;
+}
 .session-locked-screen {
-  position: fixed;
-  inset: 0;
-  z-index: 3000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 1.5rem;
-  background: rgba(31, 36, 48, .85);
+  position: fixed; inset: 0; z-index: 3000;
+  display: flex; align-items: center; justify-content: center;
+  padding: 1.5rem; background: rgba(20, 12, 7, .85);
 }
 .session-locked-card {
-  background: #fff;
-  border-radius: .75rem;
-  padding: 2rem;
-  max-width: 400px;
-  text-align: center;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, .25);
+  background: var(--carte); color: var(--encre);
+  border-radius: 24px; padding: 2rem; max-width: 400px; text-align: center;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, .35);
 }
-.session-locked-card h2 { color: var(--color2, #b6390e); margin-top: 0; }
-.session-locked-card .muted { color: #6b7280; font-size: .9rem; }
-.session-locked-custom {
-  background: #f3ebde;
-  border-radius: .5rem;
-  padding: .75rem 1rem;
-  font-style: italic;
-  white-space: pre-line;
-}
-
+.session-locked-card h2 { font-family: var(--font-display); font-size: 2.4rem; font-weight: 700; color: var(--accent-d); margin-top: 0; line-height: 1; }
+.session-locked-custom { background: var(--soft); border-radius: 14px; padding: .75rem 1rem; font-style: italic; white-space: pre-line; }
 .update-banner {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: .75rem;
-  flex-wrap: wrap;
-  padding: .6rem 1rem;
-  background-color: #2c3e50;
-  color: #fff;
-  text-align: center;
-  font-size: .95rem;
+  display: flex; align-items: center; justify-content: center; gap: .75rem; flex-wrap: wrap;
+  padding: .6rem 1rem; background-color: var(--cuir); color: #f1e4c8; text-align: center; font-size: .95rem;
 }
 
-/* Thème par scénario : ces variables sont posées sur :root par core/theme.js
-   à partir de scenario.json (color1/color2/color3/titleColor). Les valeurs de
-   repli ci-dessous reproduisent l'apparence par défaut (aucune couleur définie). */
-#titleText, #MobileRules, #mobileTitleMenu, #titleMenu, #rules { color: var(--title-color, inherit); }
+/* --- Structure de l'écran de jeu -------------------------------------------- */
+.app { max-width: 560px; margin: 0 auto; min-height: 100vh; min-height: 100dvh; padding-bottom: calc(var(--nav-h) + 24px + env(safe-area-inset-bottom)); }
 
-/* Modals natives <dialog> (remplace le JS modal de Bootstrap) */
+.app-hdr {
+  position: sticky; top: 0; z-index: 20;
+  display: flex; align-items: center; gap: 10px;
+  padding: calc(10px + env(safe-area-inset-top)) 14px 10px;
+  background: var(--page);
+}
+.spacer { flex: 1; }
+
+/* Anneau de progression : --p (0-100) posé par render.js (syncProgressBar). */
+.ring {
+  --p: 0;
+  position: relative; width: 44px; height: 44px; flex: none;
+  border-radius: 50%; display: grid; place-items: center;
+  background: conic-gradient(var(--accent) calc(var(--p) * 1%), var(--soft) 0);
+}
+.ring::after { content: ""; position: absolute; inset: 4px; border-radius: 50%; background: var(--page); }
+#myBar { position: relative; z-index: 1; width: auto !important; background: none !important; font-size: 11px; font-weight: 700; color: var(--encre); transition: none; }
+
+#timer.timer, .timer {
+  background: var(--timer-bg) !important; color: var(--timer-ink) !important;
+  border-radius: 999px; padding: 7px 14px;
+  font-weight: 700; font-size: 14px; font-variant-numeric: tabular-nums; letter-spacing: .02em;
+  width: auto; min-width: 0; text-align: center; margin: 0;
+}
+
+.iconbtn {
+  position: relative; width: 44px; height: 44px; border-radius: 50%;
+  display: grid; place-items: center; padding: 0; border: 0;
+  background: var(--soft); color: var(--encre); cursor: pointer;
+  max-width: none;
+}
+.iconbtn.menu-btn { background: transparent; border: 1.5px solid var(--line); }
+#chatUnreadDot {
+  position: absolute; top: 8px; right: 9px; width: 10px; height: 10px;
+  border-radius: 50%; background: var(--danger); border: 2px solid var(--page);
+}
+
+.app-main { padding: 0 14px; }
+.step-title {
+  margin: 4px 2px 10px; font-family: var(--font-display); font-weight: 700; line-height: .95;
+  font-size: 2.3rem; color: var(--title-color, var(--encre));
+}
+#stepName { color: var(--title-color, var(--encre)); font-size: 2.3rem; margin-bottom: 10px; }
+
+/* Contenu de l'étape : image ou widget de cadenas. */
+.hero { margin: 0 auto; }
+#contentImg { margin: 0 auto; }
+.stepImg, #contentImg img.stepImg {
+  display: block; width: 100%; max-height: 46vh; object-fit: cover;
+  border-radius: 24px; margin: 0 auto;
+}
+.stepImg.with-hotspots { max-height: none; object-fit: contain; }
+
+/* Texte de l'étape : feuille repliable. */
+.desc {
+  margin-top: 12px; padding: 12px 16px 14px;
+  border-radius: 22px; background: var(--carte);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, .05);
+}
+.desc .grab { width: 36px; height: 4px; border-radius: 4px; background: var(--line); margin: 0 auto 10px; }
+.desc-text { font-size: 1rem; line-height: 1.55; overflow-wrap: anywhere; }
+.desc-text p:last-child { margin-bottom: 0; }
+.desc.collapsed .desc-text { max-height: 7.75em; overflow: hidden; }
+/* Dégradé de fin de texte seulement quand le texte est réellement tronqué. */
+.desc.collapsed.clamped .desc-text {
+  -webkit-mask-image: linear-gradient(#000 62%, transparent);
+  mask-image: linear-gradient(#000 62%, transparent);
+}
+#scoring { margin: .5rem 0 0; }
+#scoring:empty { display: none; }
+.more {
+  display: flex; align-items: center; justify-content: center; gap: 4px;
+  width: 100%; margin-top: 8px; padding: 6px 0; border: 0; background: none;
+  font: inherit; font-size: .85rem; font-weight: 700; color: var(--accent-d); cursor: pointer; min-height: 40px;
+}
+.more[hidden] { display: none; }
+.more .ico { width: 18px; height: 18px; transition: transform .2s; }
+.more:not(.open) .ico { transform: rotate(180deg); }
+
+/* --- Barre du bas ------------------------------------------------------------ */
+.nav {
+  position: fixed; left: 50%; bottom: 0; transform: translateX(-50%); z-index: 30;
+  width: min(100%, 560px); height: calc(var(--nav-h) + env(safe-area-inset-bottom));
+  background: var(--nav-bg); border-radius: 26px 26px 0 0;
+  display: flex; align-items: center; justify-content: center;
+  padding: 0 6px calc(8px + env(safe-area-inset-bottom));
+}
+.nav-side { flex: 1; display: flex; align-items: center; justify-content: space-around; min-width: 0; }
+.tab {
+  position: relative; background: none; border: 0; color: var(--nav-ink);
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  font: inherit; font-size: .68rem; font-weight: 600;
+  min-width: 56px; min-height: 52px; padding: 6px 4px; cursor: pointer; max-width: none;
+}
+.tab:active, .tab:hover { color: #f1e4c8; }
+.tab-ico { display: grid; place-items: center; }
+.tab-ico svg { width: 24px; height: 24px; }
+.tab-badge {
+  position: absolute; top: 2px; left: calc(50% + 6px);
+  min-width: 17px; height: 17px; padding: 0 4px; border-radius: 9px;
+  background: var(--accent); color: var(--on-accent);
+  font-size: .65rem; font-weight: 700; display: grid; place-items: center;
+}
+#hintCountdown { padding: 0 !important; }
+.fab {
+  width: 62px; height: 62px; flex: none; border-radius: 50%; border: 0;
+  margin: -34px 4px 0; display: grid; place-items: center; cursor: pointer;
+  background: linear-gradient(160deg, color-mix(in srgb, var(--accent) 80%, #fff), var(--accent-d));
+  color: var(--on-accent);
+  box-shadow: 0 8px 18px -4px color-mix(in srgb, var(--accent-d) 70%, transparent), 0 0 0 6px var(--nav-bg);
+}
+.fab .ico { width: 28px; height: 28px; stroke-width: 2.1; }
+.gameInterfaceButton:disabled { opacity: .45; }
+
+/* --- Feuilles (les <dialog> natifs montent du bas de l'écran) --------------------- */
 dialog.app-dialog {
-  border: none;
-  padding: 0;
-  background: transparent;
-  width: min(92vw, 900px);
-  max-height: 90vh;
-  overflow: auto;
-  border-radius: .5rem;
+  border: none; padding: 0; color: var(--encre);
+  background: var(--page);
+  position: fixed; inset: auto 0 0 0; margin: 0 auto;
+  width: min(100%, 560px); max-width: 100%;
+  max-height: 86vh; max-height: 86dvh; overflow: auto;
+  border-radius: 28px 28px 0 0;
+  box-shadow: 0 -10px 40px rgba(0, 0, 0, .35);
 }
-/* .modal-content / -header / -body / -footer gardent leurs classes Bootstrap
-   pour le layout (flex, alignement), mais leurs couleurs/espacements sont
-   redéfinis ici : ces classes s'appuyaient sur des variables CSS que
-   Bootstrap ne définit que sous le sélecteur .modal, retiré au profit de <dialog>. */
-dialog.app-dialog .modal-content {
-  background-color: #fff;
-  border: 1px solid rgba(0, 0, 0, .175);
-  border-radius: .5rem;
-}
+dialog.app-dialog::backdrop { background: rgba(20, 12, 7, .55); }
+dialog.app-dialog .modal-dialog { margin: 0; max-width: none; width: 100%; height: auto; }
+dialog.app-dialog .modal-content { background: transparent; border: 0; border-radius: 0; color: var(--encre); }
 dialog.app-dialog .modal-header {
-  padding: 1rem;
-  border-bottom: 1px solid #dee2e6;
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  padding: 18px 18px 6px; border: 0; position: relative;
 }
-dialog.app-dialog .modal-body {
-  padding: 1rem;
+dialog.app-dialog .modal-header::before {
+  content: ""; position: absolute; top: 8px; left: 50%; width: 36px; height: 4px; margin-left: -18px;
+  border-radius: 4px; background: var(--line);
 }
-dialog.app-dialog .modal-footer {
-  padding: .75rem;
-  border-top: 1px solid #dee2e6;
+dialog.app-dialog .modal-title, #itemListTitle, #locationListTitle {
+  font-family: var(--font-display); font-weight: 700; line-height: 1; font-size: 2rem; margin: 0;
+  color: var(--title-color, var(--encre));
 }
-#menuModal .modal-footer {
-  padding-right: 1.25rem;
+dialog.app-dialog .modal-body { padding: 8px 18px 22px; }
+dialog.app-dialog .modal-footer { padding: 0 18px 22px; border: 0; justify-content: flex-start; color: var(--muted); }
+dialog.app-dialog .btn-close {
+  flex-shrink: 0; width: 44px; height: 44px; min-width: 44px; min-height: 44px; padding: 0; opacity: 1;
+  border-radius: 50%; background-color: var(--soft);
+  background-image: none; position: relative; border: 0;
 }
-dialog.app-dialog-fullscreen .modal-content {
-  height: 100%;
-  border: 0;
-  border-radius: 0;
-}
-dialog.app-dialog::backdrop {
-  background: rgba(0, 0, 0, .5);
-}
-/* Transition d'ouverture/fermeture (dégradée avec élégance : sans support de
-   @starting-style, le navigateur affiche/masque simplement sans animation). */
+dialog.app-dialog .btn-close::before { content: "×"; font-size: 1.7rem; line-height: 44px; color: var(--encre); display: block; text-align: center; }
+dialog.app-dialog .btn-close:hover { background-color: var(--line); }
+
 @media (prefers-reduced-motion: no-preference) {
   dialog.app-dialog {
-    opacity: 1;
-    transform: scale(1);
-    transition: opacity .18s ease, transform .18s ease,
-      overlay .18s ease allow-discrete, display .18s ease allow-discrete;
+    transform: translateY(0);
+    transition: transform .3s cubic-bezier(.2, .8, .2, 1), overlay .3s allow-discrete, display .3s allow-discrete;
   }
-  dialog.app-dialog::backdrop {
-    opacity: 1;
-    transition: opacity .18s ease, overlay .18s ease allow-discrete, display .18s ease allow-discrete;
-  }
-  dialog.app-dialog:not([open]) {
-    opacity: 0;
-    transform: scale(.96);
-  }
+  dialog.app-dialog:not([open]) { transform: translateY(100%); }
+  dialog.app-dialog::backdrop { transition: opacity .25s, overlay .25s allow-discrete, display .25s allow-discrete; }
   @starting-style {
-    dialog.app-dialog[open] {
-      opacity: 0;
-      transform: scale(.96);
-    }
-    dialog.app-dialog[open]::backdrop {
-      opacity: 0;
-    }
+    dialog.app-dialog[open] { transform: translateY(100%); }
+    dialog.app-dialog[open]::backdrop { opacity: 0; }
   }
 }
+
+/* Écrans de connexion / inscription : plein écran sombre, un seul gros bouton. */
 dialog.app-dialog-fullscreen {
-  width: 100vw;
-  height: 100vh; /* repli si dvh non supporté */
-  height: 100dvh; /* hauteur réelle visible : sur mobile, 100vh inclut la
-    zone sous la barre d'adresse, ce qui poussait le haut de la modale
-    (le titre) hors de l'écran une fois centrée par le navigateur. */
-  max-width: 100vw;
-  max-height: 100vh;
-  max-height: 100dvh;
+  inset: 0; width: 100vw; max-width: 100vw; height: 100vh; height: 100dvh; max-height: none;
+  border-radius: 0; box-shadow: none;
 }
-dialog.app-dialog .modal-dialog {
-  margin: 0;
-  max-width: none;
-  width: 100%;
-  height: 100%;
-}
+dialog.login-dialog { background: var(--cuir); color: #f1e4c8; }
+dialog.login-dialog .modal-dialog { height: 100%; max-width: 480px; margin: 0 auto; }
+dialog.login-dialog .modal-content { padding: calc(28px + env(safe-area-inset-top)) 22px 28px; min-height: 100%; display: flex; flex-direction: column; color: #f1e4c8; }
+.login-logo { margin: 0 auto 14px; width: 104px; height: 104px; border-radius: 50%; display: grid; place-items: center; background: radial-gradient(circle at 35% 30%, #4a3426, #2a1d15); border: 1.5px solid rgba(218, 189, 145, .35); overflow: hidden; }
+.login-logo img { width: 70%; height: auto; }
+.login-title { text-align: center; font-family: var(--font-display); font-size: 2.4rem; font-weight: 700; line-height: .95; margin: 0; }
+.login-sub { text-align: center; margin: 8px 0 22px; font-size: .9rem; color: #c9b89d; }
+dialog.login-dialog label { display: block; font-size: .72rem; letter-spacing: .08em; text-transform: uppercase; color: #c9b89d; margin: 0 0 8px; font-weight: 600; }
+dialog.login-dialog .form-control { background: rgba(241, 228, 200, .1); border-color: rgba(241, 228, 200, .22); color: #f1e4c8; margin-bottom: 18px; min-height: 52px; }
+dialog.login-dialog .form-control::placeholder { color: rgba(241, 228, 200, .45); }
+.code-input { font-size: 1.6rem !important; font-weight: 700; letter-spacing: .3em; text-transform: uppercase; text-align: center; }
+.form-error { color: #ff9aa6; min-height: 1.4em; font-size: .9rem; text-align: center; margin-bottom: 8px; }
+.btn-lg-join { padding: 14px; font-size: 1.05rem; border-radius: 16px; width: 100%; }
+.login-foot { text-align: center; margin: 14px 0 0; font-size: .8rem; color: #a8977c; }
 
-.gameInterface{
-  height: 80vh;
-  width: auto;
+/* Menu */
+.menu-head { padding-top: 22px !important; }
+.avatar { width: 46px; height: 46px; border-radius: 50%; background: var(--cuir); display: grid; place-items: center; flex: none; overflow: hidden; }
+.avatar img { width: 72%; height: auto; }
+.menu-id { flex: 1; min-width: 0; line-height: 1.2; }
+.menu-id b { display: block; font-size: 1rem; color: var(--title-color, var(--encre)); font-family: var(--font-text); font-weight: 700; }
+.menu-id small { font-size: .78rem; color: var(--muted); }
+.menu-id small[hidden] { display: none; }
+.menu-body { display: flex; flex-direction: column; gap: 6px; }
+.mrow {
+  display: flex; align-items: center; gap: 12px; width: 100%; min-height: 54px;
+  padding: 6px 12px; border-radius: 16px; background: var(--carte); color: var(--encre);
+  border: 0; font: inherit; font-weight: 600; font-size: .95rem; text-align: left; cursor: pointer;
 }
+.mrow[hidden] { display: none; }
+.mrow .ico { width: 21px; height: 21px; color: var(--muted); }
+.mrow .go { margin-left: auto; }
+.mrow.danger { background: transparent; color: var(--danger); border: 1.5px solid color-mix(in srgb, var(--danger) 32%, transparent); }
+.mrow.danger .ico { color: var(--danger); }
+.tgl { margin-left: auto; width: 42px; height: 26px; border-radius: 14px; background: var(--line); position: relative; flex: none; transition: background .2s; }
+.tgl::after { content: ""; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: #fff; transition: transform .2s; }
+[aria-checked="true"] > .tgl { background: var(--accent); }
+[aria-checked="true"] > .tgl::after { transform: translateX(16px); }
+.reset-confirm { background: var(--carte); border-radius: 16px; padding: 14px; }
+.reset-confirm p { margin: 0 0 12px; }
+.btn-row { display: flex; gap: 8px; }
+.btn-row .btn { flex: 1; }
 
-.gameInterface.with-hotspots {
-    width: 100%;
-    height: auto;
-    max-height: 80vh;
-    object-fit: contain;
+/* Listes des lieux et des objets */
+.item-row {
+  position: relative; display: flex; align-items: center; gap: 12px;
+  min-height: 58px; padding: 8px 10px 8px 8px; margin-bottom: 8px;
+  border-radius: 18px; background: var(--carte);
 }
+.item-row .locationStatus { width: 40px; height: 40px; border-radius: 13px; display: grid; place-items: center; background: var(--soft); flex: none; }
+.item-name { flex: 1; min-width: 0; font-weight: 600; line-height: 1.25; overflow-wrap: anywhere; }
+.oneLocationtoView {
+  background: none !important; color: var(--muted) !important; padding: 0 !important;
+  display: grid; place-items: center; width: 32px; min-height: 44px; cursor: pointer; border-radius: 0;
+}
+/* La puce s'étire sur toute la ligne : un appui n'importe où ouvre le lieu. */
+.oneLocationtoView::after { content: ""; position: absolute; inset: 0; border-radius: 18px; }
+.item-actions { display: flex; gap: 6px; flex: none; }
+.oneObjectToView, .oneObjectToUse {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  min-height: 44px; padding: 0 12px !important; border-radius: 13px; margin: 0;
+  font-size: .8rem; font-weight: 700; cursor: pointer;
+}
+.oneObjectToView { background: var(--chip) !important; color: var(--encre) !important; }
+.oneObjectToUse { background: var(--cuir) !important; color: #f1e4c8 !important; }
+.oneObjectToView svg, .oneObjectToUse svg { width: 16px; height: 16px; }
+.oneObject { z-index: 1; }
+.oneObjectLine { z-index: 0; }
 
+/* Chat animateur <-> équipe */
+.chat-thread {
+  max-height: 50vh; min-height: 120px; overflow-y: auto;
+  padding: 2px; margin-bottom: 12px;
+  display: flex; flex-direction: column; gap: 7px;
+}
+.chat-message { padding: 8px 12px; border-radius: 16px; max-width: 84%; word-break: break-word; font-size: .95rem; line-height: 1.35; }
+.chat-message.admin { align-self: flex-start; background: var(--carte); border-bottom-left-radius: 5px; }
+.chat-message.team { align-self: flex-end; background: var(--accent); color: var(--on-accent); border-bottom-right-radius: 5px; font-weight: 500; }
+.chat-empty { align-self: center; color: var(--muted); font-size: .9rem; margin: auto; }
+.chat-form { display: flex; gap: 8px; }
+.chat-form input { flex: 1; min-width: 0; }
+.chat-form .btn { width: 48px; padding: 0; border-radius: 14px; flex: none; }
+
+/* Classement : une carte par équipe, la première mise en avant. */
+.leaderboard-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 9px; }
+.leaderboard-row { padding: 12px 14px; border-radius: 20px; background: var(--carte); border: 0; }
+.leaderboard-first { background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 70%, #fff), var(--accent)); color: var(--on-accent); }
+.leaderboard-rank-name { display: flex; align-items: baseline; gap: .6rem; margin-bottom: .45rem; flex-wrap: wrap; }
+.leaderboard-rank { font-family: var(--font-display); font-weight: 700; font-size: 2rem; line-height: 1; color: var(--accent-d); }
+.leaderboard-first .leaderboard-rank { color: var(--on-accent); }
+.leaderboard-team { font-weight: 700; }
+.leaderboard-stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: .3rem .8rem; }
+.leaderboard-stats > div { display: flex; justify-content: space-between; gap: .5rem; font-size: .88em; }
+.leaderboard-stat-label { opacity: .75; }
+.leaderboard-stat-value { font-weight: 700; }
+
+/* Chargement */
 .spinner {
-  border: 8px solid #f3f3f3; /* Couleur claire du cercle */
-  border-top: 8px solid #3498db; /* Couleur du segment animé */
-  border-radius: 50%; /* Cercle complet */
-  width: 60px;
-  height: 60px;
-  animation: spin 1s linear infinite; /* Animation continue */
-  margin: 0 auto; /* Centrer horizontalement */
+  border: 8px solid var(--soft); border-top: 8px solid var(--accent);
+  border-radius: 50%; width: 60px; height: 60px; animation: spin 1s linear infinite; margin: 0 auto;
 }
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+@keyframes stepFadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+@media (prefers-reduced-motion: no-preference) { .step-transition { animation: stepFadeIn .25s ease; } }
 
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
+/* --- Cadenas et lecteur de QR (widgets injectés par scripts/locks et qrScanner) ---- */
+input[type=range] { accent-color: var(--accent); height: 32px; cursor: pointer; }
+input[type=range]::-webkit-slider-runnable-track { background-color: var(--chip); height: 6px; border-radius: 3px; }
+input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; background-color: var(--accent); border: none; border-radius: 50%; width: 26px; height: 26px; margin-top: -10px; cursor: pointer; }
+input[type=range]::-moz-range-track { background-color: var(--chip); height: 6px; border-radius: 3px; }
+input[type=range]::-moz-range-thumb { background-color: var(--accent); border: none; border-radius: 50%; width: 26px; height: 26px; cursor: pointer; }
 
-@keyframes stepFadeIn {
-  from { opacity: 0; transform: translateY(6px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-@media (prefers-reduced-motion: no-preference) {
-  .step-transition {
-    animation: stepFadeIn .25s ease;
-  }
-}
+#actualCode { margin: 8px auto 0; text-align: center; font-family: var(--font-display); font-size: 3rem; font-weight: 700; letter-spacing: .12em; line-height: 1.05; }
+#actualCode:empty { display: none; }
+#qrCodeReader { margin: auto; width: 100% !important; }
+#qrCodeReader__scan_region { width: 100% !important; margin: auto; border-radius: 20px; overflow: hidden; }
+#qrCodeReader video { border-radius: 20px; }
+#qrCodeReaderForSonometer { margin: auto; width: 100% !important; max-width: 500px; }
+#gameMap { width: 100%; }
+.toClick { background-color: red !important; fill: red; display: block; opacity: 1 !important; }
+.patternlock { width: 80%; max-width: 320px; margin: auto; }
+.lockContainer { padding: 4px 0; }
 
+#passZone { font-size: 2em; text-align: center; color: var(--accent-d); margin-left: auto; }
+#message { margin: 20px auto 0; width: 80%; }
+.passCard { margin: 24px auto 0; max-width: 800px; }
+.passCardBody { margin-bottom: 24px; }
+.passCardBody, .passCard { border: 0; }
 
-/* Curseur du verrou "sliders" : stylé aux couleurs de la charte sur tous
-   les moteurs (Chrome/Safari utilisent -webkit-, Firefox -moz-). */
-input[type=range] {
-  accent-color: var(--color2, #ff934f);
-  height: 32px;
-  cursor: pointer;
+/* Cadenas à chiffres, couleurs, flèches, interrupteurs : gros boutons tactiles. */
+#digit .col, .oneDigit { padding: 0; text-align: center; max-width: 80px; }
+.oneDigit { width: 52px; }
+.oneDigitFromTrying { font-size: 2.5em; }
+.digit {
+  width: 76px; font-size: 42px; margin-top: 5px; min-height: 56px; line-height: 1.1;
+  border-radius: 16px; font-family: var(--font-display); font-weight: 700;
 }
-input[type=range]::-webkit-slider-runnable-track {
-  background-color: #f3ebde;
-  height: 6px;
-  border-radius: 3px;
+/* Touches chiffrées / flèches : tuiles claires, le texte garde toujours le contraste du thème. */
+.btn.digit.btn-primary:not(.colorButton), .btn.digit.btn-warning {
+  background-color: var(--carte) !important; color: var(--encre) !important; border: 2px solid var(--line) !important;
 }
-input[type=range]::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  background-color: var(--color2, #ff934f);
-  border: none;
-  border-radius: 50%;
-  width: 24px;
-  height: 24px;
-  margin-top: -9px;
-  cursor: pointer;
+.btn.digit.btn-primary:not(.colorButton):hover, .btn.digit.btn-primary:not(.colorButton):active, .btn.digit.btn-warning:hover {
+  background-color: var(--chip) !important;
 }
-input[type=range]::-moz-range-track {
-  background-color: #f3ebde;
-  height: 6px;
-  border-radius: 3px;
-}
-input[type=range]::-moz-range-thumb {
-  background-color: var(--color2, #ff934f);
-  border: none;
-  border-radius: 50%;
-  width: 24px;
-  height: 24px;
-  cursor: pointer;
-}
+.btn.digit.colorButton { border: 2px solid var(--line) !important; }
+#reset, #resetDirectionnal, #resetSwitch { background-color: var(--accent) !important; color: var(--on-accent) !important; border: 0 !important; }
+#reset:hover, #resetDirectionnal:hover, #resetSwitch:hover { background-color: var(--accent-d) !important; }
+.switch { color: var(--encre); }
+.lock-dots circle { fill: var(--accent-d) !important; }
+line { stroke: var(--accent-d) !important; }
+#password { width: 100%; }
+#loginSendSoluce { width: auto; min-width: 20%; }
+#loginPasswordInput { margin-top: 20px; }
+.input-group-append { cursor: pointer; }
+.slidersRow { margin: 30px auto 0; }
+.slidersValue { color: var(--accent-d) !important; font-size: 1.4em; }
+.slidersName { color: var(--encre) !important; }
+.sliderButtons { width: 20px; }
+#listOfSymbols { margin: auto; text-align: center; }
+.sonoMeterProgressBar { margin: auto; max-width: 70%; }
+#hintCountdown { padding-left: 0; }
 
-#myProgress {
-  width: 100%;
-  background-color: lightgray;
-  margin-top: 8px;
-  border-radius: 999px;
-  overflow: hidden;
-}
-
-/* Rangée du chrono, en haut du header sticky de la carte (.card-header) :
-   toujours visible en scrollant, contrairement à l'ancien #titleBar. */
-#headerTimerRow{
-  margin-bottom: 4px;
-}
-
-#myBar {
-  width: 0%;
-  background-color: var(--color2, #ff934f);
-  transition: width .4s ease;
-}
-body{
-  background-color: var(--color1, #dabd91);
-}
-.toClick{
-  background-color: red;
-  fill:red;
-}
-.toClick{
-  background-color: red!important;
-  display: block;
-  opacity: 1 !important;
-}
-#titleText{
-  font-size: 2em;
-  font-family: "Gill Sans", sans-serif;
-  font-weight: 700;
-}
-#mobileFooter{
-  display: none;
-}
-#titleBar{
-  width: 100%;
-}
-
-#titleMenu{
-  text-align: right;
-}
-
-.stepImg{
-  display: block;
-  width: 60%;
-  margin: auto
-}
-
-#qrCodeReader__scan_region{
-  width: 90%!important;
-  margin: auto;
-}
-#gameMap{
-width:100%
-}
-.patternlock{
-  width: 50%;
-  margin:auto;
-}
-#passZone{
-  font-size: 2em;
-  text-align: center;
-  color:#007bff;
-  margin-left: auto;
-}
-
-#message{
-  margin: auto;
-  margin-top: 20px;
-  width:50%
-}
-.passCard{
-margin: auto;
-margin-top: 50px;
-max-width: 800px;
-border-color: #007bff;
-}
-.passCardBody{
-  border-color: #007bff;
-  margin-bottom: 50px;
-
-
-}
-
-#digit .col{
-  padding:0;
-  text-align: center;
-  max-width: 80px;
-
-}
-
-#actualCode{
-  margin: auto;
-}
-
-.oneObject{
-  z-index: 1000;
-}
-
-.oneDigitFromTrying{
-  font-size: 2.5em;
-}
-#contentImg{
-  margin: auto;
-}
-#password{
-  width: 100%;
-}
-#loginSendSoluce{
-  width: 20%;
-}
-
-#loginPasswordInput{
-  margin-top: 20px;
-}
-
-.input-group-append {
-  cursor: pointer;
-}
-.slidersRow{
-  margin: auto;
-  margin-top: 30px;
-}
-.slidersValue{
-    color:#007bff;
-    font-size: 1.5em;
-}
-/* Zones tactiles : 44px est la taille minimale recommandée (Apple HIG / Material). */
-.gameInterfaceButton{
-  max-width: 75px;
-  min-height: 44px;
-  background-color: var(--color2, #ff934f);
-}
-.badge.text-bg-primary{
-  background-color: var(--color2, #ff934f) !important;
-  color: #fff !important;
-}
-.oneLocationtoView, .oneObjectToView, .oneObjectToUse{
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 44px;
-  min-height: 44px;
-  padding: .5rem;
-  cursor: pointer;
-}
-.oneLocation, .oneObjectLine{
-  padding: .35rem 0;
-  align-items: center;
-}
-/* Colonnes de nom en largeur flexible plutôt que .col-9 (75%) figé : ce
-   dernier ne laissait pas assez de place au(x) bouton(s) (44px minimum
-   chacun) sur la même ligne, qui passaient alors à la ligne suivante —
-   même défaut que celui déjà corrigé sur #mobileFooter (cf. plus bas). */
-.oneLocation .col-9, .oneObjectLine .oneObject{
-  flex: 1 1 auto;
-  width: auto;
-  min-width: 0;
-}
-#mobileTitleMenu, #MobileRules{
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 44px;
-  min-height: 44px;
-  cursor: pointer;
-}
-dialog.app-dialog .btn-close{
-  flex-shrink: 0;
-  min-width: 44px;
-  min-height: 44px;
-  padding: 0;
-  background-position: center;
-}
-#timer{
-  width: 120px;
-  text-align: center;
-  font-size: 1.5em;
-}
-.alignRight{
-  text-align: right;
-}
-
-.pin{
-  margin-top: -10px;
-}
-.btn-primary{
-  background-color: #ff934f;
-  border: 1px solid #ff934f;
-}
-.btn-primary:hover{
-  background-color: #ee5622;
-  border: 1px solid #ee5622;
-}
-.btn-primary:active{
-  background-color: #ee5622!important;
-  border: 1px solid #ee5622;
-}
-.text-bg-primary{
-  background-color: #ff934f!important;
-  border:#ff934f!important;
-}
-.text-bg-primary:hover{
-  background-color: #ee5622!important;
-  border:#ee5622!important;
-}
-.card{
-  min-height: 85vh;
-  border: none;
-  border-radius: .75rem;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, .1);
-}
-/* Pas d'overflow:hidden sur .card : ça casserait le sticky du header
-   ci-dessous (le survol scrollant devient alors .card elle-même plutôt que
-   la page). Les coins arrondis sont donc dupliqués ici pour rester propres. */
-.card-header{
-  background-color: var(--color3, #f3ebde);
-  border-bottom: 2px solid var(--color1, #dabd91);
-  border-top-left-radius: .75rem;
-  border-top-right-radius: .75rem;
-  position: sticky;
-  top: 0;
-  z-index: 5;
-}
-.card-footer{
-  background-color: var(--color3, #f3ebde) !important;
-  border-top: 2px solid var(--color1, #dabd91);
-  border-bottom-left-radius: .75rem;
-  border-bottom-right-radius: .75rem;
-}
-/* Couleurs assombries par rapport à l'original pour atteindre un contraste
-   AA (4.5:1) tout en gardant la même teinte (orange/rouge de la charte). */
-#itemListTitle, #locationListTitle, #stepName{
-  color: var(--color2, #b6390e);
-  font-size: 1.5em;
-  margin-bottom: 5px;
-}
-#timer{
-  background-color: #de1b16!important;
-  color: #fff!important;
-}
-
-.text-bg-warning{
-  background-color: #de1b16!important;
-  color: #fff!important;
-}
-#hintCountdown{
-  padding-left: 5px!important;
-}
-.oneDigit{
-  width: 50px;
-
-}
-
-/* Même correctif de contraste : #dabd91 (tan) était quasi illisible sur fond
-   crème (#f3ebde), et carrément invisible en survol (fond #dabd91 identique
-   au texte). Assombri en gardant la même teinte. */
-.switch{
-  color:#7b5a29;
-}
-
-.oneDigit{
-  width: 50px;
-}
-.digit{
-  width:75px;
-  font-size: 45px;
-  margin-top: 5px;
-  background-color: #f3ebde!important;
-  color:#7b5a29;
-}
-.digit:hover{
-  background-color: #dabd91!important;
-}
-
-#reset, #resetDirectionnal, #resetSwitch{
-  background-color: #ff934f!important;
-  color:white!important;
-}
-#reset:hover, #resetDirectionnal:hover, #resetSwitch:hover{
-  background-color: #ee5622!important;
-}
-.btn-success{
-  background-color: #74cb96!important;
-  color:white;
-  border: none;
-}
-.btn-success:hover{
-  background-color: #4b967d!important;
-}
-.lock-dots circle{
-  fill:#7b5a29!important;
-}
-line{
-  stroke:#7b5a29!important;
-}
-#logo{
-  width:90%;
-  margin-top: 10px;
-  margin-bottom: 10px;
-}
-
-.slidersName, .slidersValue{
-  color:black!important;
-}
-
-/* ============================================
-   HOTSPOTS RESPONSIVE - SOLUTION DÉFINITIVE
-   ============================================ */
-
-/* IMPORTANT : Le conteneur doit être relatif et s'adapter à l'image */
-.hotspot-container {
-    position: relative;
-    width: 100%;
-    max-width: 100%;
-    margin: 0 auto;
-    display: block;
-}
-
-.hotspot-container img {
-    width: 100%;
-    height: auto;
-    display: block;
-}
-
-/* Boutons hotspot - DOIVENT utiliser des pourcentages */
+/* Plan et zones cliquables (hotspots responsive) */
+.hotspot-container { position: relative; width: 100%; max-width: 100%; margin: 10px auto; display: block; }
+.hotspot-container img { width: 100%; height: auto; display: block; border-radius: 20px; }
+/* Les boutons DOIVENT être positionnés en pourcentages (style en ligne posé par le verrou). */
 .hotspotButton {
-    position: absolute;
-    width: 44px;
-    height: 44px;
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    /* CRITICAL : transform pour centrer le hotspot sur le point exact */
-    transform: translate(-50%, -50%);
-    transition: all 0.3s ease;
-    display: block;
-    z-index: 10;
+  position: absolute; width: 44px; height: 44px; background: transparent; border: none; cursor: pointer;
+  /* centre le hotspot sur le point exact */
+  transform: translate(-50%, -50%); transition: all .3s ease; display: block; z-index: 10;
 }
+.hotspotButton:hover { transform: translate(-50%, -50%) scale(1.2); }
+.hotspotButton svg { display: block; pointer-events: none; width: 44px; height: 44px; }
+.lg-container { max-width: 100%; position: relative; margin: 0; padding: 0; }
+.lg-image { display: block; height: 100%; width: 100%; object-fit: scale-down; }
+.pin { margin-top: -10px; }
 
-.hotspotButton:hover {
-    transform: translate(-50%, -50%) scale(1.2);
+/* Grands écrans : la colonne de jeu reste celle d'un téléphone, centrée. */
+@media (min-width: 700px) {
+  body { background: color-mix(in srgb, var(--page) 88%, #000); }
+  .app { background: var(--page); box-shadow: 0 0 0 1px var(--line), 0 20px 60px rgba(0, 0, 0, .18); }
 }
-
-/* Le SVG bullseye à l'intérieur */
-.hotspotButton svg {
-    display: block;
-    pointer-events: none;
-}
-
-/* ============================================
-   FIN SECTION HOTSPOTS
-   ============================================ */
-
-.lg-container {
-  max-width: 100%;
-  position: relative;
-  margin: 1rem;
-  padding: 0;
-}
-
-.lg-image {
-  display: block;
-  height: 100%;
-  width: 100%;
-  object-fit: scale-down;
-}
-
-.oneObjectToUse{
-  margin-left: 5px;
-}
-
-#qrCodeReaderForSonometer{
-  margin:auto;
-  width: 500px !important;
-}
-
-#qrCodeReader{
-  margin:auto;
-  width: 90% !important;
-}
-
-/* #qrCodeReader{
-  margin:auto;
-  width: 750;
-} */
-
-#listOfSymbols{
-  margin: auto;
-  text-align: center;
-}
-.sonoMeterProgressBar{
-  margin: auto;
-  max-width: 50%;
-}
-#mobileLogo{
-  width:20%;
-  margin: 5px;
-}
-
-@media (max-width:800px){
-  .sliderButtons{
-
-    width: 20px;
-  }
-  .patternlock{
-    width: 100%;
-    margin:auto;
-  }
-  .slidersValue{
-      color:#007bff;
-      font-size: 1em;
-  }
-  .slidersName{
-    flex: none !important;
-  }
-  body, .container, .gameInterface {
-  width: 100vw;
-  margin: 0;
-  padding: 0;
-}
-
-  #titleText{
-    font-size: 1.1em;
-    font-family:  "Gill Sans", sans-serif;
-    font-weight: 300;
-  }
-  .oneObjectLine{
-    margin-bottom: 10px;
-  }
-
-.locationStatus{
-  right: 10px;
-}
-
-#qrCodeReader{
-  margin:auto;
-  width: 90% !important;
-}
-
-#qrCodeReader__scan_region{
-  width: 90%!important;
-  margin: auto;
-}
-
-/* #titleBar{display: none;} */
-.stepImg{
-  width: 90%;
-  margin: auto
-}
-
-#stepName{
-  font-size: 1.2em;
-}
-#logo{
-  display: none;
-}
-#logoCol{
-  display: none;
-}
-#mobileLogo{
-  width:35%;
-  max-width: 130px;
-  margin: 5px;
-}
-/* #hintCountZoneMenu{
-  display: none;
-} */
-#mobileFooter{
-  display: flex;
-  align-items: center;
-  flex-wrap: nowrap; /* le "?" ne doit jamais passer sous l'engrenage */
-  width: 100%;
-  flex: 0 0 100%; /* enfant flex de .gameInterface (elle-même display:flex) :
-    sans ça, il se redimensionne à son seul contenu (logo + icônes) au lieu
-    de s'étirer sur toute la largeur disponible. */
-  height: 50px;
-  margin-top: 10px;
-  padding: 0 .5rem;
-  position: sticky;
-  bottom: 0;
-  background-color: var(--color1, #dabd91);
-  z-index: 5;
-}
-/* Logo en largeur flexible plutôt qu'un col-9 figé à 75% : sur un petit
-   écran, un col-9 fixe ne laissait pas assez de place aux deux icônes
-   suivantes (engrenage + "?"), qui débordaient sur une seconde ligne. */
-#mobileFooter .col-9{
-  flex: 1 1 auto;
-  width: auto;
-  min-width: 0;
-}
-#titleMenu{
-  display: none;
-}
-#rules{
-  display: none;
-}
-
-/* Le titre ("nameStory" du scénario) et son bandeau ne servent plus sur
-   mobile : le chrono a rejoint le header sticky de la carte (#headerTimerRow)
-   et le logo/menu/règles ont déjà leur propre emplacement dans #mobileFooter. */
-#titleBar{
-  display: none;
-}
-
-
-#timer {
-  width: auto;           /* Permet au timer de s'adapter à l'espace disponible */
-  max-width: 100px;      /* Limite la largeur maximale */
-  font-size: 1em;      /* Ajuste la taille de la police pour mobile */
-  margin-top: 5px;
-  margin-bottom: 5px;
-
-}
-
-#titleContainer{
-  margin-left: 0;
-}
-
-
-/* HOTSPOTS RESPONSIVE MOBILE */
- .hotspot-container {
-     margin: 10px auto;
- }
-
- .hotspotButton {
-     width: 40px;  /* Plus grand pour le tactile */
-     height: 40px;
- }
-
- .hotspotButton svg {
-     width: 40px;
-     height: 40px;
- }
-
+@media (max-width: 380px) {
+  .step-title, #stepName { font-size: 2rem; }
+  .tab { min-width: 48px; }
+  .digit { width: 64px; font-size: 38px; }
 }

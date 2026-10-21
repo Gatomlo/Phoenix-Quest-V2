@@ -23,7 +23,7 @@
 // bandeau (scripts/core/serviceWorkerManager.js), pour ne jamais changer
 // de version de code sous les pieds d'une équipe en pleine partie.
 
-const APP_VERSION = 'v5-080926';
+const APP_VERSION = 'v6-ui2';
 const APP_SHELL_CACHE = 'phoenix-app-shell-' + APP_VERSION;
 // Pas de suffixe de version ici : ces caches ne doivent JAMAIS être purgés
 // par une mise à jour de l'app (une équipe qui a téléchargé un scénario
@@ -58,6 +58,7 @@ const APP_SHELL_FILES = [
   '/scripts/core/timer.js',
   '/scripts/core/serviceWorkerManager.js',
   '/scripts/ui/render.js',
+  '/scripts/ui/chrome.js',
   '/scripts/ui/dialogs.js',
   '/scripts/ui/icons.js',
   '/scripts/qr/qrScanner.js',

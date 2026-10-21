@@ -11,6 +11,7 @@ Node >= 22.5 (`node:sqlite` intégré, pas de dépendance native), Express 4, SQ
 - `src/routes/publicRoutes.js` (joueurs : join/reprise, events/heartbeat, chat, classements), `adminRoutes.js` (sessions, équipes, QR de transfert, sauvegardes), `scenarioAdminRoutes.js` (édition scénarios, guide, images, QR d'étape).
 - `src/scenarios.js` lit/écrit `game/scenarios/<code>/` (surchargeable via `SCENARIOS_DIR`).
 - `game/` : app joueur (PWA, `service-worker.js`, `scripts/core|ui|locks|qr`). `public/` : pages admin (servies sous `/admin`).
+- Interface v2 (charte « ranch », thème clair/sombre) : back-office = `public/shell.js` (barre latérale, thème Auto/Clair/Sombre dans localStorage `phoenixAdminTheme`, son des alertes `phoenixAdminSound`, script classique chargé dans le <head>) + `admin.css` (tokens) ; tableau de bord = grille de cartes d'équipe + panneau de détail (`teamPanelTemplate`, entrée `{summary, detail}` dans `teamCardById`) ; jeu = en-tête (anneau `#myProgress`, `#timer`), barre du bas `#nav` (Lieux/Sac/Scan/Indices/Carte, retirés par `applyScenarioChrome` si désactivés), `<dialog>` en feuilles du bas, `ui/chrome.js` (mode nuit `phoenixGameTheme`, texte d'étape repliable). Les identifiants DOM utilisés par le JS sont inchangés.
 - Variante passerelle : branche `gateway` du dépôt (copie locale : `phoenix-admin-backend-gateway/`). Les correctifs communs doivent être reportés dans les deux branches.
 
 ## Modèle de données non évident
@@ -20,7 +21,7 @@ Node >= 22.5 (`node:sqlite` intégré, pas de dépendance native), Express 4, SQ
 - Reprise d'équipe : `GET /api/teams/resume?token=` (QR admin) ou `/join` avec le même nom d'équipe.
 
 ## Commandes
-- Lancer : `npm start` (port 4000, `PORT` surchargeable). Mot de passe admin : `npm run set-password -- "mdp"`.
+- Lancer : `npm start` (port 4000, `PORT` surchargeable ; `DATA_DIR` pour une base de test séparée). Mot de passe admin : `npm run set-password -- "mdp"`.
 - Test : par API (fetch/curl) puis navigateur ; pas de suite de tests automatisés.
 - Déploiement Infomaniak : zip sans `node_modules` ni `data/*.db` (build `npm install`, start `npm start`, Node >= 22.5). Ne jamais écraser `data/`. Redémarrer Node si `src/` change (modules chargés une fois). Générer le zip avec adm-zip (PowerShell `Compress-Archive` écrit des `\` dans les chemins).
 
