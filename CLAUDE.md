@@ -11,7 +11,7 @@ Node >= 22.5 (`node:sqlite` intégré, pas de dépendance native), Express 4, SQ
 - `src/routes/publicRoutes.js` (joueurs : join/reprise, events/heartbeat, chat, classements), `adminRoutes.js` (sessions, équipes, QR de transfert, sauvegardes), `scenarioAdminRoutes.js` (édition scénarios, guide, images, QR d'étape).
 - `src/scenarios.js` lit/écrit `game/scenarios/<code>/` (surchargeable via `SCENARIOS_DIR`).
 - `game/` : app joueur (PWA, `service-worker.js`, `scripts/core|ui|locks|qr`). `public/` : pages admin (servies sous `/admin`).
-- `phoenix-admin-backend-gateway/` (dossier voisin) : copie adaptée pour `node-gateway/apps/mystere` (préfixes de chemin calculés via `import.meta.url`). Les correctifs communs doivent être reportés dans les deux.
+- Variante passerelle : branche `gateway` du dépôt (copie locale : `phoenix-admin-backend-gateway/`). Les correctifs communs doivent être reportés dans les deux branches.
 
 ## Modèle de données non évident
 - `teams.local_state` : copie JSON du localStorage de jeu (envoyée par le heartbeat toutes les 20 s) pour reprendre sur un autre téléphone ; vidée à la clôture de session.
@@ -23,6 +23,9 @@ Node >= 22.5 (`node:sqlite` intégré, pas de dépendance native), Express 4, SQ
 - Lancer : `npm start` (port 4000, `PORT` surchargeable). Mot de passe admin : `npm run set-password -- "mdp"`.
 - Test : par API (fetch/curl) puis navigateur ; pas de suite de tests automatisés.
 - Déploiement Infomaniak : zip sans `node_modules` ni `data/*.db` (build `npm install`, start `npm start`, Node >= 22.5). Ne jamais écraser `data/`. Redémarrer Node si `src/` change (modules chargés une fois). Générer le zip avec adm-zip (PowerShell `Compress-Archive` écrit des `\` dans les chemins).
+
+## Dépôt
+https://github.com/Gatomlo/Phoenix-Quest-V2 (public). Branche `main` = site autonome ; branche `gateway` = variante pour node-gateway (`apps/mystere`). Sur le serveur : `git pull` puis redémarrer Node ; `data/`, `node_modules/` et `.env` sont ignorés (jamais écrasés).
 
 ## Pièges connus
 - Service worker : incrémenter `APP_VERSION` à chaque changement de `game/` ; `/api` et `/admin` ne doivent jamais passer par le cache. Vider SW + caches avant de tester un correctif en local.
