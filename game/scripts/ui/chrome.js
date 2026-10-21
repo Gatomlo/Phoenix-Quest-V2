@@ -76,7 +76,60 @@ function initResetConfirm() {
   });
 }
 
+// Plein écran : masque la barre d'adresse du navigateur. L'API exige un geste de
+// l'utilisateur : on l'active au clic sur « Rejoindre », puis au premier appui
+// après un rechargement. Sortir du plein écran (geste système) vaut refus : on
+// ne le réimpose plus tant que l'interrupteur du menu n'est pas rallumé.
+// Indisponible sur iPhone (Safari) : l'interrupteur reste alors caché, et
+// l'installation sur l'écran d'accueil (manifest) donne le même résultat.
+const FULLSCREEN_KEY = 'phoenixGameFullscreen';
+
+function fullscreenWanted() {
+  try { return localStorage.getItem(FULLSCREEN_KEY) !== 'off'; } catch (e) { return true; }
+}
+
+function setFullscreenWanted(on) {
+  try { localStorage.setItem(FULLSCREEN_KEY, on ? 'on' : 'off'); } catch (e) { /* choix valable pour cette visite seulement */ }
+}
+
+function enterFullscreen() {
+  if (document.fullscreenElement) return;
+  const request = document.documentElement.requestFullscreen?.({ navigationUI: 'hide' });
+  request?.catch(() => { /* refusé par le navigateur : on n'insiste pas */ });
+}
+
+function initFullscreen() {
+  if (!document.fullscreenEnabled || !window.matchMedia('(pointer: coarse)').matches) return; // téléphones et tablettes seulement
+  const toggle = document.getElementById('fullscreenToggle');
+  const sync = () => toggle?.setAttribute('aria-checked', String(!!document.fullscreenElement));
+  if (toggle) {
+    toggle.hidden = false;
+    toggle.addEventListener('click', () => {
+      if (document.fullscreenElement) {
+        setFullscreenWanted(false);
+        document.exitFullscreen();
+      } else {
+        setFullscreenWanted(true);
+        enterFullscreen();
+      }
+    });
+  }
+  document.addEventListener('fullscreenchange', () => {
+    if (!document.fullscreenElement && document.visibilityState === 'visible') setFullscreenWanted(false);
+    sync();
+  });
+  document.getElementById('sessionJoinButton')?.addEventListener('click', () => {
+    setFullscreenWanted(true);
+    enterFullscreen();
+  });
+  document.addEventListener('pointerup', () => {
+    if (fullscreenWanted()) enterFullscreen();
+  }, { once: true });
+  sync();
+}
+
 export function initChrome() {
+  initFullscreen();
   initNightMode();
   initCollapsibleDescription();
   initResetConfirm();
