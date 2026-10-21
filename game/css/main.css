@@ -291,6 +291,8 @@ dialog.login-dialog .form-control::placeholder { color: rgba(241, 228, 200, .45)
 .code-input { font-size: 1.6rem !important; font-weight: 700; letter-spacing: .3em; text-transform: uppercase; text-align: center; }
 .form-error { color: #ff9aa6; min-height: 1.4em; font-size: .9rem; text-align: center; margin-bottom: 8px; }
 .btn-lg-join { padding: 14px; font-size: 1.05rem; border-radius: 16px; width: 100%; }
+.admin-link { display: block; margin: auto auto 0; padding: 18px 12px 4px; text-align: center; font-size: .75rem; color: #a8977c; opacity: .7; text-decoration: none; }
+.admin-link:hover, .admin-link:focus-visible { opacity: 1; text-decoration: underline; }
 .login-foot { text-align: center; margin: 14px 0 0; font-size: .8rem; color: #a8977c; }
 
 /* Menu */
