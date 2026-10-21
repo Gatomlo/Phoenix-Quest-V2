@@ -77,12 +77,14 @@ function initResetConfirm() {
 }
 
 // Plein écran : masque la barre d'adresse du navigateur. L'API exige un geste de
-// l'utilisateur : on l'active au clic sur « Rejoindre », puis au premier appui
-// après un rechargement. Sortir du plein écran (geste système) vaut refus : on
+// l'utilisateur : on l'active au clic sur « Rejoindre » (par défaut, téléphones et
+// tablettes), puis au premier appui après un rechargement une fois la partie
+// démarrée. Une courte notification explique, une seule fois, comment le couper. Sortir du plein écran (geste système) vaut refus : on
 // ne le réimpose plus tant que l'interrupteur du menu n'est pas rallumé.
 // Indisponible sur iPhone (Safari) : l'interrupteur reste alors caché, et
 // l'installation sur l'écran d'accueil (manifest) donne le même résultat.
 const FULLSCREEN_KEY = 'phoenixGameFullscreen';
+const FULLSCREEN_HINT_KEY = 'phoenixGameFullscreenHinted';
 
 function fullscreenWanted() {
   try { return localStorage.getItem(FULLSCREEN_KEY) !== 'off'; } catch (e) { return true; }
@@ -96,6 +98,26 @@ function enterFullscreen() {
   if (document.fullscreenElement) return;
   const request = document.documentElement.requestFullscreen?.({ navigationUI: 'hide' });
   request?.catch(() => { /* refusé par le navigateur : on n'insiste pas */ });
+}
+
+function showFullscreenHint() {
+  try {
+    if (localStorage.getItem(FULLSCREEN_HINT_KEY)) return;
+    localStorage.setItem(FULLSCREEN_HINT_KEY, '1');
+  } catch (e) { /* sans stockage, la notification peut revenir : sans gravité */ }
+  const hint = document.createElement('div');
+  hint.className = 'fs-hint';
+  hint.setAttribute('role', 'status');
+  hint.innerHTML = '<span>Plein écran activé. Vous pouvez le désactiver dans le menu <b>⋯</b>, option « Plein écran ».</span>' +
+    '<button type="button" class="fs-hint-close" aria-label="Fermer">&times;</button>';
+  const close = () => hint.remove();
+  hint.querySelector('.fs-hint-close').addEventListener('click', close);
+  document.body.appendChild(hint);
+  setTimeout(close, 9000);
+}
+
+function gameStarted() {
+  return !document.getElementById('sessionModal')?.open;
 }
 
 function initFullscreen() {
@@ -122,9 +144,17 @@ function initFullscreen() {
     setFullscreenWanted(true);
     enterFullscreen();
   });
-  document.addEventListener('pointerup', () => {
+  // Fenêtre de connexion fermée = code accepté : la partie démarre, on prévient.
+  document.getElementById('sessionModal')?.addEventListener('close', () => {
+    if (document.fullscreenElement) showFullscreenHint();
+  });
+  // Reprise après rechargement : le premier appui, une fois en jeu, remet le plein écran.
+  const resume = () => {
+    if (!gameStarted()) return;
+    document.removeEventListener('pointerup', resume);
     if (fullscreenWanted()) enterFullscreen();
-  }, { once: true });
+  };
+  document.addEventListener('pointerup', resume);
   sync();
 }
 
