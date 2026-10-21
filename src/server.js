@@ -28,6 +28,14 @@ app.use('/api/admin', scenarioAdminRoutes);
 app.use('/admin', express.static(path.join(__dirname, '..', 'public')));
 app.use(express.static(path.join(__dirname, '..', 'game')));
 
-app.listen(PORT, () => {
-  console.log(`Backend admin Phoenix en écoute sur http://localhost:${PORT}`);
-});
+// Compatible passerelle node-gateway (voir node-gateway/README.md) : monté
+// via app.use('/mystere', app) par la passerelle, ce fichier doit exporter
+// l'app Express plutôt que d'écouter lui-même sur un port. app.listen()
+// reste appelé quand ce fichier est lancé directement (dev local, ou
+// déploiement Infomaniak autonome sans passerelle).
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`Backend admin Phoenix en écoute sur http://localhost:${PORT}`);
+  });
+}
+module.exports = app;

@@ -1,4 +1,12 @@
-const API = '/api/admin';
+// Racine de l'app (pas seulement de ce dossier admin/) : déduite de l'URL
+// réelle de CE fichier (import.meta.url, fiable pour un module ES — voir le
+// même principe dans game/scripts/core/backendConfig.js). admin.js vit
+// toujours dans <racine>/admin/, donc remonter d'un niveau donne <racine>,
+// qu'elle soit servie à "/" ou montée sous "/mystere" par la passerelle
+// node-gateway. Sert à préfixer l'API (hors de admin/) et les liens vers
+// d'autres pages du tableau de bord.
+const APP_BASE = new URL('..', import.meta.url).pathname.replace(/\/$/, '');
+const API = APP_BASE + '/api/admin';
 
 async function apiFetch(path, options = {}) {
   // FormData (upload d'image) doit fixer elle-même son Content-Type (avec la
@@ -183,7 +191,7 @@ function scenarioImageUrl(code, filename) {
 function updateGlobalLeaderboardLink() {
   const select = document.getElementById('scenarioCodeInput');
   const link = document.getElementById('globalLeaderboardLink');
-  if (select.value) link.href = `/admin/leaderboard-global.html?scenario=${encodeURIComponent(select.value)}`;
+  if (select.value) link.href = `${APP_BASE}/admin/leaderboard-global.html?scenario=${encodeURIComponent(select.value)}`;
 }
 
 async function loadScenarioOptions() {
@@ -453,8 +461,8 @@ async function openSession(sessionId) {
   currentScenarioCode = session.scenario_code;
   document.getElementById('sessionTitle').textContent = `${session.name || 'Session'} — ${session.code}`;
   document.getElementById('sessionMeta').textContent = `Scénario : ${session.scenario_code}`;
-  document.getElementById('leaderboardLink').href = `/admin/leaderboard.html?code=${session.code}`;
-  document.getElementById('solutionGuideLink').href = `/admin/solution-guide.html?scenario=${encodeURIComponent(session.scenario_code)}&mode=view`;
+  document.getElementById('leaderboardLink').href = `${APP_BASE}/admin/leaderboard.html?code=${session.code}`;
+  document.getElementById('solutionGuideLink').href = `${APP_BASE}/admin/solution-guide.html?scenario=${encodeURIComponent(session.scenario_code)}&mode=view`;
   document.getElementById('pauseSessionButton').hidden = session.status !== 'active';
   document.getElementById('resumeSessionButton').hidden = session.status !== 'paused';
   document.getElementById('closeSessionButton').hidden = session.status === 'closed';

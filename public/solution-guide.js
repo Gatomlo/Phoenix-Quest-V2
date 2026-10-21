@@ -1,9 +1,12 @@
-const API = '/api/admin';
+// Voir le même principe dans admin.js : import.meta.url reste fiable même
+// monté sous un sous-chemin par la passerelle node-gateway.
+const APP_BASE = new URL('..', import.meta.url).pathname.replace(/\/$/, '');
+const API = APP_BASE + '/api/admin';
 
 async function apiFetch(path, options = {}) {
   const res = await fetch(API + path, { credentials: 'include', ...options });
   if (res.status === 401) {
-    window.location.href = '/admin/';
+    window.location.href = `${APP_BASE}/admin/`;
     throw new Error('Non authentifié');
   }
   const contentType = res.headers.get('content-type') || '';

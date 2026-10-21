@@ -32,6 +32,11 @@
 		<div id="content">Chargement…</div>
 	</div>
 	<script>
+		// Racine de l'app : cette page vit toujours dans <racine>/admin/, donc
+		// remonter d'un niveau depuis sa propre URL donne <racine> — fonctionne
+		// qu'elle soit servie à "/" ou montée sous "/mystere" par la passerelle
+		// node-gateway (voir le même principe, via import.meta.url, dans admin.js).
+		const APP_BASE = new URL('..', location.href).pathname.replace(/\/$/, '');
 		const params = new URLSearchParams(location.search);
 		const code = params.get('code');
 		const content = document.getElementById('content');
@@ -49,7 +54,7 @@
 		if (!code) {
 			content.innerHTML = '<p class="error">Aucun code de session fourni dans le lien.</p>';
 		} else {
-			fetch(`/api/sessions/${encodeURIComponent(code)}/leaderboard`)
+			fetch(`${APP_BASE}/api/sessions/${encodeURIComponent(code)}/leaderboard`)
 				.then((r) => { if (!r.ok) throw new Error(); return r.json(); })
 				.then(({ session, ranking }) => {
 					sessionInfo.textContent = `${session.name || 'Session'} — scénario « ${session.scenarioCode} »`;

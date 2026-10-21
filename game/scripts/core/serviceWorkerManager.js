@@ -3,6 +3,7 @@
 // automatique) tant que l'utilisateur n'a pas cliqué sur "Recharger" :
 // une équipe en pleine partie ne doit pas se faire basculer sous les pieds
 // vers une nouvelle version du code.
+import { BACKEND_URL as BASE } from './backendConfig.js';
 
 function hideLoadingScreen() {
   const loadingScreen = document.getElementById('loadingScreen');
@@ -54,7 +55,11 @@ export function registerServiceWorker() {
     window.location.reload();
   });
 
-  navigator.serviceWorker.register('/service-worker.js')
+  // Portée explicitement limitée à BASE (plutôt que la portée par défaut,
+  // dérivée du dossier du script) : sous une passerelle node-gateway, un
+  // service worker sans portée précisée prendrait par défaut tout le
+  // domaine, y compris les autres outils montés à côté.
+  navigator.serviceWorker.register(BASE + '/service-worker.js', { scope: BASE + '/' })
     .then((registration) => {
       hideLoadingScreen();
       watchForUpdates(registration);

@@ -32,46 +32,53 @@ const APP_SHELL_CACHE = 'phoenix-app-shell-' + APP_VERSION;
 // dynamiquement à partir de l'URL (voir scenarioCacheName ci-dessous).
 const SCENARIO_CACHE_PREFIX = 'phoenix-scenario-';
 
+// Ce fichier est toujours servi à la racine de l'app (voir l'appel à
+// register() dans serviceWorkerManager.js, qui fixe explicitement scope à
+// BASE + '/'), qu'elle soit servie à "/" ou montée sous un sous-chemin par
+// la passerelle node-gateway (ex. "/mystere/") : self.location.pathname
+// donne donc directement ce préfixe, sans configuration à coder en dur.
+const BASE_PATH = self.location.pathname.replace(/service-worker\.js$/, '');
+
 const APP_SHELL_FILES = [
-  '/',
-  '/index.html',
-  '/manifest.json',
-  '/medias/addhint.png',
-  '/medias/favicon.png',
-  '/medias/logo.png',
-  '/medias/logoComplet.png',
-  '/medias/noway.png',
-  '/medias/removehint.png',
-  '/medias/timeout.png',
-  '/medias/icon-192.png',
-  '/medias/icon-512.png',
-  '/medias/icon-maskable-192.png',
-  '/medias/icon-maskable-512.png',
-  '/medias/apple-touch-icon.png',
-  '/scripts/main.js',
-  '/scripts/game.js',
-  '/scripts/patternlock.js',
-  '/scripts/qrCodeReader.js',
-  '/scripts/core/state.js',
-  '/scripts/core/storage.js',
-  '/scripts/core/scenario.js',
-  '/scripts/core/timer.js',
-  '/scripts/core/serviceWorkerManager.js',
-  '/scripts/ui/render.js',
-  '/scripts/ui/dialogs.js',
-  '/scripts/ui/icons.js',
-  '/scripts/qr/qrScanner.js',
-  '/scripts/locks/index.js',
-  '/scripts/locks/buttonLocks.js',
-  '/scripts/locks/textLocks.js',
-  '/scripts/locks/slidersLock.js',
-  '/scripts/locks/diagramLock.js',
-  '/scripts/locks/selectorLock.js',
-  '/scripts/locks/sonoMeterLock.js',
-  '/css/bootstrap.min.css',
-  '/css/main.css',
-  '/css/patternlock.css'
-];
+  '',
+  'index.html',
+  'manifest.json',
+  'medias/addhint.png',
+  'medias/favicon.png',
+  'medias/logo.png',
+  'medias/logoComplet.png',
+  'medias/noway.png',
+  'medias/removehint.png',
+  'medias/timeout.png',
+  'medias/icon-192.png',
+  'medias/icon-512.png',
+  'medias/icon-maskable-192.png',
+  'medias/icon-maskable-512.png',
+  'medias/apple-touch-icon.png',
+  'scripts/main.js',
+  'scripts/game.js',
+  'scripts/patternlock.js',
+  'scripts/qrCodeReader.js',
+  'scripts/core/state.js',
+  'scripts/core/storage.js',
+  'scripts/core/scenario.js',
+  'scripts/core/timer.js',
+  'scripts/core/serviceWorkerManager.js',
+  'scripts/ui/render.js',
+  'scripts/ui/dialogs.js',
+  'scripts/ui/icons.js',
+  'scripts/qr/qrScanner.js',
+  'scripts/locks/index.js',
+  'scripts/locks/buttonLocks.js',
+  'scripts/locks/textLocks.js',
+  'scripts/locks/slidersLock.js',
+  'scripts/locks/diagramLock.js',
+  'scripts/locks/selectorLock.js',
+  'scripts/locks/sonoMeterLock.js',
+  'css/bootstrap.min.css',
+  'css/main.css',
+  'css/patternlock.css'
+].map((rel) => BASE_PATH + rel);
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -142,7 +149,7 @@ async function staleWhileRevalidate(request, cacheName) {
 
 // scenarios/<code>/... -> un cache par scénario, jamais versionné/purgé.
 function scenarioCacheName(pathname) {
-  const match = pathname.match(/^\/scenarios\/([^/]+)\//);
+  const match = pathname.slice(BASE_PATH.length).match(/^scenarios\/([^/]+)\//);
   return SCENARIO_CACHE_PREFIX + (match ? match[1] : 'divers');
 }
 
@@ -152,30 +159,33 @@ self.addEventListener('fetch', (event) => {
 
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return; // CDN externes : network-only, non géré ici
+  // Hors de la portée de cette instance (un autre outil monté à côté par la
+  // passerelle, ou une page non gérée) : on laisse passer sans intervenir.
+  if (!url.pathname.startsWith(BASE_PATH)) return;
 
-  if (request.mode === 'navigate' || url.pathname === '/' || url.pathname === '/index.html') {
+  if (request.mode === 'navigate' || url.pathname === BASE_PATH || url.pathname === BASE_PATH + 'index.html') {
     event.respondWith(networkFirst(request, APP_SHELL_CACHE));
     return;
   }
 
-  if (url.pathname.startsWith('/scenarios/')) {
+  if (url.pathname.startsWith(BASE_PATH + 'scenarios/')) {
     event.respondWith(cacheFirst(request, scenarioCacheName(url.pathname)));
     return;
   }
 
-  if (url.pathname.startsWith('/scripts/') || url.pathname.startsWith('/css/') || url.pathname.startsWith('/medias/')) {
+  if (url.pathname.startsWith(BASE_PATH + 'scripts/') || url.pathname.startsWith(BASE_PATH + 'css/') || url.pathname.startsWith(BASE_PATH + 'medias/')) {
     event.respondWith(staleWhileRevalidate(request, APP_SHELL_CACHE));
     return;
   }
 
-  // /api/* (données toujours à jour requises) et /admin/* (tableau de bord,
-  // pas une ressource du jeu) : laissés passer au réseau sans interception.
-  // Avant ce garde-fou, le repli cache-first ci-dessous s'appliquait à TOUTE
-  // requête GET non reconnue par manque de portée — un admin ayant aussi
-  // ouvert le jeu une fois dans le même navigateur pouvait se retrouver avec
-  // un tableau de bord figé sur des données périmées, le cache-first ne
-  // revalidant jamais.
-  if (url.pathname.startsWith('/api/') || url.pathname.startsWith('/admin/')) {
+  // <base>/api/* (données toujours à jour requises) et <base>/admin/*
+  // (tableau de bord, pas une ressource du jeu) : laissés passer au réseau
+  // sans interception. Avant ce garde-fou, le repli cache-first ci-dessous
+  // s'appliquait à TOUTE requête GET non reconnue par manque de portée — un
+  // admin ayant aussi ouvert le jeu une fois dans le même navigateur pouvait
+  // se retrouver avec un tableau de bord figé sur des données périmées, le
+  // cache-first ne revalidant jamais.
+  if (url.pathname.startsWith(BASE_PATH + 'api/') || url.pathname.startsWith(BASE_PATH + 'admin/')) {
     return;
   }
 

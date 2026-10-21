@@ -380,7 +380,12 @@ router.post('/teams/:teamId/messages', (req, res) => {
 router.get('/teams/:teamId/resume-qrcode', async (req, res) => {
   const team = db.prepare('SELECT * FROM teams WHERE id = ?').get(req.params.teamId);
   if (!team) return res.status(404).json({ error: 'Équipe introuvable' });
-  const url = `${req.protocol}://${req.get('host')}/?resume=${encodeURIComponent(team.token)}`;
+  // req.baseUrl vaut toujours "<racine de l'app>/api/admin" (ce routeur est
+  // monté à /api/admin dans server.js) — y compris le préfixe ajouté par une
+  // éventuelle passerelle node-gateway en amont (ex. "/mystere"). Retirer ce
+  // suffixe fixe donne donc la racine réelle de l'app, dans les deux cas.
+  const appRoot = req.baseUrl.replace(/\/api\/admin$/, '');
+  const url = `${req.protocol}://${req.get('host')}${appRoot}/?resume=${encodeURIComponent(team.token)}`;
   try {
     const buffer = await QRCode.toBuffer(url, { type: 'png', width: 400, margin: 2 });
     res.set('Content-Type', 'image/png');
