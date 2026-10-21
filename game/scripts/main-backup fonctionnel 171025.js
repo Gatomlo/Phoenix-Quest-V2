@@ -1,0 +1,1592 @@
+let history=[];
+let locationsOpenedHistory=[];
+let itemsHistory=[];
+let stepsReplaced=[];
+let stepsReplacedBy=[];
+let currentStep;
+let trying =[];
+let locationAddedHistory=[]
+let actualLocations=[]
+let actualObjects=[]
+let hintsCount = 0;
+let timer=0;
+let timerIsOn=false
+let timerInterval;
+let startTime;
+let isClosed;
+let scenario;
+let footerColor="#f3ebde";
+let sonoMeterTable = [['sono001','<svg xmlns="http://www.w3.org/2000/svg" value="sono001" width="64" height="64" fill="currentColor" class="bi bi-cloud-fill" viewBox="0 0 16 16"><path d="M4.406 3.342A5.53 5.53 0 0 1 8 2c2.69 0 4.923 2 5.166 4.579C14.758 6.804 16 8.137 16 9.773 16 11.569 14.502 13 12.687 13H3.781C1.708 13 0 11.366 0 9.318c0-1.763 1.266-3.223 2.942-3.593.143-.863.698-1.723 1.464-2.383"/></svg>'],['sono002','<svg xmlns="http://www.w3.org/2000/svg" value="sono002" width="64" height="64" fill="currentColor" class="bi bi-bug-fill" viewBox="0 0 16 16">  <path d="M4.978.855a.5.5 0 1 0-.956.29l.41 1.352A5 5 0 0 0 3 6h10a5 5 0 0 0-1.432-3.503l.41-1.352a.5.5 0 1 0-.956-.29l-.291.956A5 5 0 0 0 8 1a5 5 0 0 0-2.731.811l-.29-.956z"/> <path d="M13 6v1H8.5v8.975A5 5 0 0 0 13 11h.5a.5.5 0 0 1 .5.5v.5a.5.5 0 1 0 1 0v-.5a1.5 1.5 0 0 0-1.5-1.5H13V9h1.5a.5.5 0 0 0 0-1H13V7h.5A1.5 1.5 0 0 0 15 5.5V5a.5.5 0 0 0-1 0v.5a.5.5 0 0 1-.5.5zm-5.5 9.975V7H3V6h-.5a.5.5 0 0 1-.5-.5V5a.5.5 0 0 0-1 0v.5A1.5 1.5 0 0 0 2.5 7H3v1H1.5a.5.5 0 0 0 0 1H3v1h-.5A1.5 1.5 0 0 0 1 11.5v.5a.5.5 0 1 0 1 0v-.5a.5.5 0 0 1 .5-.5H3a5 5 0 0 0 4.5 4.975"/></svg>'],['sono003','<svg xmlns="http://www.w3.org/2000/svg" value="sono003" width="64" height="64" fill="currentColor" class="bi bi-droplet-fill" viewBox="0 0 16 16"><path d="M8 16a6 6 0 0 0 6-6c0-1.655-1.122-2.904-2.432-4.362C10.254 4.176 8.75 2.503 8 0c0 0-6 5.686-6 10a6 6 0 0 0 6 6M6.646 4.646l.708.708c-.29.29-1.128 1.311-1.907 2.87l-.894-.448c.82-1.641 1.717-2.753 2.093-3.13"/></svg>'],['sono004','<svg xmlns="http://www.w3.org/2000/svg" value="sono004" width="64" height="64" fill="currentColor" class="bi bi-moon-fill" viewBox="0 0 16 16"><path d="M6 .278a.77.77 0 0 1 .08.858 7.2 7.2 0 0 0-.878 3.46c0 4.021 3.278 7.277 7.318 7.277q.792-.001 1.533-.16a.79.79 0 0 1 .81.316.73.73 0 0 1-.031.893A8.35 8.35 0 0 1 8.344 16C3.734 16 0 12.286 0 7.71 0 4.266 2.114 1.312 5.124.06A.75.75 0 0 1 6 .278"/></svg>'],['sono005','<svg xmlns="http://www.w3.org/2000/svg" value="sono005" width="64" height="64" fill="currentColor" class="bi bi-brightness-high-fill" viewBox="0 0 16 16"><path d="M12 8a4 4 0 1 1-8 0 4 4 0 0 1 8 0M8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0m0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13m8-5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5M3 8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2A.5.5 0 0 1 3 8m10.657-5.657a.5.5 0 0 1 0 .707l-1.414 1.415a.5.5 0 1 1-.707-.708l1.414-1.414a.5.5 0 0 1 .707 0m-9.193 9.193a.5.5 0 0 1 0 .707L3.05 13.657a.5.5 0 0 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0m9.193 2.121a.5.5 0 0 1-.707 0l-1.414-1.414a.5.5 0 0 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .707M4.464 4.465a.5.5 0 0 1-.707 0L2.343 3.05a.5.5 0 1 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .708"/></svg>'],['sono006','<svg xmlns="http://www.w3.org/2000/svg" value="sono006" width="64" height="64" fill="currentColor" class="bi bi-star-fill" viewBox="0 0 16 16"><path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z"/></svg>'],['sono007','<svg xmlns="http://www.w3.org/2000/svg" value="sono007" width="64" height="64" fill="currentColor" class="bi bi-snow2" viewBox="0 0 16 16"> <path d="M8 16a.5.5 0 0 1-.5-.5v-1.293l-.646.647a.5.5 0 0 1-.707-.708L7.5 12.793v-1.086l-.646.647a.5.5 0 0 1-.707-.708L7.5 10.293V8.866l-1.236.713-.495 1.85a.5.5 0 1 1-.966-.26l.237-.882-.94.542-.496 1.85a.5.5 0 1 1-.966-.26l.237-.882-1.12.646a.5.5 0 0 1-.5-.866l1.12-.646-.884-.237a.5.5 0 1 1 .26-.966l1.848.495.94-.542-.882-.237a.5.5 0 1 1 .258-.966l1.85.495L7 8l-1.236-.713-1.849.495a.5.5 0 1 1-.258-.966l.883-.237-.94-.542-1.85.495a.5.5 0 0 1-.258-.966l.883-.237-1.12-.646a.5.5 0 1 1 .5-.866l1.12.646-.237-.883a.5.5 0 0 1 .966-.258l.495 1.849.94.542-.236-.883a.5.5 0 0 1 .966-.258l.495 1.849 1.236.713V5.707L6.147 4.354a.5.5 0 1 1 .707-.708l.646.647V3.207L6.147 1.854a.5.5 0 1 1 .707-.708l.646.647V.5a.5.5 0 0 1 1 0v1.293l.647-.647a.5.5 0 1 1 .707.708L8.5 3.207v1.086l.647-.647a.5.5 0 1 1 .707.708L8.5 5.707v1.427l1.236-.713.495-1.85a.5.5 0 1 1 .966.26l-.236.882.94-.542.495-1.85a.5.5 0 1 1 .966.26l-.236.882 1.12-.646a.5.5 0 0 1 .5.866l-1.12.646.883.237a.5.5 0 1 1-.26.966l-1.848-.495-.94.542.883.237a.5.5 0 1 1-.26.966l-1.848-.495L9 8l1.236.713 1.849-.495a.5.5 0 0 1 .259.966l-.883.237.94.542 1.849-.495a.5.5 0 0 1 .259.966l-.883.237 1.12.646a.5.5 0 0 1-.5.866l-1.12-.646.236.883a.5.5 0 1 1-.966.258l-.495-1.849-.94-.542.236.883a.5.5 0 0 1-.966.258L9.736 9.58 8.5 8.866v1.427l1.354 1.353a.5.5 0 0 1-.707.708l-.647-.647v1.086l1.354 1.353a.5.5 0 0 1-.707.708l-.647-.647V15.5a.5.5 0 0 1-.5.5"/></svg>'],['sono008','<svg xmlns="http://www.w3.org/2000/svg" value="sono008" width="64" height="64" fill="currentColor" class="bi bi-leaf-fill" viewBox="0 0 16 16"><path d="M1.4 1.7c.217.289.65.84 1.725 1.274 1.093.44 2.885.774 5.834.528 2.02-.168 3.431.51 4.326 1.556C14.161 6.082 14.5 7.41 14.5 8.5q0 .344-.027.734C13.387 8.252 11.877 7.76 10.39 7.5c-2.016-.288-4.188-.445-5.59-2.045-.142-.162-.402-.102-.379.112.108.985 1.104 1.82 1.844 2.308 2.37 1.566 5.772-.118 7.6 3.071.505.8 1.374 2.7 1.75 4.292.07.298-.066.611-.354.715a.7.7 0 0 1-.161.042 1 1 0 0 1-1.08-.794c-.13-.97-.396-1.913-.868-2.77C12.173 13.386 10.565 14 8 14c-1.854 0-3.32-.544-4.45-1.435-1.124-.887-1.889-2.095-2.39-3.383-1-2.562-1-5.536-.65-7.28L.73.806z"/></svg>'],['sono009','<svg xmlns="http://www.w3.org/2000/svg" value="sono009" width="64" height="64" fill="currentColor" class="bi bi-bluesky" viewBox="0 0 16 16"><path d="M3.468 1.948C5.303 3.325 7.276 6.118 8 7.616c.725-1.498 2.698-4.29 4.532-5.668C13.855.955 16 .186 16 2.632c0 .489-.28 4.105-.444 4.692-.572 2.04-2.653 2.561-4.504 2.246 3.236.551 4.06 2.375 2.281 4.2-3.376 3.464-4.852-.87-5.23-1.98-.07-.204-.103-.3-.103-.218 0-.081-.033.014-.102.218-.379 1.11-1.855 5.444-5.231 1.98-1.778-1.825-.955-3.65 2.28-4.2-1.85.315-3.932-.205-4.503-2.246C.28 6.737 0 3.12 0 2.632 0 .186 2.145.955 3.468 1.948"/></svg>'],['sono010','<svg xmlns="http://www.w3.org/2000/svg"  value="sono010" width="64" height="64" fill="currentColor" class="bi bi-flower1" viewBox="0 0 16 16"><path d="M6.174 1.184a2 2 0 0 1 3.652 0A2 2 0 0 1 12.99 3.01a2 2 0 0 1 1.826 3.164 2 2 0 0 1 0 3.652 2 2 0 0 1-1.826 3.164 2 2 0 0 1-3.164 1.826 2 2 0 0 1-3.652 0A2 2 0 0 1 3.01 12.99a2 2 0 0 1-1.826-3.164 2 2 0 0 1 0-3.652A2 2 0 0 1 3.01 3.01a2 2 0 0 1 3.164-1.826M8 1a1 1 0 0 0-.998 1.03l.01.091q.017.116.054.296c.049.241.122.542.213.887.182.688.428 1.513.676 2.314L8 5.762l.045-.144c.248-.8.494-1.626.676-2.314.091-.345.164-.646.213-.887a5 5 0 0 0 .064-.386L9 2a1 1 0 0 0-1-1M2 9l.03-.002.091-.01a5 5 0 0 0 .296-.054c.241-.049.542-.122.887-.213a61 61 0 0 0 2.314-.676L5.762 8l-.144-.045a61 61 0 0 0-2.314-.676 17 17 0 0 0-.887-.213 5 5 0 0 0-.386-.064L2 7a1 1 0 1 0 0 2m7 5-.002-.03a5 5 0 0 0-.064-.386 16 16 0 0 0-.213-.888 61 61 0 0 0-.676-2.314L8 10.238l-.045.144c-.248.8-.494 1.626-.676 2.314-.091.345-.164.646-.213.887a5 5 0 0 0-.064.386L7 14a1 1 0 1 0 2 0m-5.696-2.134.025-.017a5 5 0 0 0 .303-.248c.184-.164.408-.377.661-.629A61 61 0 0 0 5.96 9.23l.103-.111-.147.033a61 61 0 0 0-2.343.572c-.344.093-.64.18-.874.258a5 5 0 0 0-.367.138l-.027.014a1 1 0 1 0 1 1.732zM4.5 14.062a1 1 0 0 0 1.366-.366l.014-.027q.014-.03.036-.084a5 5 0 0 0 .102-.283c.078-.233.165-.53.258-.874a61 61 0 0 0 .572-2.343l.033-.147-.11.102a61 61 0 0 0-1.743 1.667 17 17 0 0 0-.629.66 5 5 0 0 0-.248.304l-.017.025a1 1 0 0 0 .366 1.366m9.196-8.196a1 1 0 0 0-1-1.732l-.025.017a5 5 0 0 0-.303.248 17 17 0 0 0-.661.629A61 61 0 0 0 10.04 6.77l-.102.111.147-.033a61 61 0 0 0 2.342-.572c.345-.093.642-.18.875-.258a5 5 0 0 0 .367-.138zM11.5 1.938a1 1 0 0 0-1.366.366l-.014.027q-.014.03-.036.084a5 5 0 0 0-.102.283c-.078.233-.165.53-.258.875a61 61 0 0 0-.572 2.342l-.033.147.11-.102a61 61 0 0 0 1.743-1.667c.252-.253.465-.477.629-.66a5 5 0 0 0 .248-.304l.017-.025a1 1 0 0 0-.366-1.366M14 9a1 1 0 0 0 0-2l-.03.002a5 5 0 0 0-.386.064c-.242.049-.543.122-.888.213-.688.182-1.513.428-2.314.676L10.238 8l.144.045c.8.248 1.626.494 2.314.676.345.091.646.164.887.213a5 5 0 0 0 .386.064zM1.938 4.5a1 1 0 0 0 .393 1.38l.084.035q.108.045.283.103c.233.078.53.165.874.258a61 61 0 0 0 2.343.572l.147.033-.103-.111a61 61 0 0 0-1.666-1.742 17 17 0 0 0-.66-.629 5 5 0 0 0-.304-.248l-.025-.017a1 1 0 0 0-1.366.366m2.196-1.196.017.025a5 5 0 0 0 .248.303c.164.184.377.408.629.661A61 61 0 0 0 6.77 5.96l.111.102-.033-.147a61 61 0 0 0-.572-2.342c-.093-.345-.18-.642-.258-.875a5 5 0 0 0-.138-.367l-.014-.027a1 1 0 1 0-1.732 1m9.928 8.196a1 1 0 0 0-.366-1.366l-.027-.014a5 5 0 0 0-.367-.138c-.233-.078-.53-.165-.875-.258a61 61 0 0 0-2.342-.572l-.147-.033.102.111a61 61 0 0 0 1.667 1.742c.253.252.477.465.66.629a5 5 0 0 0 .304.248l.025.017a1 1 0 0 0 1.366-.366m-3.928 2.196a1 1 0 0 0 1.732-1l-.017-.025a5 5 0 0 0-.248-.303 17 17 0 0 0-.629-.661A61 61 0 0 0 9.23 10.04l-.111-.102.033.147a61 61 0 0 0 .572 2.342c.093.345.18.642.258.875a5 5 0 0 0 .138.367zM8 9.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3"/></svg>']];
+var dataJsonGlobal;
+var progressBarStepValue=0;
+var progressBarValue=0;
+let stepsInProgressBar=[];
+let mailSended=false;
+let gameFinished=false;
+const htmlscanner = new Html5QrcodeScanner(
+    "qrCodeReader",
+    { fps: 10, qrbox: {width: 200, height: 200}, rememberLastUsedCamera:true }
+);
+$(document).ready(function(){
+  //selection du scénario
+  if(localStorage.getItem("scenario") !== null){
+    scenario = localStorage.getItem("scenario");
+  }
+  else{
+    $('#scenarioModal').modal("show")
+  }
+
+    $.getJSON('scenarios/'+scenario+'/scenario.json',function(data){
+
+      // récupération des différentes étapes du scénario
+      dataJsonGlobal = data;
+      if(dataJsonGlobal.SendMail && localStorage.getItem("groupMail")==null ){
+        $('#emailModal').modal("show")
+      }
+      if(dataJsonGlobal.progressBar){
+        $.each(data.steps,function(key,oneStep){
+          //calcul la valeur de chaque progression de progressBar
+          if(oneStep.progressBar){
+            progressBarStepValue=progressBarStepValue+1
+          }
+        })
+      }
+      if(data.color1!=null){
+        $('body').css("background-color",data.color1)
+        $('.card-header').css("border-bottom-color",data.color1)
+        $('.card-footer').css("border-top-color",data.color1)
+      }
+      if(data.color2!=null){
+        $('.gameInterfaceButton ').css("background-color",data.color2)
+        $('#stepName').css("color",data.color2)
+        $('#myBar').css("background-color",data.color2)
+        $('#locationListTitle').css("color",data.color2)
+        $('#itemListTitle').css("color",data.color2)
+      }
+      if(data.color3!=null){
+        $('.card-header').css("background-color",data.color3)
+        footerColor=data.color
+        $('.card-footer').css("background-color",data.color3,"!important")
+      }
+      if(data.titleColor!=null){
+        $('#titleText').css("color",data.titleColor)
+        $('#MobileRules').css("color",data.titleColor)
+        $('#mobileTitleMenu').css("color",data.titleColor)
+        $('#titleMenu').css("color",data.titleColor)
+        $('#rules').css("color",data.titleColor)
+      }
+      $('title').html(data.nameStory)
+
+      if(data.logo!=null){
+        $('#logo').attr('src','scenarios/'+scenario+'/img/'+data.logo)
+        $('#mobileLogo').attr('src','scenarios/'+scenario+'/img/'+data.logo)
+      }
+      if(data.fav!=null){
+        document.getElementById('favicon').setAttribute('href', 'scenarios/'+scenario+'/img/'+data.fav);
+      }
+      if(!dataJsonGlobal.progressBar){
+        $('#myProgress').remove()
+      }
+      var steps= data.steps;
+      //Insertion du titre du scénario
+      $('#titleText').html(data.nameStory)
+      $('#locationListTitle').html(data.locationListTitle)
+      $('#itemListTitle').html(data.itemListTitle)
+      if(data.hintsLimit != null){
+        hintsCount = data.hintsLimit
+        $('#hintCountdown').html(hintsCount)
+      }
+      if(!data.timer){$('#timer').remove()}
+      if(!dataJsonGlobal.SendMail){
+        $('.sendMailForm').remove()
+      }
+
+      if(!data.locationList){
+        $('#locationsButton').remove()
+      }
+      else{
+        if(data.locationIcon != null){
+          $('#locationsButton').html(data.locationIcon)
+        }
+        else{
+          $('#locationsButton').html("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" fill=\"currentColor\" class=\"bi bi-geo-alt-fill\" viewBox=\"0 0 16 16\"><path d=\"M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10m0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6\"/</svg>")
+        }
+      }
+      if(!data.qrCodeReader){
+        $('#qrCodeButton').remove()
+      }
+      if(!data.itemList){
+        $('#itemsButton').remove()
+      }
+      else{
+        if(data.itemIcon != null){
+          $('#itemsButton').html(data.itemIcon)
+        }
+        else{
+          $('#itemsButton').html("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" fill=\"currentColor\" class=\"bi bi-backpack-fill\" viewBox=\"0 0 16 16\"><path d=\"M5 13v-3h4v.5a.5.5 0 0 0 1 0V10h1v3z\"/><path d=\"M6 2v.341C3.67 3.165 2 5.388 2 8v5.5A2.5 2.5 0 0 0 4.5 16h7a2.5 2.5 0 0 0 2.5-2.5V8a6 6 0 0 0-4-5.659V2a2 2 0 1 0-4 0m2-1a1 1 0 0 1 1 1v.083a6 6 0 0 0-2 0V2a1 1 0 0 1 1-1m0 3a4 4 0 0 1 3.96 3.43.5.5 0 1 1-.99.14 3 3 0 0 0-5.94 0 .5.5 0 1 1-.99-.14A4 4 0 0 1 8 4M4.5 9h7a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-.5.5h-7a.5.5 0 0 1-.5-.5v-4a.5.5 0 0 1 .5-.5\"/></svg>")
+        }
+      }
+      //Insertion de la carte s'il y en a une ou retrait du bouton s'il n'y en a pas.
+      if(data.map){
+        $('#mapArea').html('<div id="imgMap" class="lg-container"><img alt="Workplace" usemap="#workmap" class="img-fluid lg-image stepImg" src="scenarios/'+scenario+'/img/map.png"><map name="workmap"><area class="toClick" shape="rect" coords="34,44,270,350" alt="Computer" href="computer.htm"><area  class="toClick" shape="rect" coords="290,172,333,250" alt="Phone" href="phone.htm"><area  class="toClick" shape="circle" coords="337,300,44" alt="Coffee" href="coffee.htm"></map></div>')
+        // $('#imgMap').append('<div  style="top: 28%; right: 25%;color:red"  class="lg-hotspot hotspotButton lg-hotspot--top-left"><div class="lg-hotspot__button"><h6>Enclos des animaux</h6><div class="pin center text-center"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pin-fill" viewBox="0 0 16 16"><path d="M4.146.146A.5.5 0 0 1 4.5 0h7a.5.5 0 0 1 .5.5c0 .68-.342 1.174-.646 1.479-.126.125-.25.224-.354.298v4.431l.078.048c.203.127.476.314.751.555C12.36 7.775 13 8.527 13 9.5a.5.5 0 0 1-.5.5h-4v4.5c0 .276-.224 1.5-.5 1.5s-.5-1.224-.5-1.5V10h-4a.5.5 0 0 1-.5-.5c0-.973.64-1.725 1.17-2.189A6 6 0 0 1 5 6.708V2.277a3 3 0 0 1-.354-.298C4.342 1.674 4 1.179 4 .5a.5.5 0 0 1 .146-.354"/></svg></div></div></div>')
+      }
+      else{
+          $('#mapButton').remove()
+      }
+      if(!data.hints){
+        $('#hintButton').remove()
+      }
+      if(!data.hintsCount){
+        $('#hintCountZone').remove()
+      }
+      if(data.hintsLimit != null){
+        hintsCount=data.hintsLimit
+      }
+      //Affichage des Règles
+      $('#stepName').html("Règles du jeu")
+      $('#contentImg').css('display','block')
+      $('#contentImg').html('<img class="img-fluid stepImg" src="scenarios/'+scenario+'/img/'+data.mediaRules+'">')
+      $('#stepDescription').html(data.rules)
+      //initialisation du jeu depuis le locaStorage
+      if(localStorage.getItem("progressBarValue") !== null){
+        progressBarValue = JSON.parse(localStorage.getItem("progressBarValue"));
+        $('#myBar').css('width', progressBarValue+'%');
+        $('#myBar').html(Math.round(progressBarValue)+'%');
+      }
+      if(localStorage.getItem("stepsInProgressBar") !== null){
+        stepsInProgressBar = JSON.parse(localStorage.getItem("stepsInProgressBar"));
+      }
+      if(localStorage.getItem("mailSended") !== null){
+        mailSended = JSON.parse(localStorage.getItem("mailSended"));
+      }
+      if(localStorage.getItem("gameFinished") !== null){
+        gameFinished = JSON.parse(localStorage.getItem("gameFinished"));
+      }
+      if(localStorage.getItem("score") !== null){
+        score = JSON.parse(localStorage.getItem("score"));
+        $('#scoring').html('<strong>Votre score est de: '+Math.ceil(score)+' points.</strong>');
+      }
+      if(localStorage.getItem("hintsCount") !== null){
+        hintsCount = JSON.parse(localStorage.getItem("hintsCount"));
+        $('#hintCountdown').html(hintsCount)
+      }
+      if(localStorage.getItem("stepsReplacedBy") !== null){
+        stepsReplacedBy = JSON.parse(localStorage.getItem("stepsReplacedBy"));
+      }
+      if(localStorage.getItem("locationsOpenedHistory") !== null){
+        locationsOpenedHistory = JSON.parse(localStorage.getItem("locationsOpenedHistory"));
+      }
+      if(localStorage.getItem("stepsReplaced") !== null){
+        stepsReplaced = JSON.parse(localStorage.getItem("stepsReplaced"));
+      }
+      if(localStorage.getItem("storageHistory") !== null){
+        history = JSON.parse(localStorage.getItem("storageHistory"));
+        if(localStorage.getItem("actualObjects")!=null){
+          tempActualObjects = JSON.parse(localStorage.getItem("actualObjects"))
+        }
+        else{tempActualObjects=[]}
+        if(localStorage.getItem("actualLocations")!=null){
+          tempActualLocations = JSON.parse(localStorage.getItem("actualLocations"))
+        }
+        else{tempActualLocations=[]}
+        currentStep = localStorage.getItem("currentStep");
+        $.each(steps,function(key,oneStep){
+          //ajout des lieux et objects par défaut
+          if($.inArray(oneStep.id,tempActualObjects)!=-1 || $.inArray(oneStep.id,tempActualLocations)!=-1 ){
+            addItemOrLocation(oneStep)
+            // if($.inArray(oneStep.id,locationsOpenedHistory)!=-1  && oneStep.lockType == null){
+            //   $('#stepID'+oneStep.id).find('.oneLocationtoView').data('closed',false)
+            //   $('#stepID'+oneStep.id).children('.locationStatus').html('<span><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#4b967d" class="bi bi-house-up-fill" viewBox="0 0 16 16"><path d="M12.5 16a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7m.354-5.854 1.5 1.5a.5.5 0 0 1-.708.708L13 11.707V14.5a.5.5 0 1 1-1 0v-2.793l-.646.647a.5.5 0 0 1-.708-.707l1.5-1.5a.5.5 0 0 1 .708 0Z"/><path d="M8.707 1.5a1 1 0 0 0-1.414 0L.646 8.146a.5.5 0 0 0 .708.708L8 2.207l6.646 6.647a.5.5 0 0 0 .708-.708L13 5.793V2.5a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5v1.293z"/><path d="m8 3.293 4.712 4.712A4.5 4.5 0 0 0 8.758 15H3.5A1.5 1.5 0 0 1 2 13.5V9.293z"/></svg></span>')
+            // }
+          }
+          if(oneStep.id==currentStep){
+            showStep(oneStep)
+          }
+        })
+        if(localStorage.getItem("actualObjects")!=null){
+          actualObjects = JSON.parse(localStorage.getItem("actualObjects"))
+        }
+        if(localStorage.getItem("actualLocations")!=null){
+          actualLocations = JSON.parse(localStorage.getItem("actualLocations"))
+        }
+      }
+      //initialisation du jeu depuis les données
+     else{
+      $.each(steps,function(key,oneStep){
+        //ajout des lieux et objects par défaut
+        if(oneStep.default==true){
+          addItemOrLocation(oneStep)
+          // locationsOpenedHistory.push(oneStep.id)
+          // localStorage.setItem("locationsOpenedHistory",JSON.stringify(history));
+          // history.push(oneStep.id)
+          // localStorage.setItem("storageHistory",JSON.stringify(history));
+        }
+      })
+    }
+  })
+})
+$(document).on('click','#MobileRules, #rules',  function(){
+    $('#stepName').html("Règles du jeu")
+    $('#contentImg').css('display','block')
+    $('#contentImg').html('<img class="img-fluid stepImg" src="scenarios/'+scenario+'/img/'+dataJsonGlobal.mediaRules+'">')
+    $('#stepDescription').html(dataJsonGlobal.rules)
+})
+
+document.addEventListener('DOMContentLoaded', function() {
+    var maModaleLocations = document.getElementById('locationsModal')
+    maModaleLocations.addEventListener('show.bs.modal', function(e) {
+      if(dataJsonGlobal.color2 != null){
+        const badges = maModaleLocations.querySelectorAll('.badge.text-bg-primary')
+        badges.forEach(badge => {
+        badge.style.setProperty('background-color', dataJsonGlobal.color2, 'important')
+        badge.style.setProperty('color', '#ffffff', 'important')
+
+        })
+      }
+    })
+    var maModale = document.getElementById('itemsModal')
+    maModale.addEventListener('show.bs.modal', function(e) {
+      if(dataJsonGlobal.color2 != null){
+        const badges = maModale.querySelectorAll('.badge.text-bg-primary')
+        badges.forEach(badge => {
+        badge.style.setProperty('background-color', dataJsonGlobal.color2, 'important')
+        badge.style.setProperty('color', '#ffffff', 'important')
+        })
+      }
+    })
+  })
+//choix du scénario
+$(document).on('click','#scenarioButton',function(){
+    var scenarioCode=$('#scenarioCode').val().toLowerCase()
+    scenarioCode=scenarioCode.trim()
+    $.getJSON('scenarios/'+scenarioCode+'/scenario.json',function(data){
+      localStorage.setItem('scenario',scenarioCode.toLowerCase())
+      location.reload()
+    }).fail(function(){
+      $('#errorMessage').html('</br><div class="alert alert-warning" role="alert"> Ce code de scénario est incorrect!</div>')
+      $('#scenarioModal').modal("show")
+    })
+})
+//Inscription du groupe
+$(document).on('click','#emailButton',function(){
+  var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  var groupName=$('#groupName').val()
+  var groupMail=$('#groupEmail').val()
+  if(groupName!="" && emailRegex.test(groupMail)){
+      localStorage.setItem('groupName',groupName)
+      localStorage.setItem('groupMail',groupMail)
+      location.reload()
+  }
+  else{
+    $('#emailErrorMessage').html('</br><div class="alert alert-warning" role="alert"> Veuillez indiquer un nom de groupe et un Email valide.</div>')
+    $('#emailModal').modal("show")
+  }
+})
+//initialisation du compteur
+function displayTime(timeToDisplay) {
+  let diffMs = timeToDisplay
+  let hours = Math.floor(diffMs / (1000 * 60 * 60));
+  diffMs -= hours * 1000 * 60 * 60;
+  let minutes = Math.floor(diffMs / (1000 * 60));
+  diffMs -= minutes * 1000 * 60;
+  let seconds = Math.floor(diffMs / 1000);
+  let hStr = String(hours).padStart(2, '0');
+  let mStr = String(minutes).padStart(2, '0');
+  let sStr = String(seconds).padStart(2, '0');
+  $('#timer').html(hStr + ':' + mStr + ':' + sStr);
+}
+function setTimer(){
+  if(dataJsonGlobal.timer){
+    timerIsOn = true;
+    if(localStorage.getItem("startTime") !== null){
+      startTimeInIso = localStorage.getItem("startTime");
+      startTime = new Date(startTimeInIso)
+    }
+    else{
+      startTime=new Date()
+      localStorage.setItem("startTime", startTime.toISOString());
+    }
+    if(dataJsonGlobal.countdown != null){
+      if(localStorage.getItem("startTime") == null){
+          displayTime(dataJsonGlobal.countdown)
+      }
+      timerInterval = setInterval(function() {
+        var now = new Date()
+        let elapsedTime = now - startTime
+        if(elapsedTime > dataJsonGlobal.countdown ){
+          clearInterval(timerInterval);
+          $('.gameInterfaceButton').each(function(){
+            $(this).prop("disabled", true);
+          });
+          $('.badge').each(function(){
+            $(this).prop("disabled", true);
+          });
+          $('.card-footer').css('background-color',footerColor);
+          $('#stepDescription').html('<div>Le temps est malheureusement écoulé.</div>');
+          $('#stepName').html('Temps écoulé');
+          $('#contentImg').html('<img class="img-fluid stepImg" src="medias/timeout.png">');
+          //ajout du scoring
+          var score = (100000000/(dataJsonGlobal.countdown/100))*(progressBarValue/100)*(1-(0.05*hintsCount))
+          score = Math.max(0, score);
+          $('#scoring').html('<strong>Votre score est de: '+Math.ceil(score)+' points.</strong>');
+          sendMail(dataJsonGlobal.countdown,hintsCount,progressBarValue,Math.ceil(score))
+
+        } else if (currentStep == dataJsonGlobal.lastStepId && !gameFinished) {
+          clearInterval(timerInterval);
+          $('.gameInterfaceButton').each(function(){
+            $(this).prop("disabled", true);
+          });
+          $('.badge').each(function(){
+            $(this).prop("disabled", true);
+          });
+          var now = new Date();
+          let elapsedTime = (now - startTime);
+          var score = (100000000/(elapsedTime/100))*(progressBarValue/100)*(1-(0.05*hintsCount))
+          score = Math.max(0, score)
+          $('#scoring').html('<strong>Votre score est de: '+Math.ceil(score)+' points.</strong>');
+          sendMail(elapsedTime,hintsCount,progressBarValue,Math.ceil(score))
+          gameFinished=true
+          localStorage.setItem("gameFinished",JSON.stringify(true));
+          localStorage.setItem("score",JSON.stringify(score));
+        }
+        else {
+          var now = new Date();
+          let elapsedTime = now - startTime
+          timeToDisplay=dataJsonGlobal.countdown-elapsedTime
+          displayTime(timeToDisplay);
+        }
+      }, 1000);
+      //Si c'est un compteur simple
+    } else {
+      timerInterval = setInterval(function() {
+        //si on est à l'étape finale
+        if(currentStep == dataJsonGlobal.lastStepId && !gameFinished){
+          clearInterval(timerInterval);
+          $('.gameInterfaceButton').each(function(){
+            $(this).prop("disabled", true);
+          });
+          $('.badge').each(function(){
+            $(this).prop("disabled", true);
+          });
+          //ajout du scoring
+          var now = new Date();
+          let elapsedTime = (now - startTime);
+          var score = (100000000/(elapsedTime/100))*(progressBarValue/100)*(1-(0.05*hintsCount))
+          score = Math.max(0, score)
+          $('#scoring').html('<strong>Votre score est de: '+Math.ceil(score)+' points.</strong>');
+          sendMail(elapsedTime,hintsCount,progressBarValue,Math.ceil(score))
+          gameFinished=true
+          localStorage.setItem("gameFinished",JSON.stringify(true));
+          localStorage.setItem("score",JSON.stringify(score));
+        }
+        //Sinon on actualise le compteur
+        else{
+          var now = new Date()
+          let timeToDisplay = now - startTime
+          displayTime(timeToDisplay);
+        }
+      }, 1000);  // Ici aussi, actualisation chaque seconde
+    }
+  }
+}
+//Ajouter un lieu ou un objet selon son id
+function addItemOrLocation(itemOrLocationObject){
+  //ajout des lieux
+  if(itemOrLocationObject.type=="location"){
+    //si le lieu est dans l'historique des lieux ouvert il est est ouvert
+    if($.inArray(itemOrLocationObject.id,locationsOpenedHistory)!=-1 || itemOrLocationObject.closed==false){
+      if($.inArray(itemOrLocationObject.id,locationsOpenedHistory)==-1){
+        locationsOpenedHistory.push(itemOrLocationObject.id)
+        localStorage.setItem("locationsOpenedHistory",JSON.stringify(locationsOpenedHistory));
+      }
+      // console.log(itemOrLocationObject.id+' est ouvert')
+      isClosed = false
+    }
+    //sinon il est fermé
+    else{
+        // console.log(itemOrLocationObject.id+' est fermé')
+      isClosed = true
+    }
+    if(isClosed){
+      //icone si pas dans l'historique des lieux ouverts (isClosed=true)
+        var icone='<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#d7263d" class="bi bi-house-dash-fill" viewBox="0 0 16 16"><path d="M8.707 1.5a1 1 0 0 0-1.414 0L.646 8.146a.5.5 0 0 0 .708.708L8 2.207l6.646 6.647a.5.5 0 0 0 .708-.708L13 5.793V2.5a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5v1.293z"/><path d="m8 3.293 4.712 4.712A4.5 4.5 0 0 0 8.758 15H3.5A1.5 1.5 0 0 1 2 13.5V9.293z"/><path d="M12.5 16a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7M11 12h3a.5.5 0 0 1 0 1h-3a.5.5 0 1 1 0-1"/></svg>'
+        if($.inArray(itemOrLocationObject.id,history)!=-1 && itemOrLocationObject.lockType!=null){
+          var icone ='<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#d7263d" class="bi bi-lock-fill" viewBox="0 0 16 16"><path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2m3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2"/></svg>'
+          isClosed=false
+        }
+    }
+    else{
+      //icones si dans l'historique des lieux ouverts (isClosed=false)
+      var icone='<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#4b967d" class="bi bi-house-up-fill" viewBox="0 0 16 16"><path d="M12.5 16a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7m.354-5.854 1.5 1.5a.5.5 0 0 1-.708.708L13 11.707V14.5a.5.5 0 1 1-1 0v-2.793l-.646.647a.5.5 0 0 1-.708-.707l1.5-1.5a.5.5 0 0 1 .708 0Z"/><path d="M8.707 1.5a1 1 0 0 0-1.414 0L.646 8.146a.5.5 0 0 0 .708.708L8 2.207l6.646 6.647a.5.5 0 0 0 .708-.708L13 5.793V2.5a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5v1.293z"/><path d="m8 3.293 4.712 4.712A4.5 4.5 0 0 0 8.758 15H3.5A1.5 1.5 0 0 1 2 13.5V9.293z"/></svg>'
+    }
+    if($.inArray(itemOrLocationObject.id,actualLocations)==-1){
+      $('#locationsList').append('<div data-id='+itemOrLocationObject.id+' id="stepID'+itemOrLocationObject.id+'" class="row oneLocation"><div class="locationStatus col-1"><span>'+icone+'</span></div><div class="col-9">'+itemOrLocationObject.name+'</div><div class="alignRight col"><div data-name="'+itemOrLocationObject.name+'" data-closed='+isClosed+' data-id='+itemOrLocationObject.id+' data-bs-dismiss="modal" class="oneLocationtoView badge text-bg-primary"><svg xmlns="http://www.w3.org/2000/svg"width="16" height="16" fill="currentColor" class="bi bi-eye-fill" viewBox="0 0 16 16"><path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0"/>  <path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8m8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7"/></svg></div></div></div>')
+      locationAddedHistory.push(itemOrLocationObject.id)
+      actualLocations.push(itemOrLocationObject.id)
+      localStorage.setItem("actualLocations",JSON.stringify(actualLocations))
+    }
+  }
+  //ajout des objets
+  if(itemOrLocationObject.type=="object"){
+    $('#objectList').append('<div id="stepID'+itemOrLocationObject.id+'" data-id='+itemOrLocationObject.id+' class="row oneObjectLine"><div class="oneObject col">'+itemOrLocationObject.name+'</div><div class="text-end col"><div data-id='+itemOrLocationObject.id+' data-bs-dismiss="modal" class=" oneObjectToView badge text-bg-primary"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye-fill" viewBox="0 0 16 16"><path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0"/>  <path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8m8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7"/></svg></div><div data-id='+itemOrLocationObject.id+' data-bs-dismiss="modal" class=" oneObjectToUse badge text-bg-primary"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-hand-index-fill" viewBox="0 0 16 16"><path d="M8.5 4.466V1.75a1.75 1.75 0 1 0-3.5 0v5.34l-1.2.24a1.5 1.5 0 0 0-1.196 1.636l.345 3.106a2.5 2.5 0 0 0 .405 1.11l1.433 2.15A1.5 1.5 0 0 0 6.035 16h6.385a1.5 1.5 0 0 0 1.302-.756l1.395-2.441a3.5 3.5 0 0 0 .444-1.389l.271-2.715a2 2 0 0 0-1.99-2.199h-.581a5 5 0 0 0-.195-.248c-.191-.229-.51-.568-.88-.716-.364-.146-.846-.132-1.158-.108l-.132.012a1.26 1.26 0 0 0-.56-.642 2.6 2.6 0 0 0-.738-.288c-.31-.062-.739-.058-1.05-.046z"/></svg></div></div></div>')
+    itemsHistory.push(itemOrLocationObject.id)
+    if($.inArray(itemOrLocationObject.id,actualObjects)==-1){
+      actualObjects.push(itemOrLocationObject.id)
+      localStorage.setItem("actualObjects",JSON.stringify(actualObjects))
+    }
+  }
+  if($.inArray(itemOrLocationObject.id,history)==-1){
+    history.push(itemOrLocationObject.id)
+    localStorage.setItem("storageHistory",JSON.stringify(history));
+  }
+}
+// Ajouter toutes les steps connexes depuis l'id
+function addConnexeSteps(oneStep){
+  if(!oneStep.closed){
+    var steps= dataJsonGlobal.steps
+    var listOfStepToAddSimultaneous = oneStep.toAdd
+    $.each(steps,function(key,oneStep){
+      if($.inArray(oneStep.id,listOfStepToAddSimultaneous)!=-1 && $.inArray(oneStep.id,history)==-1){
+        addItemOrLocation(oneStep)
+      }
+    })
+  }
+}
+// supprimer toutes les steps connexes depuis l'id
+function removeConnexeSteps(oneStep){
+  if(!oneStep.closed){
+    var stepsToRemove = oneStep.toRemove
+    var stepsToKeep = oneStep.toAdd
+    $.each(stepsToRemove,function(key,oneStep){
+      if(oneStep == "allLocations"){
+        $('.oneLocation').each( function(){
+          if($.inArray($(this).data('id'),stepsToKeep)==-1){
+            actualLocations = actualLocations.filter(item => item !== $(this).data('id'))
+            localStorage.setItem("actualLocations",JSON.stringify(actualLocations))
+            $(this).remove()
+          }
+        })
+      }
+      if(oneStep == "allItems"){
+        $('.oneObjectLine').each( function(){
+          if($.inArray($(this).data('id'),stepsToKeep)==-1){
+            actualObjects = actualObjects.filter(item => item !== $(this).data('id'))
+            localStorage.setItem("actualObjects",JSON.stringify(actualObjects))
+            $(this).remove()
+          }
+        })
+      }
+      $('#stepID'+oneStep).remove()
+      if(actualObjects.length > 0 && actualObjects != null){
+        actualObjects = actualObjects.filter(item => item !== oneStep)
+        localStorage.setItem("actualObjects",JSON.stringify(actualObjects))
+      }
+      if(actualLocations.length > 0 && actualLocations != null){
+        actualLocations = actualLocations.filter(item => item !== oneStep)
+        localStorage.setItem("actualLocations",JSON.stringify(actualLocations))
+      }
+    })
+  }
+}
+// Afficher step donné
+function showStep(step){
+  if(dataJsonGlobal.progressBar){
+    upProgressBar(step)
+  }
+  htmlscanner.clear()
+  if(!timerIsOn){
+    setTimer()
+  }
+  if(step.lastStep){
+    clearInterval(timerInterval)
+  }
+  $('#contentImg').css('display','block')
+  $('#stepName').html(step.name)
+  if(step.lockType!=null && step.lockType!="withObject" ){
+    trying=[]
+    $('#contentImg').css('display','block')
+    switch (step.lockType) {
+      case "color":
+        inserColorLock()
+        break;
+      case "digit":
+        inserDigitLock()
+        break;
+      case "directionnal":
+        inserDirectionnalLock()
+        break;
+      case "fuse":
+        inserFuseLock()
+        break;
+      case "date":
+        inserDateLock()
+        break;
+      case "password":
+        inserPasswordLock()
+        break;
+      case "diagram":
+        inserDiagramLock()
+        break;
+      case "login":
+        inserLoginLock()
+        break;
+      case "sliders":
+        inserSlidersLock(step)
+        break;
+      case "selector":
+        inserSelector(step)
+        break;
+      case "sonoMeter":
+        inserSonoMeter(step)
+        break;
+    }
+  }
+  else{ $('#contentImg').html('<img class="img-fluid stepImg" src="scenarios/'+scenario+'/img/'+step.media+'">')}
+  $('.card-footer').css('background-color',footerColor)
+  $('#stepDescription').html(step.description)
+  currentStep=step.id
+  localStorage.setItem("currentStep",currentStep);
+}
+//faire progresser la progressbar
+function upProgressBar(thisStep){
+  if(thisStep.progressBar && $.inArray(thisStep.id,stepsInProgressBar)==-1){
+      var progressBarStep = 100/progressBarStepValue
+      progressBarValue = progressBarValue + progressBarStep
+      $('#myBar').css('width', progressBarValue+'%');
+      $('#myBar').html(Math.round(progressBarValue)+'%');
+      stepsInProgressBar.push(thisStep.id)
+      localStorage.setItem("progressBarValue",progressBarValue)
+      localStorage.setItem("stepsInProgressBar",JSON.stringify(stepsInProgressBar))
+  }
+}
+
+//Ouvrir un lieu depuis la liste
+$(document).on('click','.oneLocationtoView',function(e){
+  id=$(this).data('id')
+  if($(this).data('closed')){
+    htmlscanner.clear()
+    $('#contentImg').css('display','block')
+    $('#stepName').html($(this).data('name'))
+    $('#contentImg').html('<img class="stepImg" src="medias/noway.png">')
+    $('#stepDescription').html("Ce lieu n'est pas encore accessible. Vous devez scanner son Qr code avant de pouvoir l'ouvrir.")
+  }
+  else{
+      var codeToFind
+      var steps= dataJsonGlobal.steps
+      $.each(steps, function(key, oneLocation){
+        if(oneLocation.id == id){
+          var currentStep = oneLocation;
+          // boucle tant que le code du step est dans stepsReplaced (donc remplacé)
+          while($.inArray(currentStep.code, stepsReplaced) != -1){
+            var positionToCheck = $.inArray(currentStep.code, stepsReplaced);
+            var codeToFind;
+            if(jQuery.type(currentStep.toAssociate) == "array"){
+              var positionForCodeToFind = stepsReplacedBy[positionToCheck];
+              codeToFind = currentStep.replaceBy[positionForCodeToFind];
+            } else {
+              codeToFind = currentStep.replaceBy;
+            }
+            // rechercher le step associé au code trouvé
+            var stepFindedByCode = null;
+            $.each(steps, function(k, oneStep){
+              if(oneStep.code == codeToFind){
+                stepFindedByCode = oneStep;
+                return false; // sortie anticipée
+              }
+            });
+            if(stepFindedByCode){
+              currentStep = stepFindedByCode; // on suit le remplacement plus loin
+            } else {
+              break; // pas trouvé, on casse la boucle
+            }
+          }
+          showStep(currentStep); // on affiche finalement le dernier step trouvé
+        }
+    });
+  }
+})
+//Ouvrir un objet depuis l'inventaire
+$(document).on('click','.oneObjectToView',function(e){
+  id=$(this).data('id')
+    var steps= dataJsonGlobal.steps
+    $.each(steps,function(key,oneObject){
+      if(oneObject.id==id){
+        showStep(oneObject)
+      }
+    })
+})
+//demande d'indice
+$(document).on('click','#hintButton',function(e){
+    var steps= dataJsonGlobal.steps
+    $.each(steps,function(key,oneStep){
+      if(oneStep.id==currentStep){
+        //seulement l'indice
+        if(dataJsonGlobal.hints && !dataJsonGlobal.hintsCount){
+          if(oneStep.hint != null){
+            $('#hintZone').html(oneStep.hint)
+          }
+          else{
+            $('#hintZone').html('Aucun indice disponible pour cet élément')
+          }
+        }
+          //l'indice avec le compteur
+          if(dataJsonGlobal.hints && dataJsonGlobal.hintsCount){
+            if(dataJsonGlobal.hintsLimit == null){
+              if(oneStep.hint != null){
+                $('#hintZone').html(oneStep.hint)
+                hintsCount+=1
+                $('#hintCountZone').html('Vous avez utilisez '+hintsCount+' indice(s).')
+                localStorage.setItem("hintsCount",hintsCount);
+              }
+              else{
+                $('#hintZone').html('Aucun indice disponible pour cet élément')
+              }
+              $('#hintCountdown').html(hintsCount)
+            }
+            if(dataJsonGlobal.hintsLimit != null){
+              if(hintsCount>1){
+                var displayCount = hintsCount-1
+                $('#hintCountZone').html('Il vous reste '+displayCount+' indice(s).')
+
+                localStorage.setItem("hintsCount",hintsCount);
+                if(oneStep.hint != null){
+                  hintsCount-=1
+                  $('#hintZone').html(oneStep.hint)
+                  $('#hintCountdown').html(displayCount)
+                }
+                else{
+                  $('#hintZone').html('Aucun indice disponible pour cet élément')
+                }
+              }
+              else{
+                $('#hintZone').html('Vous n\'avez plus d\'indices disponibles.')
+              }
+            }
+          }
+      }
+    })
+})
+//Utiliser un objet depuis l'inventaire
+$(document).on('click','.oneObjectToUse',function(e){
+  objectId=$(this).data('id')
+      var steps= dataJsonGlobal.steps
+      var objectPosition
+      var valueToCheck
+      $.each(steps,function(key,oneStep){
+        if(oneStep.id == currentStep){
+          if(jQuery.type(oneStep.toAssociate)=="array"){
+            if($.inArray(objectId,oneStep.toAssociate)!=-1){
+              objectPosition=$.inArray(objectId,oneStep.toAssociate)
+            }
+            valueToCheck=oneStep.toAssociate[objectPosition]
+            valueReplaceBy=oneStep.replaceBy[objectPosition]
+          }
+          else{
+            valueToCheck=oneStep.toAssociate
+            valueReplaceBy=oneStep.replaceBy
+          }
+          //si on essaie d'utiliser l'objet sur lui-même
+          if(oneStep.id==objectId){
+            $('#stepDescription').html('<div>Il n\'est pas possible d\'utiliser un objet avec lui-même.<div>')
+            $('.card-footer').css('background-color',footerColor)
+            $('#stepName').html('Action impossible')
+            $('#contentImg').html('<img class="stepImg" src="medias/noway.png">')
+            return false
+          }
+          //Si on essaie d'utiliser un objet sur un cadenas.
+          if(oneStep.type=='lock'){
+            $('#stepDescription').html('<div>Il n\'est pas possible d\'utiliser un objet avec un verrou.<div>')
+            $('.card-footer').css('background-color',footerColor)
+            $('#stepName').html('Action impossible')
+            $('#contentImg').html('<img class="stepImg" src="medias/noway.png">')
+            return false
+            }
+          //Si ce n'est pas un cadenas
+          if(oneStep.type != 'lock' ){
+            //Si l'id de l'objet correspond à l'objet associé
+            if(valueToCheck==objectId){
+                var objectStep = dataJsonGlobal.steps.find(s=>s.id === objectId)
+                if(objectStep.autoRemoveObject){
+                  $('#stepID'+objectStep.id).remove()
+                  console.log(actualObjects)
+                    actualObjects = actualObjects.filter(item => item !== objectStep.id)
+                    console.log(actualObjects)
+                    localStorage.setItem("actualObjects",JSON.stringify(actualObjects))
+                }
+              if(oneStep.lockType=='withObject'){
+                $('#stepID'+oneStep.id).children('.locationStatus').html('<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#4b967d" class="bi bi-house-up-fill" viewBox="0 0 16 16"><path d="M12.5 16a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7m.354-5.854 1.5 1.5a.5.5 0 0 1-.708.708L13 11.707V14.5a.5.5 0 1 1-1 0v-2.793l-.646.647a.5.5 0 0 1-.708-.707l1.5-1.5a.5.5 0 0 1 .708 0Z"/><path d="M8.707 1.5a1 1 0 0 0-1.414 0L.646 8.146a.5.5 0 0 0 .708.708L8 2.207l6.646 6.647a.5.5 0 0 0 .708-.708L13 5.793V2.5a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5v1.293z"/><path d="m8 3.293 4.712 4.712A4.5 4.5 0 0 0 8.758 15H3.5A1.5 1.5 0 0 1 2 13.5V9.293z"/></svg>')
+                locationsOpenedHistory.push(oneStep.id)
+                localStorage.setItem("locationsOpenedHistory",JSON.stringify(history));
+                history.push(oneStep.id)
+                localStorage.setItem("storageHistory",JSON.stringify(history));
+              }
+              //Enregistrer le code dans la liste des codes remplacés
+              if($.inArray(oneStep.code,stepsReplaced)==-1 && oneStep.definitiveReplace){
+                stepsReplaced.push(oneStep.code)
+                localStorage.setItem("stepsReplaced",JSON.stringify(stepsReplaced));
+                if(jQuery.type(oneStep.toAssociate)=="array"){
+                  if($.inArray(objectId,oneStep.toAssociate)!=-1){
+                    stepReplacedPosition = $.inArray(oneStep.code,stepsReplaced);
+                    stepsReplacedBy[stepReplacedPosition]= objectPosition
+                    localStorage.setItem("stepsReplacedBy",JSON.stringify(stepsReplacedBy));
+                 }
+               }
+              }
+              $.each(steps,function(key,newStep){
+                if(newStep.code == valueReplaceBy){
+                  htmlscanner.clear()
+                  showStep(newStep)
+                  currentStep=newStep.id
+                  if($.inArray(newStep.id,locationsOpenedHistory)==-1){
+                    history.push(newStep.id)
+                    localStorage.setItem("storageHistory",JSON.stringify(history));
+                    if(newStep.type=="location"){
+                      locationsOpenedHistory.push(newStep.id)
+                      localStorage.setItem("locationsOpenedHistory",JSON.stringify(history));
+                    }
+                  }
+                  localStorage.setItem("currentStep",currentStep);
+                  removeConnexeSteps(newStep)
+                  addConnexeSteps(newStep)
+                }
+              })
+              return false
+            }
+            if(valueToCheck!=objectId){
+              $('.card-footer').css('background-color',footerColor)
+              $('#stepDescription').html('<div">Il n\'est pas possible d\'utiliser cet objet de cette manière ou maintenant. Essayez-le ailleurs ou plus tard.<div>')
+              $('#stepName').html('Action impossible')
+              $('#contentImg').html('<img class="stepImg" src="medias/noway.png">')
+              return false
+            }
+        }
+      }
+    })
+})
+//Lancer la lecture de QRcode lors de l'appui sur le bouton caméra
+$('#qrCodeButton').on('click',function(){
+  $('#stepName').html('QrCode Scanneur')
+    $('#contentImg').css('display','none')
+  $('#stepDescription').html("Scannez un qr code pour activer un lieu, récupérer un objet ou parler à un personnage.")
+      // If found you qr code
+      htmlscanner.render(onScanSuccess);
+      function onScanSuccess(decodeText, decodeResult) {
+
+        htmlscanner.clear()
+        if(decodeText=="addhint"){
+          $('.card-footer').css('background-color',footerColor)
+          $('#stepDescription').html('<div>Bravo vous avez trouvé un indice bonus.<div>')
+          $('#stepName').html('Indice supplémentaire')
+          $('#contentImg').css('display','block')
+          $('#contentImg').html('<img class="stepImg" src="medias/addhint.png">')
+          hintsCount+=1
+          localStorage.setItem("hintsCount",hintsCount);
+        }
+        if(decodeText=="removehint"){
+          $('.card-footer').css('background-color',footerColor)
+          $('#stepDescription').html('Vous avez perdu un indice.<div>')
+          $('#stepName').html('Indice perdu')
+          $('#contentImg').css('display','block')
+          $('#contentImg').html('<img class="stepImg" src="medias/removehint.png">')
+          hintsCount-=1
+          localStorage.setItem("hintsCount",hintsCount);
+        }
+          var steps= dataJsonGlobal.steps
+          $.each(steps,function(key,oneStep){
+            //Si le code est dans la liste des step remplacée
+            if($.inArray(decodeText,stepsReplaced ) != -1 ){
+              $.each(steps,function(key,oneReplaceStep){
+                if(oneReplaceStep.code==decodeText){
+                  if(jQuery.type(oneReplaceStep.replaceBy)=="array"){
+                    var positionToCheck = $.inArray(oneReplaceStep.code,stepsReplaced )
+                    var positionValue = stepsReplacedBy[positionToCheck]
+                    decodeText = oneReplaceStep.replaceBy[positionValue]
+                  }
+                  else{
+                    decodeText=oneReplaceStep.replaceBy
+                  }
+                  localStorage.setItem("locationsOpenedHistory",JSON.stringify(locationsOpenedHistory));
+                  if($.inArray(oneReplaceStep.id,locationsOpenedHistory)==-1 && oneReplaceStep.lockType == null){
+                    locationsOpenedHistory.push(oneReplaceStep.id)
+                    localStorage.setItem("locationsOpenedHistory",JSON.stringify(history));
+                    history.push(oneReplaceStep.id)
+                    localStorage.setItem("storageHistory",JSON.stringify(history));
+                  }
+                  return false
+                }
+              })
+            }
+            //Si c'est une personne
+            if(oneStep.type=='person' && oneStep.code==decodeText){
+              //si le lieu ou l'objet parent (needBefore) n'a pas encore été scanné.
+              var theStepBefore = dataJsonGlobal.steps.find(s=>s.id === oneStep.needBefore)
+              if(oneStep.type!="location" && oneStep.needBefore != null && ($.inArray(oneStep.needBefore,history ) == -1)){
+                $('.card-footer').css('background-color',footerColor)
+                $('#stepDescription').html('<div>Vous ne pouvez pas encore parler à ce personnage. Veuillez avancer dans l\'histoire avant de pouvoir le scanner.<div>')
+                $('#stepName').html('Personnage non disponible pour le moment')
+                $('#contentImg').css('display','block')
+                $('#contentImg').html('<img class="stepImg" src="medias/noway.png">')
+              }
+              else if(oneStep.type=="location" && oneStep.needBefore != null && ($.inArray(oneStep.needBefore,history ) == -1 || $.inArray(oneStep.needBefore,locationsOpenedHistory ) == -1 )){
+                $('.card-footer').css('background-color',footerColor)
+                $('#stepDescription').html('<div>Vous ne pouvez pas encore parler à ce personnage. Veuillez avancer dans l\'histoire avant de pouvoir le scanner.<div>')
+                $('#stepName').html('Personnage non disponible pour le moment')
+                $('#contentImg').css('display','block')
+                $('#contentImg').html('<img class="stepImg" src="medias/noway.png">')
+              }
+              else{
+                $('#contentImg').css('display','block')
+                showStep(oneStep)
+                var listOfStepToAddSimultaneous = oneStep.toAdd
+                $.each(steps,function(key,oneStep){
+                  if($.inArray(oneStep.id,listOfStepToAddSimultaneous)!=-1 && $.inArray(oneStep.id,history)==-1){
+                    removeConnexeSteps(oneStep)
+                    addConnexeSteps(oneStep)
+                    addItemOrLocation(oneStep,false)
+                  }
+                })
+              }
+              return false
+            }
+            //si c'est un objet
+            if(oneStep.type=='object' && oneStep.code==decodeText){
+                if($.inArray(oneStep.id,history) != -1){
+                  $('#contentImg').css('display','block')
+                  showStep(oneStep)
+                  currentStep=oneStep.id
+                  localStorage.setItem("currentStep",currentStep)
+                  return false
+                }
+              if($.inArray(oneStep.id,history) == -1 && $.inArray(oneStep.needBefore,locationsOpenedHistory) != -1 ){
+                $('#contentImg').css('display','block')
+                showStep(oneStep)
+                removeConnexeSteps(oneStep)
+                addConnexeSteps(oneStep)
+                addItemOrLocation(oneStep,false)
+                currentStep=oneStep.id
+                localStorage.setItem("currentStep",currentStep)
+                  return false
+              }
+              //si le lieu ou l'objet parent (needBefore) n'a pas encore été scanné.
+              if($.inArray(oneStep.needBefore,locationsOpenedHistory) == -1){
+                $('.card-footer').css('background-color',footerColor)
+                $('#stepDescription').html('<div>Vous ne pouvez pas encore scanner cet objet. Veuillez avancer dans l\'histoire avant de pouvoir le scanner.<div>')
+                $('#stepName').html('Objet non disponible pour le moment')
+                $('#contentImg').css('display','block')
+                $('#contentImg').html('<img class="stepImg" src="medias/noway.png">')
+                return false
+              }
+            }
+            if(oneStep.type=='location'&& oneStep.code==decodeText){
+              if($.inArray(oneStep.id,actualLocations) != -1){
+                if(oneStep.lockType == null){
+                  locationsOpenedHistory.push(oneStep.id)
+                }
+                history.push(oneStep.id)
+                currentStep=oneStep.id
+                localStorage.setItem("currentStep",currentStep);
+                $('#contentImg').css('display','block ')
+                $('#stepID'+oneStep.id).find('.oneLocationtoView').data('closed',false)
+                if(oneStep.lockType==null){
+                  $('#stepID'+oneStep.id).children('.locationStatus').html('<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#4b967d" class="bi bi-house-up-fill" viewBox="0 0 16 16"><path d="M12.5 16a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7m.354-5.854 1.5 1.5a.5.5 0 0 1-.708.708L13 11.707V14.5a.5.5 0 1 1-1 0v-2.793l-.646.647a.5.5 0 0 1-.708-.707l1.5-1.5a.5.5 0 0 1 .708 0Z"/><path d="M8.707 1.5a1 1 0 0 0-1.414 0L.646 8.146a.5.5 0 0 0 .708.708L8 2.207l6.646 6.647a.5.5 0 0 0 .708-.708L13 5.793V2.5a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5v1.293z"/><path d="m8 3.293 4.712 4.712A4.5 4.5 0 0 0 8.758 15H3.5A1.5 1.5 0 0 1 2 13.5V9.293z"/></svg>')
+                }
+                else{
+                  $('#stepID'+oneStep.id).children('.locationStatus').html('<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#d7263d" class="bi bi-lock-fill" viewBox="0 0 16 16"><path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2m3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2"/></svg>')
+                }
+                showStep(oneStep)
+                removeConnexeSteps(oneStep)
+                addConnexeSteps(oneStep)
+                localStorage.setItem("storageHistory",JSON.stringify(history))
+                if(oneStep.lockType == null){
+                  localStorage.setItem("locationsOpenedHistory",JSON.stringify(locationsOpenedHistory));
+                }
+                return false
+              }
+              //si c'est un lieu qui n'est pas encore dans la liste.
+              if($.inArray(oneStep.id,actualLocations) == -1){
+                $('.card-footer').css('background-color',footerColor)
+                $('#stepDescription').html('<div>Vous ne n\'avez pas encore découvert ce lieu. Veuillez avancer dans l\'histoire avant de pouvoir le scanner.<div>')
+                $('#stepName').html('Lieu non découvert')
+                $('#contentImg').css('display','block')
+                $('#contentImg').html('<img class="stepImg" src="medias/noway.png">')
+                return false
+              }
+              //si le lieu ou l'objet parent (needBefore) n'a pas encore été scanné ou n'a pas encore été découvert
+              if($.inArray(oneStep.needBefore,history) == -1){
+                $('.card-footer').css('background-color',footerColor)
+                $('#stepDescription').html('<div>Vous ne pouvez pas encore scanner ce lieu. Veuillez avancer dans l\'histoire avant de pouvoir le scanner.<div>')
+                $('#stepName').html('Lieu non disponible pour le moment')
+                $('#contentImg').css('display','block')
+                $('#contentImg').html('<img class="stepImg" src="medias/noway.png">')
+                return false
+              }
+            }
+          })
+      }
+})
+function inserColorLock(){
+  $('#contentImg').html('<div class="card-body passCardBody"><div id="digit" class="lockContainer"><div class="row justify-content-center"><div class="col oneDigit justify-content-center "><button id="pinkDigit" data-color="F06292" type="button" class="btn digit btn-primary align-self-center colorButton"><svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-circle-fill" fill="#F06292" xmlns="http://www.w3.org/2000/svg"><circle cx="8" cy="8" r="8"/></svg></button></div><div class="col oneDigit">         <button id="blueDigit" data-color="0b30d9" type="button" class="btn digit btn-primary align-self-center colorButton"><svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-circle-fill" fill="#0b30d9" xmlns="http://www.w3.org/2000/svg"><circle cx="8" cy="8" r="8"/></svg></button></div><div class="col oneDigit"><button id="greenDigit" data-color="0c9411" type="button" class="btn digit btn-primary colorButton"><svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-circle-fill" fill="#0c9411" xmlns="http://www.w3.org/2000/svg"><circle cx="8" cy="8" r="8"/></svg></button></div></div><div class="row justify-content-center"><div class="col oneDigit">    <button id="yellowDigit" data-color="fafa1e" type="button" class="btn digit btn-primary colorButton"><svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-circle-fill" fill="#fafa1e" xmlns="http://www.w3.org/2000/svg"><circle cx="8" cy="8" r="8"/>           </svg></button></div><div class="col oneDigit"><button id="orangeDigit" data-color="ff8d0d" type="button" class="btn digit btn-primary colorButton"><svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-circle-fill" fill="#ff8d0d" xmlns="http://www.w3.org/2000/svg"><circle cx="8" cy="8" r="8"/></svg></button></div><div class="col oneDigit"><button id="redDigit" data-color="ff0000" type="button" class="btn digit btn-primary colorButton"><svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-circle-fill" fill="#ff0000" xmlns="http://www.w3.org/2000/svg"><circle cx="8" cy="8" r="8"/></svg></button></div></div><div class="row justify-content-center"><div class="col oneDigit"><button id="violetDigit" data-color="7B1FA2" type="button" class="btn digit btn-primary colorButton">             <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-circle-fill" fill="#7B1FA2" xmlns="http://www.w3.org/2000/svg"><circle cx="8" cy="8" r="8"/></svg></button></div><div class="col oneDigit"><button id="brownDigit" data-color="582900" type="button" class="btn digit btn-primary colorButton"><svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-circle-fill" fill="#582900" xmlns="http://www.w3.org/2000/svg"><circle cx="8" cy="8" r="8"/></svg></button></div><div class="col oneDigit"><button id="grayDigit" data-color="878787" type="button" class="btn digit btn-primary colorButton"><svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-circle-fill" fill="#878787" xmlns="http://www.w3.org/2000/svg"><circle cx="8" cy="8" r="8"/></svg></button></div></div><div class="row justify-content-center"><div class="col oneDigit"><button button id="reset" type="button" class="btn digit btn-warning"><svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-bootstrap-reboot" fill="currentColor" xmlns="http://www.w3.org/2000/svg">             <path fill-rule="evenodd" d="M1.161 8a6.84 6.84 0 1 0 6.842-6.84.58.58 0 0 1 0-1.16 8 8 0 1 1-6.556 3.412l-.663-.577a.58.58 0 0 1 .227-.997l2.52-.69a.58.58 0 0 1 .728.633l-.332 2.592a.58.58 0 0 1-.956.364l-.643-.56A6.812 6.812 0 0 0 1.16 8zm5.48-.079V5.277h1.57c.881 0 1.416.499 1.416 1.32 0 .84-.504 1.324-1.386 1.324h-1.6zm0 3.75V8.843h1.57l1.498 2.828h1.314L9.377 8.665c.897-.3 1.427-1.106 1.427-2.1 0-1.37-.943-2.246-2.456-2.246H5.5v7.352h1.141z"/></svg></button></div><div class="col oneDigit"><button id="blackDigit" data-color="000000" type="button" class="btn digit btn-primary colorButton"><svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-circle-fill" fill="#000000" xmlns="http://www.w3.org/2000/svg"><circle cx="8" cy="8" r="8"/></svg></button></div><div class="col oneDigit"><button id="sendSoluce" type="button" class="btn digit btn-success"><svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-key-fill" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M3.5 11.5a3.5 3.5 0 1 1 3.163-5H14L15.5 8 14 9.5l-1-1-1 1-1-1-1 1-1-1-1 1H6.663a3.5 3.5 0 0 1-3.163 2zM2.5 9a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/></svg></button></div></div></div></div>')
+}
+function inserDigitLock(){
+  $('#contentImg').html('<div class="card-body passCardBody"><div id="digit" class="lockContainer"><div class="row justify-content-center"><div class="col oneDigit justify-content-center "><button id="1Digit" data-digitValue="1" type="button" class="btn digit btn-primary align-self-center digitButton">1</button></div><div class="col oneDigit"><button id="2Digit" data-digitValue="2" type="button" class="btn digit btn-primary align-self-center digitButton">2</button></div><div class="col oneDigit"><button id="3Digit" data-digitValue="3" type="button" class="btn digit btn-primary digitButton">3</button></div></div><div class="row justify-content-center"><div class="col oneDigit">    <button id="4Digit"  data-digitValue="4" type="button" class="btn digit btn-primary digitButton">4</button></div><div class="col oneDigit"><button id="5Digit"  data-digitValue="5" type="button" class="btn digit btn-primary digitButton">5</button></div><div class="col oneDigit"><button id="6Digit" data-digitValue="6" type="button" class="btn digit btn-primary digitButton">6</button></div></div><div class="row justify-content-center"><div class="col oneDigit"><button id="7Digit" data-digitValue="7"  type="button" class="btn digit btn-primary digitButton">7</button></div><div class="col oneDigit"><button id="8Digit" data-digitValue="8" type="button" class="btn digit btn-primary digitButton">8</button></div><div class="col oneDigit"><button id="9Digit" data-digitValue="9" type="button" class="btn digit btn-primary digitButton">9</button></div></div><div class="row justify-content-center"><div class="col oneDigit"><button button id="reset" type="button" class="btn digit btn-warning"><svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-bootstrap-reboot" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M1.161 8a6.84 6.84 0 1 0 6.842-6.84.58.58 0 0 1 0-1.16 8 8 0 1 1-6.556 3.412l-.663-.577a.58.58 0 0 1 .227-.997l2.52-.69a.58.58 0 0 1 .728.633l-.332 2.592a.58.58 0 0 1-.956.364l-.643-.56A6.812 6.812 0 0 0 1.16 8zm5.48-.079V5.277h1.57c.881 0 1.416.499 1.416 1.32 0 .84-.504 1.324-1.386 1.324h-1.6zm0 3.75V8.843h1.57l1.498 2.828h1.314L9.377 8.665c.897-.3 1.427-1.106 1.427-2.1 0-1.37-.943-2.246-2.456-2.246H5.5v7.352h1.141z"/></svg></button></div><div class="col oneDigit"><button id="0Digit" data-digitValue="0" type="button" class="btn digit btn-primary digitButton">0</button></div><div class="col oneDigit"><button id="sendSoluce" type="button" class="btn digit btn-success"><svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-key-fill" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M3.5 11.5a3.5 3.5 0 1 1 3.163-5H14L15.5 8 14 9.5l-1-1-1 1-1-1-1 1-1-1-1 1H6.663a3.5 3.5 0 0 1-3.163 2zM2.5 9a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/></svg></button></div></div></div></div></div></div></div>')
+}
+function inserDirectionnalLock(){
+  $('#contentImg').html('<div id="digit" class="lockContainer"><div class="row justify-content-center">'+'<div class="col oneDigit"><button data-orientation="no" id="noDigit" type="button" class="btn digit btn-primary orientationButton"><svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-up-left-circle" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/><path fill-rule="evenodd" d="M5.5 5h4a.5.5 0 0 1 0 1H6.707l4.147 4.146a.5.5 0 0 1-.708.708L6 6.707V9.5a.5.5 0 0 1-1 0v-4a.5.5 0 0 1 .5-.5z"/></svg></button></div>'+'<div class="col oneDigit"><button data-orientation="n" id="nDigit" type="button" class="btn digit btn-primary orientationButton"><svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-up-circle" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/><path fill-rule="evenodd" d="M4.646 8.354a.5.5 0 0 0 .708 0L8 5.707l2.646 2.647a.5.5 0 0 0 .708-.708l-3-3a.5.5 0 0 0-.708 0l-3 3a.5.5 0 0 0 0 .708z"/><path fill-rule="evenodd" d="M8 11.5a.5.5 0 0 0 .5-.5V6a.5.5 0 0 0-1 0v5a.5.5 0 0 0 .5.5z"/></svg></button></div>'+'<div class="col oneDigit"><button data-orientation="ne" id="neDigit" type="button" class="btn digit btn-primary orientationButton"><svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-up-right-circle" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/><path fill-rule="evenodd" d="M10.5 5h-4a.5.5 0 0 0 0 1h2.793l-4.147 4.146a.5.5 0 0 0 .708.708L10 6.707V9.5a.5.5 0 0 0 1 0v-4a.5.5 0 0 0-.5-.5z"/></svg></button></div></div>'+'<div class="row justify-content-center"><div class="col oneDigit"><button data-orientation="o" id="oDigit" type="button" class="btn digit btn-primary orientationButton"><svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-left-circle" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/><path fill-rule="evenodd" d="M8.354 11.354a.5.5 0 0 0 0-.708L5.707 8l2.647-2.646a.5.5 0 1 0-.708-.708l-3 3a.5.5 0 0 0 0 .708l3 3a.5.5 0 0 0 .708 0z"/><path fill-rule="evenodd" d="M11.5 8a.5.5 0 0 0-.5-.5H6a.5.5 0 0 0 0 1h5a.5.5 0 0 0 .5-.5z"/></svg></button></div>'+'<div class="col oneDigit"></div>'+'<div class="col oneDigit"><button data-orientation="e" id="eDigit" type="button" class="btn digit btn-primary orientationButton"><svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-circle" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/><path fill-rule="evenodd" d="M7.646 11.354a.5.5 0 0 1 0-.708L10.293 8 7.646 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708 0z"/><path fill-rule="evenodd" d="M4.5 8a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1H5a.5.5 0 0 1-.5-.5z"/></svg></button></div></div>'+'<div class="row justify-content-center"><div class="col oneDigit"><button data-orientation="so" id="soDigit" type="button" class="btn digit btn-primary orientationButton"><svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-down-left-circle" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/><path fill-rule="evenodd" d="M5.5 11h4a.5.5 0 0 0 0-1H6.707l4.147-4.146a.5.5 0 0 0-.708-.708L6 9.293V6.5a.5.5 0 0 0-1 0v4a.5.5 0 0 0 .5.5z"/></svg></button></div>'+'<div class="col oneDigit"><button data-orientation="s" id="sDigit" type="button" class="btn digit btn-primary orientationButton"><svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-down-circle" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/><path fill-rule="evenodd" d="M4.646 7.646a.5.5 0 0 1 .708 0L8 10.293l2.646-2.647a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-3-3a.5.5 0 0 1 0-.708z"/><path fill-rule="evenodd" d="M8 4.5a.5.5 0 0 1 .5.5v5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5z"/></svg></button></div>'+'<div class="col oneDigit"> <button data-orientation="se" id="seDigit" type="button" class="btn digit btn-primary orientationButton"><svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-down-right-circle" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/><path fill-rule="evenodd" d="M10.5 11h-4a.5.5 0 0 1 0-1h2.793L5.146 5.854a.5.5 0 1 1 .708-.708L10 9.293V6.5a.5.5 0 0 1 1 0v4a.5.5 0 0 1-.5.5z"/></svg></button></div></div>'+'<div class="row justify-content-center"><div class="col oneDigit"><button button id="reset" type="button" class="btn digit btn-warning"><svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-bootstrap-reboot" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M1.161 8a6.84 6.84 0 1 0 6.842-6.84.58.58 0 0 1 0-1.16 8 8 0 1 1-6.556 3.412l-.663-.577a.58.58 0 0 1 .227-.997l2.52-.69a.58.58 0 0 1 .728.633l-.332 2.592a.58.58 0 0 1-.956.364l-.643-.56A6.812 6.812 0 0 0 1.16 8zm5.48-.079V5.277h1.57c.881 0 1.416.499 1.416 1.32 0 .84-.504 1.324-1.386 1.324h-1.6zm0 3.75V8.843h1.57l1.498 2.828h1.314L9.377 8.665c.897-.3 1.427-1.106 1.427-2.1 0-1.37-.943-2.246-2.456-2.246H5.5v7.352h1.141z"/></svg></button></div><div class="col oneDigit"><button id="sendSoluce" type="button" class="btn digit btn-success"><svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-key-fill" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M3.5 11.5a3.5 3.5 0 1 1 3.163-5H14L15.5 8 14 9.5l-1-1-1 1-1-1-1 1-1-1-1 1H6.663a3.5 3.5 0 0 1-3.163 2zM2.5 9a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/></svg></button></div></div>')
+}
+function inserFuseLock(){
+  trying = [false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false]
+  $('#contentImg').html('<div id="digit" class="lockContainer"><div class="row justify-content-center">'+
+        '<div class="col oneDigit"><button id="switch0" data-index=0 data-check="false" type="button" class="btn digit switch btn-primary"><svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-toggle-off" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M11 4a4 4 0 0 1 0 8H8a4.992 4.992 0 0 0 2-4 4.992 4.992 0 0 0-2-4h3zm-6 8a4 4 0 1 1 0-8 4 4 0 0 1 0 8zM0 8a5 5 0 0 0 5 5h6a5 5 0 0 0 0-10H5a5 5 0 0 0-5 5z"/></svg></button></div>'+
+        '<div class="col oneDigit"><button id="switch1" data-index=1 data-check="false" type="button" class="btn digit switch btn-primary"><svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-toggle-off" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M11 4a4 4 0 0 1 0 8H8a4.992 4.992 0 0 0 2-4 4.992 4.992 0 0 0-2-4h3zm-6 8a4 4 0 1 1 0-8 4 4 0 0 1 0 8zM0 8a5 5 0 0 0 5 5h6a5 5 0 0 0 0-10H5a5 5 0 0 0-5 5z"/></svg></button></div>'+
+        '<div class="col oneDigit"><button id="switch2" data-index=2 data-check="false" type="button" class="btn digit switch btn-primary"><svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-toggle-off" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M11 4a4 4 0 0 1 0 8H8a4.992 4.992 0 0 0 2-4 4.992 4.992 0 0 0-2-4h3zm-6 8a4 4 0 1 1 0-8 4 4 0 0 1 0 8zM0 8a5 5 0 0 0 5 5h6a5 5 0 0 0 0-10H5a5 5 0 0 0-5 5z"/></svg></button></div>'+
+        '<div class="col oneDigit"><button  id="switch3" data-index=3 data-check="false" type="button" class="btn digit switch btn-primary"><svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-toggle-off" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M11 4a4 4 0 0 1 0 8H8a4.992 4.992 0 0 0 2-4 4.992 4.992 0 0 0-2-4h3zm-6 8a4 4 0 1 1 0-8 4 4 0 0 1 0 8zM0 8a5 5 0 0 0 5 5h6a5 5 0 0 0 0-10H5a5 5 0 0 0-5 5z"/></svg></button></div></div>'+
+        '<div class="row justify-content-center"><div class="col oneDigit"><button id="switch4" data-index=4 data-check="false" type="button" class="btn digit switch btn-primary"><svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-toggle-off" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M11 4a4 4 0 0 1 0 8H8a4.992 4.992 0 0 0 2-4 4.992 4.992 0 0 0-2-4h3zm-6 8a4 4 0 1 1 0-8 4 4 0 0 1 0 8zM0 8a5 5 0 0 0 5 5h6a5 5 0 0 0 0-10H5a5 5 0 0 0-5 5z"/></svg></button></div>'+
+        '<div class="col oneDigit"><button id="switch5" data-index=5 data-check="false" type="button" class="btn digit switch btn-primary"><svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-toggle-off" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M11 4a4 4 0 0 1 0 8H8a4.992 4.992 0 0 0 2-4 4.992 4.992 0 0 0-2-4h3zm-6 8a4 4 0 1 1 0-8 4 4 0 0 1 0 8zM0 8a5 5 0 0 0 5 5h6a5 5 0 0 0 0-10H5a5 5 0 0 0-5 5z"/></svg></button></div><div class="col oneDigit"><button id="switch6" data-index=6 data-check="false" type="button" class="btn digit switch btn-primary"><svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-toggle-off" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M11 4a4 4 0 0 1 0 8H8a4.992 4.992 0 0 0 2-4 4.992 4.992 0 0 0-2-4h3zm-6 8a4 4 0 1 1 0-8 4 4 0 0 1 0 8zM0 8a5 5 0 0 0 5 5h6a5 5 0 0 0 0-10H5a5 5 0 0 0-5 5z"/></svg></button></div>'+
+        '<div class="col oneDigit"><button id="switch7" data-index=7 data-check="false" type="button" class="btn digit switch btn-primary"><svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-toggle-off" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M11 4a4 4 0 0 1 0 8H8a4.992 4.992 0 0 0 2-4 4.992 4.992 0 0 0-2-4h3zm-6 8a4 4 0 1 1 0-8 4 4 0 0 1 0 8zM0 8a5 5 0 0 0 5 5h6a5 5 0 0 0 0-10H5a5 5 0 0 0-5 5z"/></svg></button></div></div>'+
+        '<div class="row justify-content-center"><div class="col oneDigit"><button id="switch8" data-index=8 data-check="false" type="button" class="btn digit switch btn-primary"><svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-toggle-off" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M11 4a4 4 0 0 1 0 8H8a4.992 4.992 0 0 0 2-4 4.992 4.992 0 0 0-2-4h3zm-6 8a4 4 0 1 1 0-8 4 4 0 0 1 0 8zM0 8a5 5 0 0 0 5 5h6a5 5 0 0 0 0-10H5a5 5 0 0 0-5 5z"/></svg></button></div>'+
+        '<div class="col oneDigit"><button id="switch9" data-index=9 data-check="false" type="button" class="btn digit switch btn-primary"><svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-toggle-off" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M11 4a4 4 0 0 1 0 8H8a4.992 4.992 0 0 0 2-4 4.992 4.992 0 0 0-2-4h3zm-6 8a4 4 0 1 1 0-8 4 4 0 0 1 0 8zM0 8a5 5 0 0 0 5 5h6a5 5 0 0 0 0-10H5a5 5 0 0 0-5 5z"/></svg></button></div>'+
+        '<div class="col oneDigit"><button id="switch10" data-index=10 data-check="false" type="button" class="btn digit switch btn-primary"><svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-toggle-off" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M11 4a4 4 0 0 1 0 8H8a4.992 4.992 0 0 0 2-4 4.992 4.992 0 0 0-2-4h3zm-6 8a4 4 0 1 1 0-8 4 4 0 0 1 0 8zM0 8a5 5 0 0 0 5 5h6a5 5 0 0 0 0-10H5a5 5 0 0 0-5 5z"/></svg></button></div><div class="col oneDigit"><button id="switch11" data-index=11 data-check="false" type="button" class="btn digit switch btn-primary"><svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-toggle-off" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M11 4a4 4 0 0 1 0 8H8a4.992 4.992 0 0 0 2-4 4.992 4.992 0 0 0-2-4h3zm-6 8a4 4 0 1 1 0-8 4 4 0 0 1 0 8zM0 8a5 5 0 0 0 5 5h6a5 5 0 0 0 0-10H5a5 5 0 0 0-5 5z"/></svg></button></div></div>'+
+        '<div class="row justify-content-center"><div class="col oneDigit"><button id="switch12" data-index=12 data-check="false" type="button" class="btn digit switch btn-primary"><svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-toggle-off" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M11 4a4 4 0 0 1 0 8H8a4.992 4.992 0 0 0 2-4 4.992 4.992 0 0 0-2-4h3zm-6 8a4 4 0 1 1 0-8 4 4 0 0 1 0 8zM0 8a5 5 0 0 0 5 5h6a5 5 0 0 0 0-10H5a5 5 0 0 0-5 5z"/></svg></button></div><div class="col oneDigit"><button id="switch13" data-index=13 data-check="false" type="button" class="btn digit switch btn-primary"><svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-toggle-off" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M11 4a4 4 0 0 1 0 8H8a4.992 4.992 0 0 0 2-4 4.992 4.992 0 0 0-2-4h3zm-6 8a4 4 0 1 1 0-8 4 4 0 0 1 0 8zM0 8a5 5 0 0 0 5 5h6a5 5 0 0 0 0-10H5a5 5 0 0 0-5 5z"/></svg></button></div>'+
+        '<div class="col oneDigit"><button id="switch14"  data-index=14 data-check="false" type="button" class="btn digit switch btn-primary"><svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-toggle-off" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M11 4a4 4 0 0 1 0 8H8a4.992 4.992 0 0 0 2-4 4.992 4.992 0 0 0-2-4h3zm-6 8a4 4 0 1 1 0-8 4 4 0 0 1 0 8zM0 8a5 5 0 0 0 5 5h6a5 5 0 0 0 0-10H5a5 5 0 0 0-5 5z"/></svg></button></div><div class="col oneDigit"><button id="switch15" data-index=15 data-check="false"  type="button" class="btn digit switch btn-primary"><svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-toggle-off" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M11 4a4 4 0 0 1 0 8H8a4.992 4.992 0 0 0 2-4 4.992 4.992 0 0 0-2-4h3zm-6 8a4 4 0 1 1 0-8 4 4 0 0 1 0 8zM0 8a5 5 0 0 0 5 5h6a5 5 0 0 0 0-10H5a5 5 0 0 0-5 5z"/></svg></button></div></div>'+
+        '<div class="row justify-content-center"><div class="col oneDigit"><button button id="resetSwitch" type="button" class="btn digit btn-warning"><svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-bootstrap-reboot" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M1.161 8a6.84 6.84 0 1 0 6.842-6.84.58.58 0 0 1 0-1.16 8 8 0 1 1-6.556 3.412l-.663-.577a.58.58 0 0 1 .227-.997l2.52-.69a.58.58 0 0 1 .728.633l-.332 2.592a.58.58 0 0 1-.956.364l-.643-.56A6.812 6.812 0 0 0 1.16 8zm5.48-.079V5.277h1.57c.881 0 1.416.499 1.416 1.32 0 .84-.504 1.324-1.386 1.324h-1.6zm0 3.75V8.843h1.57l1.498 2.828h1.314L9.377 8.665c.897-.3 1.427-1.106 1.427-2.1 0-1.37-.943-2.246-2.456-2.246H5.5v7.352h1.141z"/></svg></button></div><div class="col oneDigit"><button id="sendSoluce" type="button" class="btn digit btn-success"><svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-key-fill" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M3.5 11.5a3.5 3.5 0 1 1 3.163-5H14L15.5 8 14 9.5l-1-1-1 1-1-1-1 1-1-1-1 1H6.663a3.5 3.5 0 0 1-3.163 2zM2.5 9a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/></svg></button></div></div> </div>')
+}
+function inserDiagramLock(){
+  $('#contentImg').html('<svg class="patternlock" id="lock" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><g class="lock-actives"></g><g class="lock-lines"></g><g class="lock-dots"><circle cx="20" cy="20" r="2"/><circle cx="50" cy="20" r="2"/><circle cx="80" cy="20" r="2"/><circle cx="20" cy="50" r="2"/><circle cx="50" cy="50" r="2"/><circle cx="80" cy="50" r="2"/><circle cx="20" cy="80" r="2"/><circle cx="50" cy="80" r="2"/>   <circle cx="80" cy="80" r="2"/></g></svg>')
+  var lock = new PatternLock("#lock", {
+    onPattern: function(result) {
+          var steps=dataJsonGlobal.steps
+          $.each(steps,function(key,oneStep){
+            if(oneStep.id==currentStep){
+              console.log('patern: '+result.pattern)
+                if(result.pattern==oneStep.lockCode){
+                  locationsOpenedHistory.push(oneStep.id)
+                  localStorage.setItem("locationsOpenedHistory",JSON.stringify(history));
+                  history.push(oneStep.id)
+                  localStorage.setItem("storageHistory",JSON.stringify(history));
+                  if(oneStep.definitiveReplace){
+                    stepsReplaced.push(oneStep.code)
+                    localStorage.setItem("stepsReplaced",JSON.stringify(stepsReplaced));
+                  }
+                  $.each(steps,function(key,newStep){
+                    if(newStep.code == oneStep.replaceBy){
+                      htmlscanner.clear()
+                      $('#contentImg').css('display','block')
+                      $("#actualCode").html("");
+                      showStep(newStep)
+                      currentStep=newStep.id
+                      localStorage.setItem("currentStep",currentStep);
+                      removeConnexeSteps(newStep)
+                      addItemOrLocation(newStep,true)
+                      addConnexeSteps(newStep)
+                    }
+                  })
+                  trying = [];
+                }
+                else{
+                    // $('.card-footer').css('background-color',footerColor)
+                    // $('#actualCode').html('<div>Cela ne semble pas être la bonne combinaison. Veuillez réessayer.<div>')
+                    $('#myToast').toast('show');
+                    trying = [];
+                    $("#actualCode").html("");
+                }
+                return false
+            }
+          })
+     }
+  });
+}
+function inserSelector(step){
+  $('#contentImg').html('<div id="imgHotsop" class="responsive-img-wrap lg-container"><img class="lg-image stepImg" src="scenarios/'+scenario+'/img/'+step.media+'"></div>')
+  var buttonsToAdd = step.lockCode
+  $(buttonsToAdd).each(function(index,thisButton){
+    $('#imgHotsop').append('<div '+thisButton[0]+' data-value='+thisButton[1]+' class="lg-hotspot hotspotButton lg-hotspot--top-left"><div class="lg-hotspot__button"></div><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill='+thisButton[2]+' class="bi bi-bullseye" viewBox="0 0 16 16"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/><path d="M8 13A5 5 0 1 1 8 3a5 5 0 0 1 0 10m0 1A6 6 0 1 0 8 2a6 6 0 0 0 0 12"/><path d="M8 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6m0 1a4 4 0 1 0 0-8 4 4 0 0 0 0 8"/><path d="M9.5 8a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0"/></svg></div>')
+  })
+  }
+function inserPasswordLock(){
+  $('#contentImg').html( '<div class="input-group mb-3"><input id="passwordInput" type="text" class="form-control" placeholder="Mot de passe" aria-label="Recipient username" aria-describedby="basic-addon2"><div class="input-group-append"><button id="passwordSendSoluce" class="btn btn-success" type="button"><svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-key-fill" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M3.5 11.5a3.5 3.5 0 1 1 3.163-5H14L15.5 8 14 9.5l-1-1-1 1-1-1-1 1-1-1-1 1H6.663a3.5 3.5 0 0 1-3.163 2zM2.5 9a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/></svg></button></div></div>')
+}
+function getRandomSymboleForSonoMeter(arr, n) {
+  let result = [];
+  let indices = [];
+  // Génère n indices aléatoires sans doublons
+  let possible = [...Array(arr.length).keys()];
+  for (let i = 0; i < n; i++) {
+    let index = Math.floor(Math.random() * possible.length);
+    indices.push(possible[index]);
+    possible.splice(index, 1); // Supprime pour éviter les doublons
+  }
+  // Récupère les éléments correspondants
+  for (let i = 0; i < indices.length; i++) {
+    result.push(arr[indices[i]]);
+  }
+  return result;
+}
+function inserSonoMeter(step){
+  var oneStep = step
+  var numberOfSymbol = 4
+  var n = 0
+  var symbolsValidated = 0
+  var actualSymbols =getRandomSymboleForSonoMeter(sonoMeterTable,numberOfSymbol)
+  var selectedSymbols = actualSymbols.map(item => item[1]);
+  var symbolsText = selectedSymbols.join('  ');
+  $('#contentImg').html( '<div class="row"><div id="qrCodeReaderForSonometer"></div></div></br><div class="row align-items-start"><div class="col" id="listOfSymbols">'+
+symbolsText
+  +'</div></div></br><div class="progress sonoMeterProgressBar"><div id="sonoMeterCount" class="progress-bar" role="progressbar"   aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"></div></div>')
+
+  const SonoMeterScanner = new Html5QrcodeScanner(
+      "qrCodeReaderForSonometer",
+      { fps: 10, qrbox: {width: 200, height: 200}, rememberLastUsedCamera:true }
+  );
+  SonoMeterScanner.render(onScanSuccessSonometer);
+  function onScanSuccessSonometer(decodeText, decodeResult) {
+    if(decodeText==actualSymbols[n][0]){
+      $('[value="' + actualSymbols[n][0] + '"]').attr('fill','green')
+      n = n+1
+      symbolsValidated = symbolsValidated+1
+    }
+    if(symbolsValidated == numberOfSymbol){
+      locationsOpenedHistory.push(oneStep.id)
+      localStorage.setItem("locationsOpenedHistory",JSON.stringify(history));
+      history.push(oneStep.id)
+      localStorage.setItem("storageHistory",JSON.stringify(history));
+      if(oneStep.definitiveReplace){
+        stepsReplaced.push(oneStep.code)
+        localStorage.setItem("stepsReplaced",JSON.stringify(stepsReplaced));
+      }
+        $.each(dataJsonGlobal.steps,function(key,newStep){
+          if(newStep.code == oneStep.replaceBy){
+            htmlscanner.clear()
+            $('#contentImg').css('display','block')
+            $("#actualCode").html("");
+            showStep(newStep)
+            currentStep=newStep.id
+            localStorage.setItem("currentStep",currentStep);
+            removeConnexeSteps(newStep)
+            addItemOrLocation(newStep,true)
+            addConnexeSteps(newStep)
+          }
+        })
+    }
+  }
+  //fonctions pour l'interface sonoMeter
+  navigator.mediaDevices.getUserMedia({ audio: true }).then(function(stream) {
+      const audioContext = new AudioContext();
+      const analyser = audioContext.createAnalyser();
+      const microphone = audioContext.createMediaStreamSource(stream);
+      analyser.smoothingTimeConstant = 0.8;
+      analyser.fftSize = 1024;
+      microphone.connect(analyser);
+      setInterval(() => {
+          const array = new Uint8Array(analyser.frequencyBinCount);
+          analyser.getByteFrequencyData(array);
+          let sum = 0;
+          for (let i = 0; i < array.length; i++) {
+              sum += array[i];
+          }
+          const average = sum / array.length;
+
+          if (Math.round(average) > 15) {
+              document.getElementById("sonoMeterCount").style.width= Math.round(average) - 10+"%"
+
+              if(Math.round(average) - 10 > 40){
+                document.getElementById("sonoMeterCount").className="";
+                document.getElementById("sonoMeterCount").classList.add("bg-danger")
+              }
+              else if(Math.round(average) - 10 < 40 && Math.round(average) - 10 > 20 ){
+                document.getElementById("sonoMeterCount").className="";
+                document.getElementById("sonoMeterCount").classList.add("bg-warning")
+                n = 0
+                symbolsValidated = 0
+                actualSymbols =getRandomSymboleForSonoMeter(sonoMeterTable,numberOfSymbol)
+                selectedSymbols = actualSymbols.map(item => item[1]);
+                symbolsText = selectedSymbols.join('  ');
+
+                $('#listOfSymbols').html(symbolsText)
+              }
+              else{
+                document.getElementById("sonoMeterCount").className="";
+                document.getElementById("sonoMeterCount").classList.add("bg-success")
+              }
+          }
+      }, 100);
+  }).catch(function(err) {
+      console.error('Error accessing microphone: ', err);
+  });
+
+}
+
+function inserLoginLock(){
+  $('#contentImg').html( '<div class=" mb-3"><input id="loginInput" type="text" class="form-control" placeholder="Identifiant" aria-label="Recipient username" aria-describedby="basic-addon2"><div class=" mb-3"><div class=" mb-3"><input id="loginPasswordInput" type="text" class="form-control" placeholder="Mot de passe" aria-label="Recipient username" aria-describedby="basic-addon2"></div><button id="loginSendSoluce" class="btn btn-success" type="button"><svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-key-fill" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M3.5 11.5a3.5 3.5 0 1 1 3.163-5H14L15.5 8 14 9.5l-1-1-1 1-1-1-1 1-1-1-1 1H6.663a3.5 3.5 0 0 1-3.163 2zM2.5 9a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/></svg></button></div>')
+}
+
+function inserDateLock(){
+
+ $('#contentImg').html('<input id="datepicker" /><button id="dateSoluce" class="btn btn-success" type="button"><svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-key-fill" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M3.5 11.5a3.5 3.5 0 1 1 3.163-5H14L15.5 8 14 9.5l-1-1-1 1-1-1-1 1-1-1-1 1H6.663a3.5 3.5 0 0 1-3.163 2zM2.5 9a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/></svg></button>')
+ $('#datepicker').datepicker({
+    locale: 'fr-fr',
+    format: 'dd/mm/yyyy',
+    uiLibrary: 'bootstrap5'
+   });
+}
+//fonctions pour le sliders
+function inserSlidersLock(step){
+  $('#contentImg').html('')
+  $(step.lockCode).each(function(index, elem) {
+  trying[index] = 0;
+  // Ligne 1 : label + valeur côte à côte
+  $('#contentImg').append(
+    '<div class="row slidersRow align-items-center mb-1">' +
+      '<label for="slider' + index + '" class="col-auto form-label">' + elem[0] + '</label>' +
+      '<div class="col-auto result" id="result' + index + '">0</div>' +
+    '</div>' +
+    // Ligne 2 : input range en pleine largeur
+    '<div class="row mb-3">' +
+      '<input value="0" min="0" max="200" type="range" data-index="' + index + '" id="slider' + index + '" class="form-range multi-range col">' +
+    '</div>'
+  );
+});
+
+$('#contentImg').on('input', '.multi-range', function() {
+  var valeur = $(this).val();
+  var indexId = $(this).data('index');
+  $('#result' + indexId).text(valeur);
+  trying[indexId] = parseInt(valeur);
+  $('#value' + indexId).html('<span class="slidersValue">' + valeur + '<span>');
+});
+
+  $('#contentImg').append('<button id="sendSoluce" class="btn btn-success" type="button"><svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-key-fill" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M3.5 11.5a3.5 3.5 0 1 1 3.163-5H14L15.5 8 14 9.5l-1-1-1 1-1-1-1 1-1-1-1 1H6.663a3.5 3.5 0 0 1-3.163 2zM2.5 9a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/></svg></button>')
+}
+
+
+
+//fonctions pour l'interface date
+$(document).on('click','#dateSoluce',function(){
+
+    var steps= dataJsonGlobal.steps
+      $.each(steps,function(key,oneStep){
+        if(oneStep.id==currentStep){
+            if($('#datepicker').val()== oneStep.lockCode){
+              locationsOpenedHistory.push(oneStep.id)
+              localStorage.setItem("locationsOpenedHistory",JSON.stringify(history));
+              history.push(oneStep.id)
+              localStorage.setItem("storageHistory",JSON.stringify(history));
+              if(oneStep.definitiveReplace){
+                stepsReplaced.push(oneStep.code)
+                localStorage.setItem("stepsReplaced",JSON.stringify(stepsReplaced));
+              }
+              $.each(steps,function(key,newStep){
+                if(newStep.code == oneStep.replaceBy){
+                  history.push(newStep.id)
+                  localStorage.setItem("storageHistory",JSON.stringify(history));
+                  if(!newStep.closed){
+                    locationsOpenedHistory.push(oneStep.id)
+                    localStorage.setItem("locationsOpenedHistory",JSON.stringify(history));
+                  }
+                  htmlscanner.clear()
+                  $('#contentImg').css('display','block')
+                  $("#actualCode").html("");
+                  showStep(newStep)
+                  currentStep=newStep.id
+                  localStorage.setItem("currentStep",currentStep);
+                  removeConnexeSteps(newStep)
+                  addItemOrLocation(newStep,true)
+                  addConnexeSteps(newStep)
+                }
+              })
+              trying = [];
+            }
+            else{
+                // $('.card-footer').css('background-color',footerColor)
+                // $('#actualCode').html('<div>Cela ne semble pas être la bonne combinaison. Veuillez réessayer.<div>')
+                $('#myToast').toast('show');
+                trying = [];
+                $("#actualCode").html("");
+            }
+            return false
+        }
+      })
+
+})
+
+
+//fonctions pour l'interface password
+$(document).on('click','#passwordSendSoluce',function(e){
+    var steps= dataJsonGlobal.steps
+      $.each(steps,function(key,oneStep){
+        if(oneStep.id==currentStep){
+          var tryedPassword = $('#passwordInput').val().trim()
+            if(tryedPassword==oneStep.lockCode){
+              locationsOpenedHistory.push(oneStep.id)
+              localStorage.setItem("locationsOpenedHistory",JSON.stringify(history));
+              history.push(oneStep.id)
+              localStorage.setItem("storageHistory",JSON.stringify(history));
+              if(oneStep.definitiveReplace){
+                stepsReplaced.push(oneStep.code)
+                localStorage.setItem("stepsReplaced",JSON.stringify(stepsReplaced));
+              }
+              $.each(steps,function(key,newStep){
+                if(newStep.code == oneStep.replaceBy){
+                  history.push(newStep.id)
+                  localStorage.setItem("storageHistory",JSON.stringify(history));
+                  if(!newStep.closed){
+                    locationsOpenedHistory.push(oneStep.id)
+                    localStorage.setItem("locationsOpenedHistory",JSON.stringify(history));
+                  }
+                  htmlscanner.clear()
+                  $('#contentImg').css('display','block')
+                  $("#actualCode").html("");
+                  showStep(newStep)
+                  currentStep=newStep.id
+                  localStorage.setItem("currentStep",currentStep);
+                  removeConnexeSteps(newStep)
+                  addItemOrLocation(newStep,true)
+                  addConnexeSteps(newStep)
+                }
+              })
+              trying = [];
+            }
+            else{
+                // $('.card-footer').css('background-color',footerColor)
+                // $('#actualCode').html('<div>Cela ne semble pas être la bonne combinaison. Veuillez réessayer.<div>')
+                $('#myToast').toast('show');
+                trying = [];
+                $("#actualCode").html("");
+            }
+            return false
+        }
+      })
+
+  });
+  //fonctions pour l'interface login
+  $(document).on('click','#loginSendSoluce',function(e){
+
+      var steps= dataJsonGlobal.steps
+        $.each(steps,function(key,oneStep){
+          if(oneStep.id==currentStep){
+            var login =$('#loginInput').val();
+            var passwordLogin = $('#loginPasswordInput').val()
+            var responseCode = oneStep.lockCode.join()
+            trying.push(login)
+            trying.push(passwordLogin)
+              if(trying==responseCode){
+                locationsOpenedHistory.push(oneStep.id)
+                localStorage.setItem("locationsOpenedHistory",JSON.stringify(history));
+                history.push(oneStep.id)
+                localStorage.setItem("storageHistory",JSON.stringify(history));
+                if(oneStep.definitiveReplace){
+                  stepsReplaced.push(oneStep.code)
+                  localStorage.setItem("stepsReplaced",JSON.stringify(stepsReplaced));
+                }
+                $.each(steps,function(key,newStep){
+                  if(newStep.code == oneStep.replaceBy){
+                    history.push(newStep.id)
+                    localStorage.setItem("storageHistory",JSON.stringify(history));
+                    if(!newStep.closed){
+                      locationsOpenedHistory.push(oneStep.id)
+                      localStorage.setItem("locationsOpenedHistory",JSON.stringify(history));
+                    }
+                    htmlscanner.clear()
+                    $('#contentImg').css('display','block')
+                    $("#actualCode").html("");
+                    showStep(newStep)
+                    currentStep=newStep.id
+                    localStorage.setItem("currentStep",currentStep);
+                    removeConnexeSteps(newStep)
+                    addItemOrLocation(newStep,true)
+                    addConnexeSteps(newStep)
+                  }
+                })
+                trying = [];
+              }
+              else{
+                  // $('.card-footer').css('background-color',footerColor)
+                  // $('#actualCode').html('<div>Cela ne semble pas être la bonne combinaison. Veuillez réessayer.<div>')
+                  $('#myToast').toast('show');
+                  trying = [];
+                  $("#actualCode").html("");
+              }
+              return false
+          }
+        })
+    });
+
+//fonctions pour l'interface color
+$(document).on('click','.colorButton',function(e){
+    var color = $(this).data('color');
+    trying.push(color);
+    $("#actualCode").html("");
+    displayColors();
+  });
+function displayColors(){
+  $('#actualCode').html("");
+  $.each(trying, function(index,color){
+    $("#actualCode").append('<svg width="2em" height="2em" viewBox="0 0 16 16" class="bi bi-circle-fill" fill="#'+color+'" xmlns="http://www.w3.org/2000/svg"><circle cx="8" cy="8" r="8"/></svg>');
+  });
+  console.log(trying)
+}
+//fonctions pour l'interface switch
+$(document).on('click','.switch',function(e){
+  var position = $(this).data('index');
+  var value = $(this).data('check');
+  if (value){
+    $(this).html('<svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-toggle-on" fill="currentColor" xmlns="http://www.w3.org/2000/svg">'+
+    '<path fill-rule="evenodd" d="M11 4a4 4 0 0 1 0 8H8a4.992 4.992 0 0 0 2-4 4.992 4.992 0 0 0-2-4h3zm-6 8a4 4 0 1 1 0-8 4 4 0 0 1 0 8zM0 8a5 5 0 0 0 5 5h6a5 5 0 0 0 0-10H5a5 5 0 0 0-5 5z"/>'+
+    '</svg>')
+  }
+  else{
+    $(this).html('<svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-toggle-on" fill="currentColor" xmlns="http://www.w3.org/2000/svg">'+
+    '<path fill-rule="evenodd" d="M5 3a5 5 0 0 0 0 10h6a5 5 0 0 0 0-10H5zm6 9a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/>'+
+    '</svg>')
+  }
+  trying[position]=!value;
+  $(this).data('check',!value);
+  console.log(trying)
+  });
+  $(document).on('click','#resetSwitch',function() {
+      trying = [false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false];
+      $('.switch').data('check',false);
+      $('.switch').html('<svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-toggle-on" fill="currentColor" xmlns="http://www.w3.org/2000/svg">'+
+      '<path fill-rule="evenodd" d="M11 4a4 4 0 0 1 0 8H8a4.992 4.992 0 0 0 2-4 4.992 4.992 0 0 0-2-4h3zm-6 8a4 4 0 1 1 0-8 4 4 0 0 1 0 8zM0 8a5 5 0 0 0 5 5h6a5 5 0 0 0 0-10H5a5 5 0 0 0-5 5z"/>'+
+      '</svg>')
+    })
+//fonctions pour l'interface digit
+function displayDigits(){
+  $('#actualCode').html("");
+  $.each(trying, function(index,digits){
+    $("#actualCode").append('<span class="oneDigitFromTrying">'+digits+'</span>');
+  });
+}
+$(document).on('click','.digitButton',function(e){
+    var digitValue = $(this).data('digitvalue');
+    trying.push(digitValue);
+    $("#actualCode").html("");
+    displayDigits();
+  });
+
+// fonctions pour l'interface selector
+$(document).on('click','.hotspotButton',function(){
+  var thisId=$(this).data('value')
+    var steps= dataJsonGlobal.steps
+      $.each(steps,function(key,oneStep){
+        if(oneStep.id==thisId){
+          showStep(oneStep)
+          removeConnexeSteps(oneStep)
+          addConnexeSteps(oneStep)
+          locationsOpenedHistory.push(oneStep.id)
+          localStorage.setItem("locationsOpenedHistory",JSON.stringify(history));
+          history.push(oneStep.id)
+          localStorage.setItem("storageHistory",JSON.stringify(history));
+        }
+      })
+})
+//fonctions pour l'interface directionnal
+function displayDirectionnal(){
+  $('#actualCode').html("");
+  console.log(trying)
+  $.each(trying, function(index,digits){
+    switch(digits){
+            case 'n':
+              $("#actualCode").append(
+                '<svg width="2em" height="2em" viewBox="0 0 16 16" class="bi bi-arrow-up-circle" fill="currentColor" xmlns="http://www.w3.org/2000/svg">'+
+                  '<path fill-rule="evenodd" d="M8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>'+
+                  '<path fill-rule="evenodd" d="M4.646 8.354a.5.5 0 0 0 .708 0L8 5.707l2.646 2.647a.5.5 0 0 0 .708-.708l-3-3a.5.5 0 0 0-.708 0l-3 3a.5.5 0 0 0 0 .708z"/>'+
+                  '<path fill-rule="evenodd" d="M8 11.5a.5.5 0 0 0 .5-.5V6a.5.5 0 0 0-1 0v5a.5.5 0 0 0 .5.5z"/>'+
+                '</svg>'
+              );
+              break;
+            case 's':
+              $("#actualCode").append(
+                '<svg width="2em" height="2em" viewBox="0 0 16 16" class="bi bi-arrow-down-circle" fill="currentColor" xmlns="http://www.w3.org/2000/svg">'+
+                  '<path fill-rule="evenodd" d="M8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>'+
+                  '<path fill-rule="evenodd" d="M4.646 7.646a.5.5 0 0 1 .708 0L8 10.293l2.646-2.647a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-3-3a.5.5 0 0 1 0-.708z"/>'+
+                  '<path fill-rule="evenodd" d="M8 4.5a.5.5 0 0 1 .5.5v5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5z"/>'+
+                '</svg>'
+              );
+              break;
+            case 'o':
+              $("#actualCode").append(
+                '<svg width="2em" height="2em" viewBox="0 0 16 16" class="bi bi-arrow-left-circle" fill="currentColor" xmlns="http://www.w3.org/2000/svg">'+
+                  '<path fill-rule="evenodd" d="M8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>'+
+                  '<path fill-rule="evenodd" d="M8.354 11.354a.5.5 0 0 0 0-.708L5.707 8l2.647-2.646a.5.5 0 1 0-.708-.708l-3 3a.5.5 0 0 0 0 .708l3 3a.5.5 0 0 0 .708 0z"/>'+
+                  '<path fill-rule="evenodd" d="M11.5 8a.5.5 0 0 0-.5-.5H6a.5.5 0 0 0 0 1h5a.5.5 0 0 0 .5-.5z"/>'+
+                '</svg>'
+              );
+              break;
+            case 'e':
+              $("#actualCode").append(
+                '<svg width="2em" height="2em" viewBox="0 0 16 16" class="bi bi-arrow-right-circle" fill="currentColor" xmlns="http://www.w3.org/2000/svg">'+
+                  '<path fill-rule="evenodd" d="M8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>'+
+                  '<path fill-rule="evenodd" d="M7.646 11.354a.5.5 0 0 1 0-.708L10.293 8 7.646 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708 0z"/>'+
+                  '<path fill-rule="evenodd" d="M4.5 8a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1H5a.5.5 0 0 1-.5-.5z"/>'+
+                '</svg>'
+              );
+              break;
+            case 'no':
+              $("#actualCode").append(
+                '<svg width="2em" height="2em" viewBox="0 0 16 16" class="bi bi-arrow-up-left-circle" fill="currentColor" xmlns="http://www.w3.org/2000/svg">'+
+                  '<path fill-rule="evenodd" d="M8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>'+
+                  '<path fill-rule="evenodd" d="M5.5 5h4a.5.5 0 0 1 0 1H6.707l4.147 4.146a.5.5 0 0 1-.708.708L6 6.707V9.5a.5.5 0 0 1-1 0v-4a.5.5 0 0 1 .5-.5z"/>'+
+                '</svg>'
+              );
+              break;
+            case 'ne':
+              $("#actualCode").append(
+                '<svg width="2em" height="2em" viewBox="0 0 16 16" class="bi bi-arrow-up-right-circle" fill="currentColor" xmlns="http://www.w3.org/2000/svg">'+
+                  '<path fill-rule="evenodd" d="M8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>'+
+                  '<path fill-rule="evenodd" d="M10.5 5h-4a.5.5 0 0 0 0 1h2.793l-4.147 4.146a.5.5 0 0 0 .708.708L10 6.707V9.5a.5.5 0 0 0 1 0v-4a.5.5 0 0 0-.5-.5z"/>'+
+                '</svg>'
+              );
+              break;
+            case 'se':
+              $("#actualCode").append(
+                '<svg width="2em" height="2em" viewBox="0 0 16 16" class="bi bi-arrow-down-right-circle" fill="currentColor" xmlns="http://www.w3.org/2000/svg">'+
+                  '<path fill-rule="evenodd" d="M8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>'+
+                  '<path fill-rule="evenodd" d="M10.5 11h-4a.5.5 0 0 1 0-1h2.793L5.146 5.854a.5.5 0 1 1 .708-.708L10 9.293V6.5a.5.5 0 0 1 1 0v4a.5.5 0 0 1-.5.5z"/>'+
+                '</svg>'
+              );
+              break;
+            case 'so':
+              $("#actualCode").append(
+                '<svg width="2em" height="2em" viewBox="0 0 16 16" class="bi bi-arrow-down-left-circle" fill="currentColor" xmlns="http://www.w3.org/2000/svg">'+
+                  '<path fill-rule="evenodd" d="M8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>'+
+                  '<path fill-rule="evenodd" d="M5.5 11h4a.5.5 0 0 0 0-1H6.707l4.147-4.146a.5.5 0 0 0-.708-.708L6 9.293V6.5a.5.5 0 0 0-1 0v4a.5.5 0 0 0 .5.5z"/>'+
+                '</svg>'
+              );
+              break;
+          }
+  });
+}
+$(document).on('click','.orientationButton',function(e){
+    var digitValue = $(this).data('orientation');
+    console.log(digitValue)
+    trying.push(digitValue);
+    $("#actualCode").html("");
+    displayDirectionnal();
+  });
+
+
+//fonctions générale pour les cadenas
+$(document).on('click','#reset',function(e){
+    $("#actualCode").html("Entrer code");
+    trying = [];
+    $("#actualCode").html("");
+  })
+
+$(document).on('click','#sendSoluce',function(e){
+    var steps= dataJsonGlobal.steps
+      $.each(steps,function(key,oneStep){
+        if(oneStep.id==currentStep){
+            var tryingCode = trying.join()
+            if(oneStep.lockType=="sliders"){
+              var responseCode=[]
+              $(oneStep.lockCode).each(function(index,value){
+                responseCode.push(value[1])
+              })
+              responseCode = responseCode.join()
+            }
+            else{
+              var responseCode = oneStep.lockCode.join()
+            }
+            if(tryingCode==responseCode){
+              locationsOpenedHistory.push(oneStep.id)
+              localStorage.setItem("locationsOpenedHistory",JSON.stringify(history));
+              history.push(oneStep.id)
+              localStorage.setItem("storageHistory",JSON.stringify(history));
+              if(oneStep.definitiveReplace){
+                stepsReplaced.push(oneStep.code)
+                localStorage.setItem("stepsReplaced",JSON.stringify(stepsReplaced));
+              }
+              $.each(steps,function(key,newStep){
+                if(newStep.code == oneStep.replaceBy){
+                  history.push(newStep.id)
+                  localStorage.setItem("storageHistory",JSON.stringify(history));
+                  if(!newStep.closed){
+                    locationsOpenedHistory.push(oneStep.id)
+                    localStorage.setItem("locationsOpenedHistory",JSON.stringify(history));
+                  }
+                  htmlscanner.clear()
+                  $('#contentImg').css('display','block')
+                  $("#actualCode").html("");
+                  showStep(newStep)
+                  currentStep=newStep.id
+                  localStorage.setItem("currentStep",currentStep);
+                  removeConnexeSteps(newStep)
+                  addItemOrLocation(newStep,true)
+                  addConnexeSteps(newStep)
+
+                }
+              })
+              trying = [];
+            }
+            else{
+                // $('.card-footer').css('background-color',footerColor)
+                // $('#actualCode').html('<div>Cela ne semble pas être la bonne combinaison. Veuillez réessayer.<div>')
+                $('#myToast').toast('show');
+                if(oneStep.lockType!="fuse"){
+                  trying = [];
+                }
+                $("#actualCode").html("");
+            }
+            return false
+        }
+      })
+})
+
+//réinitialisation du jeu
+$(document).on('click','#resetGame',function(){
+  if ('caches' in window) {
+  caches.keys()
+    .then((cacheNames) => {
+      if (!cacheNames || !Array.isArray(cacheNames)) {
+        throw new Error('Aucun cache trouvé ou résultat inattendu.');
+      }
+      return Promise.all(
+        cacheNames.map((cacheName) => caches.delete(cacheName))
+      );
+    })
+    .then(() => {
+      window.location.reload();
+    })
+    .catch((error) => {
+    });
+} else {}
+  localStorage.clear();
+  location.reload()
+})
+
+ function sendMail(time,hints,progress,score) {
+   if(dataJsonGlobal.SendMail && !mailSended){
+     let diffMs = time
+     let hours = Math.floor(diffMs / (1000 * 60 * 60));
+     diffMs -= hours * 1000 * 60 * 60;
+     let minutes = Math.floor(diffMs / (1000 * 60));
+     diffMs -= minutes * 1000 * 60;
+     let seconds = Math.floor(diffMs / 1000);
+     let hStr = String(hours).padStart(2, '0');
+     let mStr = String(minutes).padStart(2, '0');
+     let sStr = String(seconds).padStart(2, '0');
+
+     emailjs.init('h8ZCIF_7XC9SdzgOB')
+
+     var templateParams = {
+       email: localStorage.getItem("groupMail"),
+       group:localStorage.getItem("groupName"),
+       message: "test",
+       progress:Math.round(progress),
+       time:hStr+":"+mStr+":"+sStr,
+       hints:hints,
+       score:score
+     };
+
+     emailjs.send("service_4xsokbe", "template_i0okt9m", templateParams)
+       .then(function(response) {
+         console.log('SUCCÈS !', response.status, response.text);
+         mailSended=true;
+         localStorage.setItem("mailSended",JSON.stringify(true));
+       }, function(error) {
+         console.log('ÉCHEC ...', error);
+       });
+   }
+
+ }

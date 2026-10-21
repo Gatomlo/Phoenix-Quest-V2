@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Éditeur de scénarios — Les Enquêtes du Phoenix</title>
+	<link rel="stylesheet" href="admin.css">
+	<link rel="stylesheet" href="scenario-editor.css">
+</head>
+<body>
+	<header class="topbar">
+		<h1>Éditeur de scénarios</h1>
+		<a href="/admin/" class="btn btn-secondary">← Tableau de bord</a>
+	</header>
+
+	<main>
+		<section id="scenarioListView">
+			<div class="card">
+				<h2>Scénarios</h2>
+				<ul id="scenarioList" class="session-list"></ul>
+			</div>
+			<div class="card">
+				<h2>Créer un nouveau scénario</h2>
+				<form id="createScenarioForm" class="inline-form">
+					<input type="text" id="newScenarioCode" placeholder="Code (ex: hamlet)" required>
+					<input type="text" id="newScenarioName" placeholder="Nom du scénario" required>
+					<button type="submit" class="btn btn-primary">Créer</button>
+				</form>
+				<p id="createScenarioError" class="error-text" hidden></p>
+			</div>
+			<div class="card">
+				<h2>Importer un scénario (package .zip)</h2>
+				<form id="importScenarioForm" class="inline-form">
+					<input type="text" id="importScenarioCode" placeholder="Code pour ce scénario" required>
+					<input type="file" id="importScenarioFile" accept=".zip" required>
+					<button type="submit" class="btn btn-primary">Importer</button>
+				</form>
+				<p id="importScenarioError" class="error-text" hidden></p>
+			</div>
+		</section>
+
+		<section id="scenarioEditView" hidden>
+			<button id="backToScenarioListButton" type="button" class="btn btn-secondary back-button">← Tous les scénarios</button>
+
+			<div class="card">
+				<div class="scenario-edit-header">
+					<h2 id="scenarioEditTitle"></h2>
+					<div class="scenario-edit-actions">
+						<a id="solutionGuideEditLink" href="#" class="btn btn-secondary">Guide de solution</a>
+						<button id="exportScenarioButton" type="button" class="btn btn-secondary">Télécharger le package</button>
+						<button id="deleteScenarioButton" type="button" class="btn btn-danger">Supprimer ce scénario</button>
+					</div>
+				</div>
+
+				<details class="scenario-section" open>
+					<summary>Paramètres généraux</summary>
+					<h4 class="field-group-title">Informations générales</h4>
+					<div class="form-grid">
+						<label>Nom du scénario<input type="text" id="fieldNameStory"></label>
+						<label class="span-2">Introduction<textarea id="fieldStoryIntroduction" rows="2"></textarea></label>
+					</div>
+
+					<h4 class="field-group-title">Carte</h4>
+					<div class="form-grid">
+						<label class="checkbox-label"><input type="checkbox" id="fieldMap"> Carte activée</label>
+						<label>Image de la carte
+							<input type="file" id="fieldMapImageUpload" accept="image/*">
+							<input type="hidden" id="fieldMapMedia">
+						</label>
+						<div id="fieldMapImagePreview" class="step-image-preview span-2"></div>
+					</div>
+
+					<h4 class="field-group-title">Minuteur</h4>
+					<div class="form-grid">
+						<label class="checkbox-label"><input type="checkbox" id="fieldTimer"> Minuteur activé</label>
+						<label>Type de minuteur
+							<select id="fieldTimerType">
+								<option value="">Chrono simple (compte le temps écoulé)</option>
+								<option value="countdown">Décompte (durée fixe)</option>
+								<option value="endHour">Heure de fin fixe</option>
+							</select>
+						</label>
+						<label>Paramètre du minuteur<input type="text" id="fieldTimerParam" placeholder="ms si décompte, HH:MM si heure de fin"></label>
+					</div>
+
+					<h4 class="field-group-title">Indices</h4>
+					<div class="form-grid">
+						<label class="checkbox-label"><input type="checkbox" id="fieldHints"> Indices activés</label>
+						<label class="checkbox-label"><input type="checkbox" id="fieldHintsCount"> Nombre d'indices limité</label>
+						<label>Nombre d'indices disponibles<input type="number" id="fieldHintsLimit" min="0" placeholder="si limité"></label>
+					</div>
+
+					<h4 class="field-group-title">Autres réglages</h4>
+					<div class="form-grid">
+						<label class="checkbox-label"><input type="checkbox" id="fieldChat"> Messagerie activée</label>
+						<label class="checkbox-label"><input type="checkbox" id="fieldProgressBar"> Barre de progression</label>
+						<label class="checkbox-label"><input type="checkbox" id="fieldSendMail"> Email de fin de partie</label>
+						<label class="checkbox-label"><input type="checkbox" id="fieldQrCodeReader"> Lecteur de QR code activé</label>
+					</div>
+
+					<details class="scenario-section">
+						<summary>Autres champs (JSON brut)</summary>
+						<p class="muted">Champs moins courants (thème, couleurs, logo...) non couverts par le formulaire ci-dessus — modifiables ici directement, fusionnés au reste à l'enregistrement.</p>
+						<textarea id="fieldRawExtra" rows="8" spellcheck="false"></textarea>
+					</details>
+				</details>
+
+				<details class="scenario-section" open>
+					<summary>Étapes (<span id="stepCount">0</span>)</summary>
+					<div class="step-editor-layout">
+						<div class="step-list-panel">
+							<button id="addStepButton" type="button" class="btn btn-primary full-width">+ Nouvelle étape</button>
+							<input type="text" id="stepSearchInput" placeholder="Rechercher une étape...">
+							<ul id="stepList" class="step-list"></ul>
+						</div>
+						<div class="step-form-panel">
+							<p id="stepFormEmpty" class="muted">Sélectionnez une étape à gauche, ou créez-en une nouvelle.</p>
+							<form id="stepForm" hidden>
+								<div class="form-grid">
+									<label>ID (géré automatiquement)<input type="number" id="stepId" readonly></label>
+									<label>Nom<input type="text" id="stepName"></label>
+									<label>Type
+										<select id="stepType">
+											<option value="location">Lieu</option>
+											<option value="object">Objet</option>
+											<option value="person">Personnage</option>
+										</select>
+									</label>
+									<label>Code QR<input type="text" id="stepCode"></label>
+									<label class="span-2">Image
+										<input type="file" id="stepImageUpload" accept="image/*">
+										<input type="hidden" id="stepMedia">
+									</label>
+									<div id="stepImagePreview" class="step-image-preview"></div>
+									<label class="checkbox-label"><input type="checkbox" id="stepDefault"> Ajoutée au lancement (default)</label>
+									<label class="checkbox-label"><input type="checkbox" id="stepClosed"> Verrouillée à l'arrivée (closed)</label>
+									<label class="checkbox-label"><input type="checkbox" id="stepProgressBar"> Compte dans la progression</label>
+									<label class="checkbox-label"><input type="checkbox" id="stepDefinitiveReplace"> Remplacement définitif</label>
+								</div>
+								<label>Description<textarea id="stepDescription" rows="3"></textarea></label>
+								<label>Indice<textarea id="stepHint" rows="2"></textarea></label>
+								<label>toAdd (étapes ajoutées en même temps — Ctrl/Cmd+clic pour en choisir plusieurs)
+									<div class="field-with-preview">
+										<div class="field-with-add">
+											<select id="stepToAdd" multiple size="3"></select>
+											<button type="button" class="btn btn-secondary btn-sm add-linked-step-btn" data-field="toAdd" title="Créer une nouvelle étape et la lier ici">+ Nouvelle</button>
+										</div>
+										<div id="stepToAddPreview" class="reference-preview"></div>
+									</div>
+								</label>
+								<label>toRemove (étapes retirées en même temps — Ctrl/Cmd+clic pour en choisir plusieurs)
+									<div class="field-with-preview">
+										<div class="field-with-add">
+											<select id="stepToRemove" multiple size="3"></select>
+											<button type="button" class="btn btn-secondary btn-sm add-linked-step-btn" data-field="toRemove" title="Créer une nouvelle étape et la lier ici">+ Nouvelle</button>
+										</div>
+										<div id="stepToRemovePreview" class="reference-preview"></div>
+									</div>
+								</label>
+								<label>needBefore (étape requise avant)
+									<div class="field-with-preview">
+										<div class="field-with-add">
+											<select id="stepNeedBefore"><option value="">Aucune</option></select>
+											<button type="button" class="btn btn-secondary btn-sm add-linked-step-btn" data-field="needBefore" title="Créer une nouvelle étape et la lier ici">+ Nouvelle</button>
+										</div>
+										<div id="stepNeedBeforePreview" class="reference-preview"></div>
+									</div>
+								</label>
+								<label>toAssociate (objet à associer)
+									<div class="field-with-preview">
+										<div class="field-with-add">
+											<select id="stepToAssociate"><option value="">Aucun</option></select>
+											<button type="button" class="btn btn-secondary btn-sm add-linked-step-btn" data-field="toAssociate" title="Créer un nouvel objet et le lier ici">+ Nouveau</button>
+										</div>
+										<div id="stepToAssociatePreview" class="reference-preview"></div>
+									</div>
+									<p class="field-help">Objet qui résout cette étape quand le joueur clique "utiliser" — fonctionne même sans cadenas (simple combinaison d'objets). Avec le type de cadenas "withObject" ci-dessous, l'étape s'affiche <em>en plus</em> comme un lieu verrouillé (icône cadenas) tant que cet objet n'a pas été fourni.</p>
+								</label>
+								<label>replaceBy (étape(s) suivante(s) — Ctrl/Cmd+clic pour en choisir plusieurs)
+									<div class="field-with-add">
+										<select id="stepReplaceBy" multiple size="3"></select>
+										<button type="button" class="btn btn-secondary btn-sm add-linked-step-btn" data-field="replaceBy" title="Créer une nouvelle étape et la lier ici">+ Nouvelle</button>
+									</div>
+								</label>
+								<details>
+									<summary>Cadenas (lockType / lockCode)</summary>
+									<div class="form-grid">
+										<label>Type de cadenas
+											<select id="stepLockType">
+												<option value="">Aucun</option>
+												<option value="color">color</option>
+												<option value="digit">digit</option>
+												<option value="directionnal">directionnal</option>
+												<option value="date">date</option>
+												<option value="fuse">fuse</option>
+												<option value="password">password</option>
+												<option value="diagram">diagram</option>
+												<option value="login">login</option>
+												<option value="sliders">sliders</option>
+												<option value="selector">selector</option>
+												<option value="withObject">withObject</option>
+											</select>
+										</label>
+										<p id="lockWithObjectHint" class="muted span-2" hidden>Ce type de cadenas se résout en associant un objet : choisissez-le dans le champ "toAssociate" ci-dessus, aucun code supplémentaire n'est nécessaire ici.</p>
+										<div id="lockEditorContainer" class="span-2"></div>
+										<details id="stepLockCodeLabel" class="span-2">
+											<summary>JSON brut du code du cadenas</summary>
+											<textarea id="stepLockCode" rows="2" spellcheck="false" placeholder='ex : ["rouge","bleu"] ou "12/25/2024"'></textarea>
+										</details>
+									</div>
+								</details>
+								<div class="step-form-footer">
+									<button type="button" id="duplicateStepButton" class="btn btn-secondary">Dupliquer</button>
+									<button type="button" id="deleteStepButton" class="btn btn-danger">Supprimer l'étape</button>
+									<button type="submit" class="btn btn-primary">Valider cette étape</button>
+								</div>
+							</form>
+						</div>
+					</div>
+				</details>
+
+				<div class="form-grid">
+					<label class="span-2">Dernière étape (termine le scénario)
+						<div class="field-with-add">
+							<select id="fieldLastStepId"><option value="">Aucune</option></select>
+							<button type="button" id="addLastStepButton" class="btn btn-secondary btn-sm" title="Créer une nouvelle étape et la désigner comme dernière étape">+ Nouvelle</button>
+						</div>
+					</label>
+				</div>
+
+				<div class="scenario-save-bar">
+					<button id="saveScenarioButton" type="button" class="btn btn-primary">Enregistrer le scénario</button>
+					<span id="scenarioSaveStatus" class="muted"></span>
+				</div>
+			</div>
+		</section>
+	</main>
+
+	<dialog id="confirmDialog" class="app-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 id="confirmDialogTitle" class="modal-title">Confirmer</h5>
+				<button type="button" class="btn-close" data-close-modal></button>
+			</div>
+			<div class="modal-body">
+				<p id="confirmDialogMessage"></p>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-close-modal>Annuler</button>
+				<button type="button" id="confirmDialogConfirmButton" class="btn btn-danger">Confirmer</button>
+			</div>
+		</div>
+	</dialog>
+
+	<script src="scenario-editor.js" type="module"></script>
+</body>
+</html>

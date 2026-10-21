@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="fr">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Classement général — Les Enquêtes du Phoenix</title>
+	<style>
+		:root { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
+		body { margin: 0; background: #dabd91; color: #1f2430; padding: 1.5rem; }
+		.card {
+			max-width: 640px;
+			margin: 0 auto;
+			background: #fff;
+			border-radius: .75rem;
+			padding: 1.5rem;
+			box-shadow: 0 4px 16px rgba(0,0,0,.1);
+		}
+		h1 { color: #b6390e; margin-top: 0; }
+		.muted { color: #6b7280; }
+		table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+		th, td { text-align: left; padding: .6rem .5rem; border-bottom: 1px solid #eee; }
+		th { color: #6b7280; font-weight: 600; font-size: .85rem; text-transform: uppercase; }
+		tr:first-child td { font-weight: 700; }
+		.rank-medal { font-size: 1.1rem; }
+		.session-tag { color: #6b7280; font-size: .8rem; }
+		.empty, .error { text-align: center; color: #6b7280; padding: 2rem 0; }
+	</style>
+</head>
+<body>
+	<div class="card">
+		<h1>Classement général</h1>
+		<p id="scenarioInfo" class="muted"></p>
+		<div id="content">Chargement…</div>
+	</div>
+	<script>
+		const params = new URLSearchParams(location.search);
+		const scenario = params.get('scenario');
+		const content = document.getElementById('content');
+		const scenarioInfo = document.getElementById('scenarioInfo');
+
+		function medal(rank) {
+			return { 1: '🥇', 2: '🥈', 3: '🥉' }[rank] || rank;
+		}
+		function formatDuration(ms) {
+			if (!ms) return '—';
+			const s = Math.floor(ms / 1000);
+			return `${String(Math.floor(s / 3600)).padStart(2, '0')}:${String(Math.floor((s % 3600) / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
+		}
+		function formatDate(isoString) {
+			if (!isoString) return '—';
+			const d = new Date(isoString.endsWith('Z') ? isoString : isoString + 'Z');
+			return d.toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' });
+		}
+
+		if (!scenario) {
+			content.innerHTML = '<p class="error">Aucun scénario indiqué dans le lien.</p>';
+		} else {
+			scenarioInfo.textContent = `Top 10 — scénario « ${scenario} », toutes sessions confondues`;
+			fetch(`/api/scenarios/${encodeURIComponent(scenario)}/leaderboard`)
+				.then((r) => { if (!r.ok) throw new Error(); return r.json(); })
+				.then(({ ranking }) => {
+					if (ranking.length === 0) {
+						content.innerHTML = '<p class="empty">Aucune équipe n\'a encore terminé ce scénario.</p>';
+						return;
+					}
+					const rows = ranking.map((t) => `
+						<tr>
+							<td class="rank-medal">${medal(t.rank)}</td>
+							<td>${t.name}<br><span class="session-tag">${t.sessionName || t.sessionCode}</span></td>
+							<td>${formatDuration(t.elapsedMs)}</td>
+							<td>${Math.round(t.progressPercent || 0)}%</td>
+							<td>${t.hintsUsed}</td>
+							<td>${Math.round(t.score)}</td>
+							<td>${formatDate(t.finishedAt)}</td>
+						</tr>
+					`).join('');
+					content.innerHTML = `
+						<table>
+							<thead><tr><th>#</th><th>Équipe</th><th>Temps</th><th>Progression</th><th>Indices</th><th>Score</th><th>Terminé le</th></tr></thead>
+							<tbody>${rows}</tbody>
+						</table>
+					`;
+				})
+				.catch(() => {
+					content.innerHTML = '<p class="error">Classement indisponible.</p>';
+				});
+		}
+	</script>
+</body>
+</html>

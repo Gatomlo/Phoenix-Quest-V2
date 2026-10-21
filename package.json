@@ -1,0 +1,23 @@
+{
+  "name": "phoenix-admin-backend",
+  "version": "1.0.0",
+  "description": "Backend d'administration pour Les Enquêtes du Phoenix : sessions de jeu, suivi des équipes en temps réel, chat, classement.",
+  "main": "src/server.js",
+  "type": "commonjs",
+  "engines": {
+    "node": ">=22.5.0"
+  },
+  "scripts": {
+    "start": "node src/server.js",
+    "set-password": "node scripts/set-password.js"
+  },
+  "dependencies": {
+    "adm-zip": "^0.6.0",
+    "bcryptjs": "^2.4.3",
+    "cookie-parser": "^1.4.6",
+    "dotenv": "^16.6.1",
+    "express": "^4.19.2",
+    "multer": "^2.3.0",
+    "qrcode": "^1.5.4"
+  }
+}

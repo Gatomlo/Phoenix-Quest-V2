@@ -1,0 +1,455 @@
+:root {
+  --bg: #f4f5f7;
+  --card-bg: #ffffff;
+  --text: #1f2430;
+  --muted: #6b7280;
+  --border: #e3e5ea;
+  --primary: #ff934f;
+  --primary-dark: #ee5622;
+  --danger: #d7263d;
+  --success: #4b967d;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+/* [hidden] doit gagner même face à un display:flex/grid posé par ailleurs
+   sur le même élément (sinon la règle du user-agent, de même spécificité,
+   perd face à nos propres règles). */
+[hidden] { display: none !important; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+}
+
+h1, h2, h3 { margin: 0 0 .5rem; }
+
+.muted { color: var(--muted); font-size: .9rem; }
+
+.centered-view {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: .75rem;
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .04);
+}
+
+.login-card {
+  width: 100%;
+  max-width: 320px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: .75rem;
+}
+
+input[type="text"], input[type="password"], textarea, select {
+  padding: .6rem .75rem;
+  border: 1px solid var(--border);
+  border-radius: .5rem;
+  font-size: 1rem;
+  width: 100%;
+}
+textarea { resize: vertical; font-family: inherit; }
+select { background: var(--card-bg); color: var(--text); font-family: inherit; }
+#pauseSessionModal label { display: block; margin: .75rem 0 .35rem; font-size: .85rem; color: var(--muted); }
+
+.btn {
+  border: none;
+  border-radius: .5rem;
+  padding: .6rem 1rem;
+  font-size: .95rem;
+  cursor: pointer;
+  min-height: 44px;
+}
+.btn-primary { background: var(--primary); color: #fff; }
+.btn-primary:hover { background: var(--primary-dark); }
+.btn-secondary { background: #eef0f3; color: var(--text); text-decoration: none; display: inline-flex; align-items: center; justify-content: center; }
+.btn-secondary:hover { background: #e2e5ea; }
+.btn-danger { background: var(--danger); color: #fff; }
+.btn-ghost { background: transparent; color: var(--text); border: 1px solid var(--border); }
+.btn-sm { padding: .25rem .6rem; font-size: .8rem; min-height: auto; }
+
+.error-text { color: var(--danger); font-size: .9rem; margin: 0; }
+
+.other-session-banner {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  padding: .6rem 1.5rem;
+  background: #fff3cd;
+  color: #664d03;
+  border-bottom: 1px solid #ffe69c;
+}
+.other-session-banner .banner-close-btn {
+  margin-left: auto;
+  background: transparent;
+  border: none;
+  font-size: 1.25rem;
+  line-height: 1;
+  color: #664d03;
+  cursor: pointer;
+  min-width: 32px;
+  min-height: 32px;
+}
+
+.unread-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 .4rem;
+  border-radius: 999px;
+  background: var(--danger);
+  color: #fff;
+  font-size: .75rem;
+  font-weight: 700;
+  margin-left: .4rem;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: .5rem;
+  padding: 1rem 1.5rem;
+  background: var(--card-bg);
+  border-bottom: 1px solid var(--border);
+}
+.topbar h1 { font-size: 1.1rem; }
+.topbar-actions { display: flex; align-items: center; gap: .5rem; }
+
+main {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+.inline-form {
+  display: flex;
+  gap: .5rem;
+  flex-wrap: wrap;
+}
+.inline-form input { flex: 1; min-width: 160px; }
+
+/* Réglages de session et sauvegardes : anciennement des <details> repliables
+   dans la page, déplacés en modales (voir #sessionSettingsModal et
+   #scenarioSavesModal) pour ne pas allonger la rangée d'actions au-delà de
+   ce qui tient sur une ligne en mode smartphone. */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: .75rem 1rem;
+  margin: 1rem 0;
+}
+.form-grid label {
+  display: flex;
+  flex-direction: column;
+  gap: .3rem;
+  font-size: .85rem;
+  color: var(--muted);
+}
+.form-grid .span-2 { grid-column: 1 / -1; }
+.form-grid img { max-width: 200px; max-height: 150px; border-radius: .5rem; border: 1px solid var(--border); }
+
+.session-groups { display: flex; flex-direction: column; gap: 1.25rem; }
+.session-group-title {
+  margin: 0;
+  font-size: .85rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  cursor: pointer;
+  user-select: none;
+}
+.session-group[open] .session-group-title { margin-bottom: .25rem; }
+.session-list { list-style: none; margin: .5rem 0 0; padding: 0; display: flex; flex-direction: column; gap: .5rem; }
+.session-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: .75rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: .5rem;
+  cursor: pointer;
+}
+.session-list li:hover { background: #fafafa; }
+.session-list .badge { margin-left: .5rem; }
+.session-row-meta { display: inline-flex; align-items: center; gap: .6rem; }
+
+.badge {
+  display: inline-block;
+  padding: .15rem .5rem;
+  border-radius: 999px;
+  font-size: .75rem;
+  background: #eef0f3;
+  color: var(--muted);
+}
+.badge.active { background: #e6f4ee; color: var(--success); }
+.badge.closed { background: #fdeceb; color: var(--danger); }
+.badge.timeout, .badge.paused { background: #fdf1e6; color: var(--primary-dark); }
+
+.session-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+.session-actions { display: flex; flex-wrap: wrap; gap: .5rem; }
+
+/* Icône devant le mot même en mode ordinateur : associer les deux avant de
+   passer à l'icône seule sur petit écran rend cette dernière plus lisible
+   sans avoir à réapprendre chaque symbole. */
+.btn-icon-label { display: inline-flex; align-items: center; gap: .4rem; }
+.btn-icon-label .btn-icon { flex-shrink: 0; }
+
+/* Réglages et Sauvegardes vivent derrière le bouton "Plus" (menu dans
+   #moreActionsMenu) plutôt que dans la rangée elle-même : à 5 actions
+   (Classement/Solution/Pause/Clôturer/Plus), 44px chacune tiennent sur une
+   seule ligne même sur les écrans les plus étroits, sans repli sur deux
+   lignes ni bouton qui déborde de la carte. */
+.more-actions-menu { display: flex; flex-direction: column; gap: .5rem; }
+.more-actions-menu .btn-icon-label { justify-content: flex-start; width: 100%; }
+.more-actions-menu .btn-icon-label .btn-label { display: inline; }
+
+/* "Mode smartphone" : le texte cède la place à l'icône seule pour que les 5
+   actions de session tiennent sur une seule ligne. Le menu "Plus"
+   (.more-actions-menu, plus spécifique) garde ses libellés visibles quelle
+   que soit la largeur d'écran — inutile d'y deviner une icône. */
+@media (max-width: 600px) {
+  .btn-icon-label { padding: .5rem; min-width: 44px; min-height: 44px; justify-content: center; }
+  .btn-icon-label .btn-label { display: none; }
+  .btn-icon-label .btn-icon { display: inline-block; }
+}
+
+.teams-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1rem;
+}
+
+.team-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.team-transfer-row { display: flex; flex-wrap: wrap; gap: .5rem; margin: .5rem 0; }
+
+.qr-modal-body { display: flex; flex-direction: column; align-items: center; gap: .5rem; text-align: center; }
+.qr-modal-body img { width: 280px; height: 280px; image-rendering: pixelated; }
+
+.saves-list { list-style: none; margin: 0 0 .5rem; padding: 0; display: flex; flex-direction: column; gap: .5rem; }
+.saves-list li {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  flex-wrap: wrap;
+  padding: .5rem .6rem;
+  border: 1px solid var(--border);
+  border-radius: .4rem;
+}
+.saves-list .save-name { font-weight: 600; margin-right: auto; }
+.saves-list .save-date { color: var(--muted); font-size: .8rem; }
+.team-name-row { display: flex; align-items: center; gap: .4rem; margin: 0; }
+.team-unread-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--danger);
+}
+/* Signal de présence (basé sur le heartbeat périodique envoyé par le jeu,
+   voir backendSync.js) : vert = signal reçu récemment, gris = plus de
+   signal depuis un moment (veille, app fermée, réseau coupé), transparent
+   = pas encore de signal ou équipe terminée (l'info n'a plus de sens). */
+.presence-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.presence-dot.presence-online { background: var(--success); }
+.presence-dot.presence-offline { background: var(--muted); }
+.presence-dot.presence-na { background: transparent; border: 1px solid var(--border); }
+
+.progress-bar {
+  width: 100%;
+  height: 10px;
+  background: #eef0f3;
+  border-radius: 999px;
+  overflow: hidden;
+  margin: .5rem 0;
+}
+.progress-bar-fill {
+  height: 100%;
+  background: var(--primary);
+  width: 0%;
+  transition: width .3s ease;
+}
+
+.team-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: .5rem;
+  margin: 0 0 .75rem;
+  font-size: .85rem;
+}
+.team-stats dt { color: var(--muted); }
+.team-stats dd { margin: 0; font-weight: 600; }
+
+.stat-hints-row { display: flex; align-items: center; gap: .4rem; }
+.hint-adjust-btn {
+  width: 24px;
+  height: 24px;
+  line-height: 1;
+  border-radius: 50%;
+  border: 1px solid var(--primary);
+  background: #fff;
+  color: var(--primary);
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0;
+}
+.hint-adjust-btn:hover { background: var(--primary); color: #fff; }
+
+.unlock-form { margin-bottom: .5rem; flex-wrap: nowrap; }
+.unlock-form .unlock-step-input { flex: 1; min-width: 0; }
+.unlock-form button { flex-shrink: 0; }
+.unlock-step-preview { margin-bottom: .75rem; }
+.unlock-step-preview:empty { display: none; }
+.unlock-step-preview-item {
+  display: flex;
+  gap: .5rem;
+  align-items: flex-start;
+  padding: .4rem;
+  border: 1px solid var(--border);
+  border-radius: .5rem;
+  font-size: .8rem;
+}
+.unlock-step-preview-item img { width: 40px; height: 40px; object-fit: cover; border-radius: .35rem; flex-shrink: 0; }
+.unlock-step-preview-item p { margin: .2rem 0 0; color: var(--muted); }
+
+.chat-thread {
+  max-height: 320px;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: .5rem;
+  padding: .5rem;
+  margin-bottom: .5rem;
+  display: flex;
+  flex-direction: column;
+  gap: .35rem;
+  font-size: .85rem;
+}
+.chat-message {
+  padding: .35rem .6rem;
+  border-radius: .5rem;
+  max-width: 85%;
+}
+.chat-message.admin { align-self: flex-end; background: var(--primary); color: #fff; }
+.chat-message.team { align-self: flex-start; background: #eef0f3; }
+.chat-empty { align-self: center; color: var(--muted); font-size: .85rem; margin: auto; }
+
+.history-section, .chat-section { margin-bottom: .75rem; }
+.history-section summary, .chat-section summary {
+  margin: 0 0 .5rem;
+  font-size: .85rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  cursor: pointer;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+}
+.history-section[open] summary, .chat-section[open] summary { margin-bottom: .5rem; }
+.chat-summary-unread-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--danger);
+}
+.history-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 280px;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: .5rem;
+  font-size: .85rem;
+}
+.history-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: .5rem;
+  padding: .4rem .6rem;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+}
+.history-list li:last-child { border-bottom: none; }
+.history-list li:hover { background: #fafafa; }
+.history-list .history-time { color: var(--muted); font-size: .8rem; white-space: nowrap; }
+.history-list .history-empty { color: var(--muted); cursor: default; }
+.history-list .history-empty:hover { background: none; }
+
+dialog.app-dialog {
+  border: none;
+  padding: 0;
+  background: transparent;
+  width: min(92vw, 600px);
+  max-height: 90vh;
+  overflow: auto;
+  border-radius: .75rem;
+}
+dialog.app-dialog::backdrop { background: rgba(0, 0, 0, .5); }
+dialog.app-dialog .modal-content {
+  background: var(--card-bg);
+  border-radius: .75rem;
+}
+dialog.app-dialog .modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+dialog.app-dialog .modal-header .btn-close {
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+  line-height: 1;
+  color: var(--text);
+  cursor: pointer;
+  min-width: 44px;
+  min-height: 44px;
+}
+dialog.app-dialog .modal-header .btn-close::before {
+  content: "×";
+}
+dialog.app-dialog .modal-header .btn-close:hover { color: var(--danger); }
+dialog.app-dialog .modal-body { padding: 1rem; }
+#confirmDialogMessage { white-space: pre-line; }
+dialog.app-dialog .modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: 1rem;
+  border-top: 1px solid var(--border);
+}
+#stepPreviewImage img { max-width: 100%; border-radius: .5rem; margin-bottom: .75rem; }

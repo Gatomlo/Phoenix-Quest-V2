@@ -1,0 +1,368 @@
+.gameInterface{
+  height: 80vh;
+  width: auto;
+}
+#itemsListColumn{display: none}
+#locationsListColumn{display: none}
+body{
+  background-color: #dabd91;
+}
+#titleText{
+  font-size: 2.5em;
+  font-family: "Amatic SC", sans-serif;
+  font-weight: 700;
+}
+#titleBar{
+  width: 100%;
+}
+
+#titleMenu{
+  text-align: right;
+}
+
+.stepImg{
+  display: block;
+  width: 60%;
+  margin: auto
+}
+
+
+#gameMap{
+width:100%
+}
+
+#passZone{
+  font-size: 2em;
+  text-align: center;
+  color:#007bff;
+  margin-left: auto;
+}
+
+
+#message{
+  margin: auto;
+  margin-top: 20px;
+  width:50%
+}
+.passCard{
+margin: auto;
+margin-top: 50px;
+max-width: 800px;
+border-color: #007bff;
+}
+.passCardBody{
+  border-color: #007bff;
+  margin-bottom: 50px;
+
+
+}
+.toast{
+  background-color: red;
+}
+#digit .col{
+  padding:0;
+  text-align: center;
+  max-width: 80px;
+
+}
+
+#actualCode{
+  margin: auto;
+}
+
+.oneObject{
+  z-index: 1000;
+}
+
+.oneDigitFromTrying{
+  font-size: 2.5em;
+}
+#contentImg{
+  margin: auto;
+}
+#password{
+  width: 100%;
+}
+#loginSendSoluce{
+  width: 20%;
+}
+
+#loginPasswordInput{
+  margin-top: 20px;
+}
+
+.input-group-append {
+  cursor: pointer;
+}
+.slidersRow{
+  margin: auto;
+  margin-top: 30px;
+}
+.slidersValue{
+    color:#007bff;
+    font-size: 1.5em;
+}
+
+@@font-face {
+
+  font-family: gijgo-material;
+  src: url(./fonts/gijgo.material.woff);
+}
+#timer{
+  text-align: right;
+  font-size: 1.5em;
+}
+.alignRight{
+  text-align: right;
+}
+
+.lg-hotspot {
+  position: absolute;
+  margin: 0;
+  padding: 0;
+  transform: translate(-50%, -50%);
+  z-index: 0;
+}
+.pin{
+  margin-top: -10px;
+}
+.btn-primary{
+  background-color: #ff934f;
+  border:#ff934f;
+}
+.btn-primary:hover{
+  background-color: #ee5622;
+  border:#ee5622;
+}
+.text-bg-primary{
+  background-color: #ff934f!important;
+  border:#ff934f!important;
+  margin-left: 2px;
+}
+.text-bg-primary:hover{
+  background-color: #ee5622!important;
+  border:#ee5622!important;
+}
+
+.card-header{
+  background-color: #f3ebde;
+  border-bottom: 2px solid #dabd91;
+}
+.card-footer{
+  background-color: #f3ebde;
+  border-top: 2px solid #dabd91;
+
+}
+#itemListTitle, #locationListTitle, #stepName{
+  color:#ee5622;
+}
+#timer{
+  background-color: #ef6461!important;
+  color: #dabd91!important;
+}
+
+.text-bg-warning{
+  background-color: #ef6461!important;
+  color: #dabd91!important;
+}
+#hintCountdown{
+  padding-left: 5px!important;
+}
+.oneDigit{
+  width: 50px;
+
+}
+
+.switch{
+  color:#dabd91;
+}
+
+.oneDigit{
+  width: 50px;
+}
+.digit{
+  width:75px;
+  font-size: 45px;
+  margin-top: 5px;
+  background-color: #f3ebde!important;
+  color:#dabd91;
+}
+.digit:hover{
+  background-color: #dabd91!important;
+}
+
+#reset, #resetDirectionnal, #resetSwitch{
+  background-color: #ff934f!important;
+  color:white!important;
+}
+#reset:hover, #resetDirectionnal:hover, #resetSwitch:hover{
+  background-color: #ee5622!important;
+}
+.btn-success{
+  background-color: #74cb96!important;
+  color:white;
+  border: none;
+}
+.btn-success:hover{
+  background-color: #4b967d!important;
+}
+.lock-dots circle{
+  fill:#dabd91!important;
+}
+line{
+  stroke:#dabd91!important;
+}
+#logo{
+  width:10%;
+}
+
+.slidersName, .slidersValue{
+  color:black!important;
+}
+
+.gj-slider-md [role="handle"], .gj-slider-md [role="progress"]{
+  background-color: #dabd91!important;
+}
+
+.lg-container {
+  max-width: 100%;
+  position: relative;
+  margin: 1rem;
+  padding: 0;
+}
+
+.lg-image {
+  display: block;
+  height: 100%;
+  width: 100%;
+  object-fit: scale-down;
+}
+
+.lg-hotspot {
+  position: absolute;
+  margin: 0;
+  padding: 0;
+  transform: translate(-50%, -50%);
+  z-index: 0;
+  &:hover,
+  &:active {
+    .lg-hotspot__button {
+      border-color: $colorButtonHover;
+      &:after {
+        background-color: $colorButtonHover;
+      }
+    }
+  }
+  &--selected {
+    z-index: 999;
+    .lg-hotspot__label {
+      opacity: 1;
+    }
+  }
+  &__button {
+    height: $buttonRadius * 2;
+    width: $buttonRadius * 2;
+    padding: 0px;
+    border-radius: 100%;
+    border: 1px solid $colorButton;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    z-index: 999;
+    animation: button-pulse 7s ease-in-out infinite;
+    cursor: pointer;
+    &:after {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      content: "";
+      display: block;
+      height: $buttonRadius * 0.7;
+      width: $buttonRadius * 0.7;
+      border-radius: 100%;
+      border: 3px solid white;
+      background-color: $colorButton;
+      transition: border-color 1s linear;
+    }
+  }
+  &__label {
+    position: absolute;
+    padding: 0 0 1.1em 0;
+    width: 16em;
+    max-width: 50vw;
+    background-color: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    font-family: "Open Sans", sans-serif;
+    font-size: 14.5px;
+    line-height: 1.45em;
+    z-index: -1;
+    border-radius: $labelBorderRadius;
+    user-select: none;
+    opacity: 0;
+    transition: all $labelFade linear;
+    h4 {
+      margin: 0;
+      padding: 0.65em $labelPaddingX;
+      background-color: $colorHeadingBackground;
+      font-size: 1.1em;
+      font-weight: normal;
+      letter-spacing: 0.02em;
+      color: white;
+      border-radius: $labelBorderRadius $labelBorderRadius 0 0;
+    }
+    p {
+      margin: 0;
+      padding: 1.1em $labelPaddingX 0 $labelPaddingX;
+      color: $colorText;
+    }
+  }
+}
+
+.lg-hotspot:hover{
+  color:red;
+}
+.lg-hotspot--top-left .lg-hotspot__label {
+  top: $buttonRadius;
+  left: $buttonRadius;
+}
+
+.lg-hotspot--top-right .lg-hotspot__label {
+  top: $buttonRadius;
+  right: $buttonRadius;
+}
+
+.lg-hotspot--bottom-right .lg-hotspot__label {
+  right: $buttonRadius;
+  bottom: $buttonRadius;
+}
+
+.lg-hotspot--bottom-left .lg-hotspot__label {
+  bottom: $buttonRadius;
+  left: $buttonRadius;
+}
+
+@keyframes button-pulse {
+  0% {
+    transform: scale(1, 1);
+    opacity: 1;
+  }
+  40% {
+    transform: scale(1.15, 1.15);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1, 1);
+    opacity: 1;
+  }
+}
+
+@media (max-width:812px){
+
+#itemsListColumn{display: none}
+#locationsListColumn{display: none}
+#titleBar{display: none;}
+#locationsButton,#itemsButton{
+  display: block;
+}
+
+}

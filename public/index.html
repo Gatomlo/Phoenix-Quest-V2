@@ -1,0 +1,336 @@
+<!doctype html>
+<html lang="fr">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Administration — Les Enquêtes du Phoenix</title>
+	<link rel="stylesheet" href="admin.css">
+</head>
+<body>
+	<div id="loginView" class="centered-view">
+		<form id="loginForm" class="card login-card">
+			<h1>Administration</h1>
+			<p>Les Enquêtes du Phoenix</p>
+			<input type="password" id="passwordInput" placeholder="Mot de passe" autocomplete="current-password" required>
+			<button type="submit" class="btn btn-primary">Se connecter</button>
+			<p id="loginError" class="error-text" hidden></p>
+		</form>
+	</div>
+
+	<div id="dashboardView" hidden>
+		<header class="topbar">
+			<h1>Administration — Enquêtes du Phoenix</h1>
+			<div class="topbar-actions">
+				<a href="scenario-editor.html" class="btn btn-secondary">Scénarios</a>
+				<button id="logoutButton" class="btn btn-ghost">Déconnexion</button>
+			</div>
+		</header>
+		<div id="otherSessionBanner" class="other-session-banner" hidden>
+			<span id="otherSessionBannerText"></span>
+			<button id="otherSessionBannerButton" type="button" class="btn btn-sm btn-primary">Voir</button>
+			<button id="otherSessionBannerClose" type="button" class="banner-close-btn" aria-label="Fermer">&times;</button>
+		</div>
+
+		<main>
+			<section id="sessionListView">
+				<div class="card">
+					<h2>Nouvelle session</h2>
+					<form id="createSessionForm" class="inline-form">
+						<select id="scenarioCodeInput" required>
+							<option value="" disabled selected>Chargement des scénarios…</option>
+						</select>
+						<input type="text" id="sessionNameInput" placeholder="Nom de la session (optionnel)">
+						<button type="submit" class="btn btn-primary">Créer</button>
+						<a id="globalLeaderboardLink" href="#" target="_blank" class="btn btn-secondary">Classement général de ce scénario</a>
+					</form>
+				</div>
+				<div class="card">
+					<h2>Sessions</h2>
+					<div id="sessionList" class="session-groups"></div>
+				</div>
+			</section>
+
+			<section id="sessionDetailView" hidden>
+				<button id="backToListButton" class="btn btn-ghost">&larr; Toutes les sessions</button>
+				<div class="session-header card">
+					<div>
+						<h2 id="sessionTitle"></h2>
+						<p id="sessionMeta" class="muted"></p>
+					</div>
+					<div class="session-actions">
+						<a id="leaderboardLink" href="#" target="_blank" class="btn btn-secondary btn-icon-label" aria-label="Classement public">
+							<svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M2.5.5A.5.5 0 0 1 3 0h10a.5.5 0 0 1 .5.5c0 .538-.012 1.05-.034 1.536a3 3 0 1 1-1.133 5.89c-.79 1.865-1.878 2.777-2.833 3.011v2.173l1.425.356c.194.048.377.135.537.255L13.3 15.1a.5.5 0 0 1-.3.9H3a.5.5 0 0 1-.3-.9l1.838-1.379c.16-.12.343-.207.537-.255L6.5 13.11v-2.173c-.955-.234-2.043-1.146-2.833-3.012a3 3 0 1 1-1.132-5.89A33 33 0 0 1 2.5.5m.099 2.54a2 2 0 0 0 .72 3.935c-.333-1.05-.588-2.346-.72-3.935m10.802 0c-.133 1.59-.388 2.885-.72 3.935a2 2 0 0 0 .72-3.935"/></svg>
+							<span class="btn-label">Classement</span>
+						</a>
+						<a id="solutionGuideLink" href="#" target="_blank" class="btn btn-secondary btn-icon-label" aria-label="Guide de solution (lecture)">
+							<svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M8 3.5c-1.5-1-4.5-1.5-6-.5v9c1.5-1 4.5-.5 6 .5 1.5-1 4.5-1.5 6-.5v-9c-1.5-1-4.5-.5-6 .5m0 0v9"/></svg>
+							<span class="btn-label">Solution</span>
+						</a>
+						<button id="pauseSessionButton" class="btn btn-primary btn-icon-label" aria-label="Mettre en pause">
+							<svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M6 3.5a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0V4a.5.5 0 0 1 .5-.5m4 0a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0V4a.5.5 0 0 1 .5-.5"/></svg>
+							<span class="btn-label">Pause</span>
+						</button>
+						<button id="resumeSessionButton" class="btn btn-primary btn-icon-label" aria-label="Reprendre" hidden>
+							<svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M10.804 8 5 4.633v6.734zm.792-.696a.802.802 0 0 1 0 1.392l-6.363 3.692C4.713 12.69 4 12.345 4 11.692V4.308c0-.653.713-.998 1.233-.696z"/></svg>
+							<span class="btn-label">Reprendre</span>
+						</button>
+						<button id="closeSessionButton" class="btn btn-danger btn-icon-label" aria-label="Clôturer la session">
+							<svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2m3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2"/></svg>
+							<span class="btn-label">Clôturer</span>
+						</button>
+						<button id="reopenSessionButton" class="btn btn-primary btn-icon-label" aria-label="Réactiver la session" hidden>
+							<svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M11 1a2 2 0 0 1 2 2v4a.5.5 0 0 1-1 0V3a1 1 0 0 0-1-1H6a1 1 0 0 0-1 1v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2H5V3a2 2 0 0 1 2-2z"/></svg>
+							<span class="btn-label">Réactiver</span>
+						</button>
+						<button id="openMoreActionsButton" type="button" class="btn btn-secondary btn-icon-label" aria-label="Plus d'actions (réglages, sauvegardes)">
+							<svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M3 9.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3m5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3m5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3"/></svg>
+							<span class="btn-label">Plus</span>
+						</button>
+					</div>
+				</div>
+				<div id="teamsGrid" class="teams-grid"></div>
+			</section>
+		</main>
+	</div>
+
+	<template id="teamCardTemplate">
+		<div class="card team-card">
+			<div class="team-card-header">
+				<h3 class="team-name-row"><span class="presence-dot" title=""></span><span class="team-name"></span><span class="team-unread-dot" title="Message non lu" hidden></span></h3>
+				<span class="team-status badge"></span>
+			</div>
+			<div class="team-transfer-row">
+				<button type="button" class="btn btn-sm btn-secondary btn-icon-label team-transfer-btn" aria-label="Transférer (QR)">
+					<svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M0 .5A.5.5 0 0 1 .5 0h3a.5.5 0 0 1 0 1H1v2.5a.5.5 0 0 1-1 0zm12 0a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 .5.5v3a.5.5 0 0 1-1 0V1h-2.5a.5.5 0 0 1-.5-.5M.5 12a.5.5 0 0 1 .5.5V15h2.5a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5v-3a.5.5 0 0 1 .5-.5m15 0a.5.5 0 0 1 .5.5v3a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1 0-1H15v-2.5a.5.5 0 0 1 .5-.5M4 4h1v1H4z"/><path d="M7 2H2v5h5zM3 3h3v3H3zm2 8H4v1h1z"/><path d="M7 9H2v5h5zm-4 1h3v3H3zm8-6h1v1h-1z"/><path d="M9 2h5v5H9zm1 1v3h3V3zM8 8v2h1v1H8v1h2v-2h1v2h1v-1h2v-1h-3V8zm2 2H9V9h1zm4 2h-1v1h-2v1h3zm-4 2v-1H8v1z"/><path d="M12 9h2V8h-2z"/></svg>
+					<span class="btn-label">Transférer (QR)</span>
+				</button>
+				<button type="button" class="btn btn-sm btn-secondary btn-icon-label team-save-btn" aria-label="Sauvegarder l'état">
+					<svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M11 2H9v3h2z"/><path d="M1.5 0h11.586a1.5 1.5 0 0 1 1.06.44l1.415 1.414A1.5 1.5 0 0 1 16 2.914V14.5a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 0 14.5v-13A1.5 1.5 0 0 1 1.5 0M1 1.5v13a.5.5 0 0 0 .5.5H2v-4.5A1.5 1.5 0 0 1 3.5 9h9a1.5 1.5 0 0 1 1.5 1.5V15h.5a.5.5 0 0 0 .5-.5V2.914a.5.5 0 0 0-.146-.353l-1.415-1.415A.5.5 0 0 0 13.086 1H13v4.5A1.5 1.5 0 0 1 11.5 7h-7A1.5 1.5 0 0 1 3 5.5V1H1.5a.5.5 0 0 0-.5.5m9.5 0v4a.5.5 0 0 1-.5.5h-6a.5.5 0 0 1-.5-.5V1zM3 15h9v-4.5a.5.5 0 0 0-.5-.5h-8a.5.5 0 0 0-.5.5z"/></svg>
+					<span class="btn-label">Sauvegarder l'état</span>
+				</button>
+			</div>
+			<div class="progress-bar"><div class="progress-bar-fill"></div></div>
+			<dl class="team-stats">
+				<div><dt>Progression</dt><dd class="stat-progress"></dd></div>
+				<div><dt>Temps</dt><dd class="stat-time"></dd></div>
+				<div>
+					<dt>Indices</dt>
+					<dd class="stat-hints-row">
+						<span class="stat-hints"></span>
+						<button type="button" class="hint-adjust-btn hint-minus" title="Retirer un indice">−</button>
+						<button type="button" class="hint-adjust-btn hint-plus" title="Donner un indice">+</button>
+					</dd>
+				</div>
+				<div><dt>Étape</dt><dd class="stat-step"></dd></div>
+				<div><dt>Dernier signal</dt><dd class="stat-lastseen"></dd></div>
+			</dl>
+			<form class="unlock-form inline-form">
+				<select class="unlock-step-input">
+					<option value="" disabled selected>Choisir une étape…</option>
+				</select>
+				<button type="submit" class="btn btn-secondary">Ajouter</button>
+			</form>
+			<div class="unlock-step-preview"></div>
+			<details class="history-section" name="admin-accordion">
+				<summary>Historique</summary>
+				<ul class="history-list"></ul>
+			</details>
+			<details class="chat-section" name="admin-accordion" open>
+				<summary>Messagerie<span class="chat-summary-unread-dot" title="Nouveau message" hidden></span></summary>
+				<div class="chat-thread"><p class="chat-empty">Aucun message pour l'instant.</p></div>
+				<form class="chat-form inline-form">
+					<input type="text" class="chat-input" placeholder="Message à l'équipe...">
+					<button type="submit" class="btn btn-primary">Envoyer</button>
+				</form>
+			</details>
+		</div>
+	</template>
+
+	<dialog id="stepPreviewModal" class="app-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 id="stepPreviewTitle" class="modal-title"></h5>
+				<button type="button" class="btn-close" data-close-modal></button>
+			</div>
+			<div class="modal-body">
+				<p id="stepPreviewMeta" class="muted"></p>
+				<div id="stepPreviewImage"></div>
+				<div id="stepPreviewDescription"></div>
+			</div>
+			<div class="modal-footer">
+				<button id="stepPreviewUnlockButton" type="button" class="btn btn-secondary" hidden>Débloquer cette étape</button>
+			</div>
+		</div>
+	</dialog>
+
+	<dialog id="confirmDialog" class="app-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 id="confirmDialogTitle" class="modal-title">Confirmer</h5>
+				<button type="button" class="btn-close" data-close-modal></button>
+			</div>
+			<div class="modal-body">
+				<p id="confirmDialogMessage"></p>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-close-modal>Annuler</button>
+				<button type="button" id="confirmDialogConfirmButton" class="btn btn-danger">Confirmer</button>
+			</div>
+		</div>
+	</dialog>
+
+	<dialog id="promptDialog" class="app-dialog">
+		<div class="modal-content">
+			<form id="promptDialogForm">
+				<div class="modal-header">
+					<h5 id="promptDialogTitle" class="modal-title">Saisie</h5>
+					<button type="button" class="btn-close" data-close-modal></button>
+				</div>
+				<div class="modal-body">
+					<p id="promptDialogMessage" class="muted"></p>
+					<input type="text" id="promptDialogInput" required>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-close-modal>Annuler</button>
+					<button type="submit" id="promptDialogConfirmButton" class="btn btn-primary">Valider</button>
+				</div>
+			</form>
+		</div>
+	</dialog>
+
+	<dialog id="pauseSessionModal" class="app-dialog">
+		<div class="modal-content">
+			<form id="pauseSessionForm">
+				<div class="modal-header">
+					<h5 class="modal-title">Mettre le jeu en pause</h5>
+					<button type="button" class="btn-close" data-close-modal></button>
+				</div>
+				<div class="modal-body">
+					<p class="muted">Le chrono de chaque équipe sera figé pendant la pause : le temps passé en pause ne sera pas compté.</p>
+					<label for="pauseMessageInput">Message affiché aux équipes (optionnel)</label>
+					<textarea id="pauseMessageInput" rows="3" placeholder="Ex : Pause déjeuner, on reprend dans 15 minutes !"></textarea>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-close-modal>Annuler</button>
+					<button type="submit" class="btn btn-primary">Mettre en pause</button>
+				</div>
+			</form>
+		</div>
+	</dialog>
+
+	<dialog id="moreActionsMenu" class="app-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title">Plus d'actions</h5>
+				<button type="button" class="btn-close" data-close-modal></button>
+			</div>
+			<div class="modal-body more-actions-menu">
+				<button type="button" id="moreActionsSettingsItem" class="btn btn-secondary btn-icon-label">
+					<svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M9.405 1.05c-.413-1.4-2.397-1.4-2.81 0l-.1.34a1.464 1.464 0 0 1-2.105.872l-.31-.17c-1.283-.698-2.686.705-1.987 1.987l.169.311c.446.82.023 1.841-.872 2.105l-.34.1c-1.4.413-1.4 2.397 0 2.81l.34.1a1.464 1.464 0 0 1 .872 2.105l-.17.31c-.698 1.283.705 2.686 1.987 1.987l.311-.169a1.464 1.464 0 0 1 2.105.872l.1.34c.413 1.4 2.397 1.4 2.81 0l.1-.34a1.464 1.464 0 0 1 2.105-.872l.31.17c1.283.698 2.686-.705 1.987-1.987l-.169-.311a1.464 1.464 0 0 1 .872-2.105l.34-.1c1.4-.413 1.4-2.397 0-2.81l-.34-.1a1.464 1.464 0 0 1-.872-2.105l.17-.31c.698-1.283-.705-2.686-1.987-1.987l-.311.169a1.464 1.464 0 0 1-2.105-.872zM8 10.93a2.929 2.929 0 1 1 0-5.86 2.929 2.929 0 0 1 0 5.858z"/></svg>
+					<span class="btn-label">Réglages de cette session</span>
+				</button>
+				<button type="button" id="moreActionsSavesItem" class="btn btn-secondary btn-icon-label">
+					<svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M11 2H9v3h2z"/><path d="M1.5 0h11.586a1.5 1.5 0 0 1 1.06.44l1.415 1.414A1.5 1.5 0 0 1 16 2.914V14.5a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 0 14.5v-13A1.5 1.5 0 0 1 1.5 0M1 1.5v13a.5.5 0 0 0 .5.5H2v-4.5A1.5 1.5 0 0 1 3.5 9h9a1.5 1.5 0 0 1 1.5 1.5V15h.5a.5.5 0 0 0 .5-.5V2.914a.5.5 0 0 0-.146-.353l-1.415-1.415A.5.5 0 0 0 13.086 1H13v4.5A1.5 1.5 0 0 1 11.5 7h-7A1.5 1.5 0 0 1 3 5.5V1H1.5a.5.5 0 0 0-.5.5m9.5 0v4a.5.5 0 0 1-.5.5h-6a.5.5 0 0 1-.5-.5V1zM3 15h9v-4.5a.5.5 0 0 0-.5-.5h-8a.5.5 0 0 0-.5.5z"/></svg>
+					<span class="btn-label">Sauvegardes du scénario</span>
+				</button>
+			</div>
+		</div>
+	</dialog>
+
+	<dialog id="sessionSettingsModal" class="app-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title">Réglages de cette session</h5>
+				<button type="button" class="btn-close" data-close-modal></button>
+			</div>
+			<div class="modal-body">
+				<p class="muted">Remplacent le scénario par défaut pour cette session uniquement. S'appliquent au prochain chargement de l'app pour chaque équipe (pas en direct pour une partie déjà en cours).</p>
+				<div class="form-grid">
+					<label>Indices
+						<select id="settingHints">
+							<option value="">Par défaut du scénario</option>
+							<option value="true">Activés</option>
+							<option value="false">Désactivés</option>
+						</select>
+					</label>
+					<label>Barre de progression
+						<select id="settingProgressBar">
+							<option value="">Par défaut du scénario</option>
+							<option value="true">Activée</option>
+							<option value="false">Désactivée</option>
+						</select>
+					</label>
+					<label>Carte
+						<select id="settingMap">
+							<option value="">Par défaut du scénario</option>
+							<option value="true">Activée</option>
+							<option value="false">Désactivée</option>
+						</select>
+					</label>
+					<label class="span-2">Image de la carte pour cette session (optionnel)
+						<input type="file" id="settingMapImageUpload" accept="image/*">
+						<input type="hidden" id="settingMapMedia">
+					</label>
+					<div id="settingMapImagePreview" class="span-2"></div>
+					<label>Messagerie
+						<select id="settingChat">
+							<option value="">Par défaut du scénario</option>
+							<option value="true">Activée</option>
+							<option value="false">Désactivée</option>
+						</select>
+					</label>
+					<label>Minuteur
+						<select id="settingTimer">
+							<option value="">Par défaut du scénario</option>
+							<option value="true">Activé</option>
+							<option value="false">Désactivé</option>
+						</select>
+					</label>
+					<label>Type de minuteur
+						<select id="settingTimerType">
+							<option value="">Par défaut du scénario</option>
+							<option value="countdown">Décompte (durée fixe)</option>
+							<option value="endHour">Heure de fin fixe</option>
+							<option value="chrono">Chrono simple</option>
+						</select>
+					</label>
+					<label>Paramètre du minuteur<input type="text" id="settingTimerParam" placeholder="vide = valeur du scénario"></label>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<span id="sessionSettingsStatus" class="muted"></span>
+				<button id="saveSessionSettingsButton" type="button" class="btn btn-primary">Enregistrer les réglages</button>
+			</div>
+		</div>
+	</dialog>
+
+	<dialog id="scenarioSavesModal" class="app-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title">Sauvegardes du scénario</h5>
+				<button type="button" class="btn-close" data-close-modal></button>
+			</div>
+			<div class="modal-body">
+				<p class="muted">Instantanés de progression réutilisables à volonté, indépendants de cette session — pratique pour tester un scénario sans tout rejouer à chaque fois. Effacés uniquement si tu les supprimes ici.</p>
+				<ul id="scenarioSavesList" class="saves-list"></ul>
+				<p id="scenarioSavesEmpty" class="muted" hidden>Aucune sauvegarde pour ce scénario pour l'instant.</p>
+			</div>
+		</div>
+	</dialog>
+
+	<dialog id="transferQrDialog" class="app-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title">Transférer <span id="transferQrTeamName"></span> vers un autre téléphone</h5>
+				<button type="button" class="btn-close" data-close-modal></button>
+			</div>
+			<div class="modal-body qr-modal-body">
+				<img id="transferQrImage" alt="QR code de transfert">
+				<p class="muted">À scanner depuis le nouveau téléphone : il reprend la partie exactement là où elle en était sur celui-ci.</p>
+			</div>
+		</div>
+	</dialog>
+
+	<script src="admin.js" type="module"></script>
+</body>
+</html>

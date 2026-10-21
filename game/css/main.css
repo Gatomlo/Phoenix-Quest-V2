@@ -1,0 +1,807 @@
+/* Chat animateur <-> équipe et classement (intégration backend, Phase 5) */
+#chatButton { position: relative; }
+#chatUnreadDot {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #d7263d;
+  border: 2px solid #fff;
+}
+.chat-thread {
+  max-height: 50vh;
+  overflow-y: auto;
+  border: 1px solid #e3e5ea;
+  border-radius: .5rem;
+  padding: .5rem;
+  margin-bottom: .75rem;
+  display: flex;
+  flex-direction: column;
+  gap: .4rem;
+}
+.chat-message {
+  padding: .5rem .75rem;
+  border-radius: .75rem;
+  max-width: 85%;
+  word-break: break-word;
+}
+.chat-message.admin { align-self: flex-start; background: #eef0f3; }
+.chat-message.team { align-self: flex-end; background: var(--color2, #ff934f); color: #fff; }
+.chat-empty { align-self: center; color: #6b7280; font-size: .9rem; margin: auto; }
+.chat-form { display: flex; gap: .5rem; }
+.chat-form input { flex: 1; }
+
+/* Classement en cartes empilées (une équipe par ligne, ses statistiques en
+   dessous) plutôt qu'un tableau à 6 colonnes : celui-ci ne tenait pas dans
+   la largeur d'une modale sur mobile, forçant un défilement horizontal peu
+   naturel à cet endroit. Cet empilement affiche tout sans glissière, quelle
+   que soit la largeur d'écran. */
+.leaderboard-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: .6rem; }
+.leaderboard-row {
+  padding: .6rem .75rem;
+  border: 1px solid #e3e5ea;
+  border-radius: .5rem;
+}
+.leaderboard-first { border-color: var(--color2, #ff934f); background: color-mix(in srgb, var(--color2, #ff934f) 8%, #fff); }
+.leaderboard-rank-name { display: flex; align-items: baseline; gap: .5rem; margin-bottom: .5rem; flex-wrap: wrap; }
+.leaderboard-rank { font-weight: 700; color: var(--color2, #ff934f); }
+.leaderboard-team { font-weight: 700; }
+.leaderboard-stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: .35rem .75rem;
+}
+.leaderboard-stats > div { display: flex; justify-content: space-between; gap: .5rem; font-size: .92em; }
+.leaderboard-stat-label { color: #6b7280; }
+.leaderboard-stat-value { font-weight: 600; }
+
+.session-locked-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background: rgba(31, 36, 48, .85);
+}
+.session-locked-card {
+  background: #fff;
+  border-radius: .75rem;
+  padding: 2rem;
+  max-width: 400px;
+  text-align: center;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, .25);
+}
+.session-locked-card h2 { color: var(--color2, #b6390e); margin-top: 0; }
+.session-locked-card .muted { color: #6b7280; font-size: .9rem; }
+.session-locked-custom {
+  background: #f3ebde;
+  border-radius: .5rem;
+  padding: .75rem 1rem;
+  font-style: italic;
+  white-space: pre-line;
+}
+
+.update-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .75rem;
+  flex-wrap: wrap;
+  padding: .6rem 1rem;
+  background-color: #2c3e50;
+  color: #fff;
+  text-align: center;
+  font-size: .95rem;
+}
+
+/* Thème par scénario : ces variables sont posées sur :root par core/theme.js
+   à partir de scenario.json (color1/color2/color3/titleColor). Les valeurs de
+   repli ci-dessous reproduisent l'apparence par défaut (aucune couleur définie). */
+#titleText, #MobileRules, #mobileTitleMenu, #titleMenu, #rules { color: var(--title-color, inherit); }
+
+/* Modals natives <dialog> (remplace le JS modal de Bootstrap) */
+dialog.app-dialog {
+  border: none;
+  padding: 0;
+  background: transparent;
+  width: min(92vw, 900px);
+  max-height: 90vh;
+  overflow: auto;
+  border-radius: .5rem;
+}
+/* .modal-content / -header / -body / -footer gardent leurs classes Bootstrap
+   pour le layout (flex, alignement), mais leurs couleurs/espacements sont
+   redéfinis ici : ces classes s'appuyaient sur des variables CSS que
+   Bootstrap ne définit que sous le sélecteur .modal, retiré au profit de <dialog>. */
+dialog.app-dialog .modal-content {
+  background-color: #fff;
+  border: 1px solid rgba(0, 0, 0, .175);
+  border-radius: .5rem;
+}
+dialog.app-dialog .modal-header {
+  padding: 1rem;
+  border-bottom: 1px solid #dee2e6;
+}
+dialog.app-dialog .modal-body {
+  padding: 1rem;
+}
+dialog.app-dialog .modal-footer {
+  padding: .75rem;
+  border-top: 1px solid #dee2e6;
+}
+#menuModal .modal-footer {
+  padding-right: 1.25rem;
+}
+dialog.app-dialog-fullscreen .modal-content {
+  height: 100%;
+  border: 0;
+  border-radius: 0;
+}
+dialog.app-dialog::backdrop {
+  background: rgba(0, 0, 0, .5);
+}
+/* Transition d'ouverture/fermeture (dégradée avec élégance : sans support de
+   @starting-style, le navigateur affiche/masque simplement sans animation). */
+@media (prefers-reduced-motion: no-preference) {
+  dialog.app-dialog {
+    opacity: 1;
+    transform: scale(1);
+    transition: opacity .18s ease, transform .18s ease,
+      overlay .18s ease allow-discrete, display .18s ease allow-discrete;
+  }
+  dialog.app-dialog::backdrop {
+    opacity: 1;
+    transition: opacity .18s ease, overlay .18s ease allow-discrete, display .18s ease allow-discrete;
+  }
+  dialog.app-dialog:not([open]) {
+    opacity: 0;
+    transform: scale(.96);
+  }
+  @starting-style {
+    dialog.app-dialog[open] {
+      opacity: 0;
+      transform: scale(.96);
+    }
+    dialog.app-dialog[open]::backdrop {
+      opacity: 0;
+    }
+  }
+}
+dialog.app-dialog-fullscreen {
+  width: 100vw;
+  height: 100vh; /* repli si dvh non supporté */
+  height: 100dvh; /* hauteur réelle visible : sur mobile, 100vh inclut la
+    zone sous la barre d'adresse, ce qui poussait le haut de la modale
+    (le titre) hors de l'écran une fois centrée par le navigateur. */
+  max-width: 100vw;
+  max-height: 100vh;
+  max-height: 100dvh;
+}
+dialog.app-dialog .modal-dialog {
+  margin: 0;
+  max-width: none;
+  width: 100%;
+  height: 100%;
+}
+
+.gameInterface{
+  height: 80vh;
+  width: auto;
+}
+
+.gameInterface.with-hotspots {
+    width: 100%;
+    height: auto;
+    max-height: 80vh;
+    object-fit: contain;
+}
+
+.spinner {
+  border: 8px solid #f3f3f3; /* Couleur claire du cercle */
+  border-top: 8px solid #3498db; /* Couleur du segment animé */
+  border-radius: 50%; /* Cercle complet */
+  width: 60px;
+  height: 60px;
+  animation: spin 1s linear infinite; /* Animation continue */
+  margin: 0 auto; /* Centrer horizontalement */
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes stepFadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .step-transition {
+    animation: stepFadeIn .25s ease;
+  }
+}
+
+
+/* Curseur du verrou "sliders" : stylé aux couleurs de la charte sur tous
+   les moteurs (Chrome/Safari utilisent -webkit-, Firefox -moz-). */
+input[type=range] {
+  accent-color: var(--color2, #ff934f);
+  height: 32px;
+  cursor: pointer;
+}
+input[type=range]::-webkit-slider-runnable-track {
+  background-color: #f3ebde;
+  height: 6px;
+  border-radius: 3px;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  background-color: var(--color2, #ff934f);
+  border: none;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  margin-top: -9px;
+  cursor: pointer;
+}
+input[type=range]::-moz-range-track {
+  background-color: #f3ebde;
+  height: 6px;
+  border-radius: 3px;
+}
+input[type=range]::-moz-range-thumb {
+  background-color: var(--color2, #ff934f);
+  border: none;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+}
+
+#myProgress {
+  width: 100%;
+  background-color: lightgray;
+  margin-top: 8px;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+/* Rangée du chrono, en haut du header sticky de la carte (.card-header) :
+   toujours visible en scrollant, contrairement à l'ancien #titleBar. */
+#headerTimerRow{
+  margin-bottom: 4px;
+}
+
+#myBar {
+  width: 0%;
+  background-color: var(--color2, #ff934f);
+  transition: width .4s ease;
+}
+body{
+  background-color: var(--color1, #dabd91);
+}
+.toClick{
+  background-color: red;
+  fill:red;
+}
+.toClick{
+  background-color: red!important;
+  display: block;
+  opacity: 1 !important;
+}
+#titleText{
+  font-size: 2em;
+  font-family: "Gill Sans", sans-serif;
+  font-weight: 700;
+}
+#mobileFooter{
+  display: none;
+}
+#titleBar{
+  width: 100%;
+}
+
+#titleMenu{
+  text-align: right;
+}
+
+.stepImg{
+  display: block;
+  width: 60%;
+  margin: auto
+}
+
+#qrCodeReader__scan_region{
+  width: 90%!important;
+  margin: auto;
+}
+#gameMap{
+width:100%
+}
+.patternlock{
+  width: 50%;
+  margin:auto;
+}
+#passZone{
+  font-size: 2em;
+  text-align: center;
+  color:#007bff;
+  margin-left: auto;
+}
+
+#message{
+  margin: auto;
+  margin-top: 20px;
+  width:50%
+}
+.passCard{
+margin: auto;
+margin-top: 50px;
+max-width: 800px;
+border-color: #007bff;
+}
+.passCardBody{
+  border-color: #007bff;
+  margin-bottom: 50px;
+
+
+}
+
+#digit .col{
+  padding:0;
+  text-align: center;
+  max-width: 80px;
+
+}
+
+#actualCode{
+  margin: auto;
+}
+
+.oneObject{
+  z-index: 1000;
+}
+
+.oneDigitFromTrying{
+  font-size: 2.5em;
+}
+#contentImg{
+  margin: auto;
+}
+#password{
+  width: 100%;
+}
+#loginSendSoluce{
+  width: 20%;
+}
+
+#loginPasswordInput{
+  margin-top: 20px;
+}
+
+.input-group-append {
+  cursor: pointer;
+}
+.slidersRow{
+  margin: auto;
+  margin-top: 30px;
+}
+.slidersValue{
+    color:#007bff;
+    font-size: 1.5em;
+}
+/* Zones tactiles : 44px est la taille minimale recommandée (Apple HIG / Material). */
+.gameInterfaceButton{
+  max-width: 75px;
+  min-height: 44px;
+  background-color: var(--color2, #ff934f);
+}
+.badge.text-bg-primary{
+  background-color: var(--color2, #ff934f) !important;
+  color: #fff !important;
+}
+.oneLocationtoView, .oneObjectToView, .oneObjectToUse{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  padding: .5rem;
+  cursor: pointer;
+}
+.oneLocation, .oneObjectLine{
+  padding: .35rem 0;
+  align-items: center;
+}
+/* Colonnes de nom en largeur flexible plutôt que .col-9 (75%) figé : ce
+   dernier ne laissait pas assez de place au(x) bouton(s) (44px minimum
+   chacun) sur la même ligne, qui passaient alors à la ligne suivante —
+   même défaut que celui déjà corrigé sur #mobileFooter (cf. plus bas). */
+.oneLocation .col-9, .oneObjectLine .oneObject{
+  flex: 1 1 auto;
+  width: auto;
+  min-width: 0;
+}
+#mobileTitleMenu, #MobileRules{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  cursor: pointer;
+}
+dialog.app-dialog .btn-close{
+  flex-shrink: 0;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  background-position: center;
+}
+#timer{
+  width: 120px;
+  text-align: center;
+  font-size: 1.5em;
+}
+.alignRight{
+  text-align: right;
+}
+
+.pin{
+  margin-top: -10px;
+}
+.btn-primary{
+  background-color: #ff934f;
+  border: 1px solid #ff934f;
+}
+.btn-primary:hover{
+  background-color: #ee5622;
+  border: 1px solid #ee5622;
+}
+.btn-primary:active{
+  background-color: #ee5622!important;
+  border: 1px solid #ee5622;
+}
+.text-bg-primary{
+  background-color: #ff934f!important;
+  border:#ff934f!important;
+}
+.text-bg-primary:hover{
+  background-color: #ee5622!important;
+  border:#ee5622!important;
+}
+.card{
+  min-height: 85vh;
+  border: none;
+  border-radius: .75rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, .1);
+}
+/* Pas d'overflow:hidden sur .card : ça casserait le sticky du header
+   ci-dessous (le survol scrollant devient alors .card elle-même plutôt que
+   la page). Les coins arrondis sont donc dupliqués ici pour rester propres. */
+.card-header{
+  background-color: var(--color3, #f3ebde);
+  border-bottom: 2px solid var(--color1, #dabd91);
+  border-top-left-radius: .75rem;
+  border-top-right-radius: .75rem;
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
+.card-footer{
+  background-color: var(--color3, #f3ebde) !important;
+  border-top: 2px solid var(--color1, #dabd91);
+  border-bottom-left-radius: .75rem;
+  border-bottom-right-radius: .75rem;
+}
+/* Couleurs assombries par rapport à l'original pour atteindre un contraste
+   AA (4.5:1) tout en gardant la même teinte (orange/rouge de la charte). */
+#itemListTitle, #locationListTitle, #stepName{
+  color: var(--color2, #b6390e);
+  font-size: 1.5em;
+  margin-bottom: 5px;
+}
+#timer{
+  background-color: #de1b16!important;
+  color: #fff!important;
+}
+
+.text-bg-warning{
+  background-color: #de1b16!important;
+  color: #fff!important;
+}
+#hintCountdown{
+  padding-left: 5px!important;
+}
+.oneDigit{
+  width: 50px;
+
+}
+
+/* Même correctif de contraste : #dabd91 (tan) était quasi illisible sur fond
+   crème (#f3ebde), et carrément invisible en survol (fond #dabd91 identique
+   au texte). Assombri en gardant la même teinte. */
+.switch{
+  color:#7b5a29;
+}
+
+.oneDigit{
+  width: 50px;
+}
+.digit{
+  width:75px;
+  font-size: 45px;
+  margin-top: 5px;
+  background-color: #f3ebde!important;
+  color:#7b5a29;
+}
+.digit:hover{
+  background-color: #dabd91!important;
+}
+
+#reset, #resetDirectionnal, #resetSwitch{
+  background-color: #ff934f!important;
+  color:white!important;
+}
+#reset:hover, #resetDirectionnal:hover, #resetSwitch:hover{
+  background-color: #ee5622!important;
+}
+.btn-success{
+  background-color: #74cb96!important;
+  color:white;
+  border: none;
+}
+.btn-success:hover{
+  background-color: #4b967d!important;
+}
+.lock-dots circle{
+  fill:#7b5a29!important;
+}
+line{
+  stroke:#7b5a29!important;
+}
+#logo{
+  width:90%;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.slidersName, .slidersValue{
+  color:black!important;
+}
+
+/* ============================================
+   HOTSPOTS RESPONSIVE - SOLUTION DÉFINITIVE
+   ============================================ */
+
+/* IMPORTANT : Le conteneur doit être relatif et s'adapter à l'image */
+.hotspot-container {
+    position: relative;
+    width: 100%;
+    max-width: 100%;
+    margin: 0 auto;
+    display: block;
+}
+
+.hotspot-container img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* Boutons hotspot - DOIVENT utiliser des pourcentages */
+.hotspotButton {
+    position: absolute;
+    width: 44px;
+    height: 44px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    /* CRITICAL : transform pour centrer le hotspot sur le point exact */
+    transform: translate(-50%, -50%);
+    transition: all 0.3s ease;
+    display: block;
+    z-index: 10;
+}
+
+.hotspotButton:hover {
+    transform: translate(-50%, -50%) scale(1.2);
+}
+
+/* Le SVG bullseye à l'intérieur */
+.hotspotButton svg {
+    display: block;
+    pointer-events: none;
+}
+
+/* ============================================
+   FIN SECTION HOTSPOTS
+   ============================================ */
+
+.lg-container {
+  max-width: 100%;
+  position: relative;
+  margin: 1rem;
+  padding: 0;
+}
+
+.lg-image {
+  display: block;
+  height: 100%;
+  width: 100%;
+  object-fit: scale-down;
+}
+
+.oneObjectToUse{
+  margin-left: 5px;
+}
+
+#qrCodeReaderForSonometer{
+  margin:auto;
+  width: 500px !important;
+}
+
+#qrCodeReader{
+  margin:auto;
+  width: 90% !important;
+}
+
+/* #qrCodeReader{
+  margin:auto;
+  width: 750;
+} */
+
+#listOfSymbols{
+  margin: auto;
+  text-align: center;
+}
+.sonoMeterProgressBar{
+  margin: auto;
+  max-width: 50%;
+}
+#mobileLogo{
+  width:20%;
+  margin: 5px;
+}
+
+@media (max-width:800px){
+  .sliderButtons{
+
+    width: 20px;
+  }
+  .patternlock{
+    width: 100%;
+    margin:auto;
+  }
+  .slidersValue{
+      color:#007bff;
+      font-size: 1em;
+  }
+  .slidersName{
+    flex: none !important;
+  }
+  body, .container, .gameInterface {
+  width: 100vw;
+  margin: 0;
+  padding: 0;
+}
+
+  #titleText{
+    font-size: 1.1em;
+    font-family:  "Gill Sans", sans-serif;
+    font-weight: 300;
+  }
+  .oneObjectLine{
+    margin-bottom: 10px;
+  }
+
+.locationStatus{
+  right: 10px;
+}
+
+#qrCodeReader{
+  margin:auto;
+  width: 90% !important;
+}
+
+#qrCodeReader__scan_region{
+  width: 90%!important;
+  margin: auto;
+}
+
+/* #titleBar{display: none;} */
+.stepImg{
+  width: 90%;
+  margin: auto
+}
+
+#stepName{
+  font-size: 1.2em;
+}
+#logo{
+  display: none;
+}
+#logoCol{
+  display: none;
+}
+#mobileLogo{
+  width:35%;
+  max-width: 130px;
+  margin: 5px;
+}
+/* #hintCountZoneMenu{
+  display: none;
+} */
+#mobileFooter{
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap; /* le "?" ne doit jamais passer sous l'engrenage */
+  width: 100%;
+  flex: 0 0 100%; /* enfant flex de .gameInterface (elle-même display:flex) :
+    sans ça, il se redimensionne à son seul contenu (logo + icônes) au lieu
+    de s'étirer sur toute la largeur disponible. */
+  height: 50px;
+  margin-top: 10px;
+  padding: 0 .5rem;
+  position: sticky;
+  bottom: 0;
+  background-color: var(--color1, #dabd91);
+  z-index: 5;
+}
+/* Logo en largeur flexible plutôt qu'un col-9 figé à 75% : sur un petit
+   écran, un col-9 fixe ne laissait pas assez de place aux deux icônes
+   suivantes (engrenage + "?"), qui débordaient sur une seconde ligne. */
+#mobileFooter .col-9{
+  flex: 1 1 auto;
+  width: auto;
+  min-width: 0;
+}
+#titleMenu{
+  display: none;
+}
+#rules{
+  display: none;
+}
+
+/* Le titre ("nameStory" du scénario) et son bandeau ne servent plus sur
+   mobile : le chrono a rejoint le header sticky de la carte (#headerTimerRow)
+   et le logo/menu/règles ont déjà leur propre emplacement dans #mobileFooter. */
+#titleBar{
+  display: none;
+}
+
+
+#timer {
+  width: auto;           /* Permet au timer de s'adapter à l'espace disponible */
+  max-width: 100px;      /* Limite la largeur maximale */
+  font-size: 1em;      /* Ajuste la taille de la police pour mobile */
+  margin-top: 5px;
+  margin-bottom: 5px;
+
+}
+
+#titleContainer{
+  margin-left: 0;
+}
+
+
+/* HOTSPOTS RESPONSIVE MOBILE */
+ .hotspot-container {
+     margin: 10px auto;
+ }
+
+ .hotspotButton {
+     width: 40px;  /* Plus grand pour le tactile */
+     height: 40px;
+ }
+
+ .hotspotButton svg {
+     width: 40px;
+     height: 40px;
+ }
+
+}

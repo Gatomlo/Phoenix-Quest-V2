@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Guide de solution — Les Enquêtes du Phoenix</title>
+	<link rel="stylesheet" href="admin.css">
+	<link rel="stylesheet" href="scenario-editor.css">
+	<link rel="stylesheet" href="solution-guide.css">
+</head>
+<body>
+	<header class="topbar">
+		<h1>Guide de solution — <span id="scenarioNameTitle"></span></h1>
+		<a href="/admin/" class="btn btn-secondary">← Tableau de bord</a>
+	</header>
+
+	<main>
+		<p id="viewModeBanner" class="muted view-mode-banner" hidden>Mode lecture seule — pour modifier ce guide, ouvrez-le depuis l'éditeur de scénarios.</p>
+		<div class="card">
+			<div class="guide-add-row">
+				<select id="addStepSelect"><option value="">Ajouter une étape au parcours...</option></select>
+				<button id="addStepToGuideButton" type="button" class="btn btn-primary">Ajouter</button>
+			</div>
+			<p id="guideEmpty" class="muted" hidden>Aucune étape dans ce guide pour l'instant. Ajoutez-en une ci-dessus pour commencer le parcours.</p>
+			<ol id="guideList" class="guide-list"></ol>
+		</div>
+
+		<div class="scenario-save-bar">
+			<button id="saveGuideButton" type="button" class="btn btn-primary">Enregistrer le guide</button>
+			<span id="guideSaveStatus" class="muted"></span>
+		</div>
+	</main>
+
+	<dialog id="qrDialog" class="app-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title">QR code — <span id="qrDialogStepName"></span></h5>
+				<button type="button" class="btn-close" data-close-modal></button>
+			</div>
+			<div class="modal-body qr-modal-body">
+				<img id="qrDialogImage" alt="QR code">
+				<p id="qrDialogCode" class="muted"></p>
+			</div>
+		</div>
+	</dialog>
+
+	<dialog id="confirmDialog" class="app-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 id="confirmDialogTitle" class="modal-title">Confirmer</h5>
+				<button type="button" class="btn-close" data-close-modal></button>
+			</div>
+			<div class="modal-body">
+				<p id="confirmDialogMessage"></p>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-close-modal>Annuler</button>
+				<button type="button" id="confirmDialogConfirmButton" class="btn btn-danger">Confirmer</button>
+			</div>
+		</div>
+	</dialog>
+
+	<script src="solution-guide.js" type="module"></script>
+</body>
+</html>

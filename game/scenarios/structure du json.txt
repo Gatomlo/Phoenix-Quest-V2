@@ -1,0 +1,30 @@
+"nameStory":"Nom du scénario",
+"storyIntroduction":"Résumé du scénario",
+"map": true/false pour indiquer la présence d'une carte,
+"mapMedia":"map.png / nom de la carte",
+"steps":[
+  {
+    "id": identifiant unique,
+    "type":"location/object/lock/person",
+    "lockType":color/digit/directionnal/date/fuse/password/diagram/login/sliders/selector,
+
+
+    "lockCode":array contenant le code du cadenas,
+    sauf pour date(mm/jj/aaaa), et password contenu dans un "text"
+    fuse true/false pour chaque bouton en partant de en haut à gauche vers en bas à droite
+    diagram les points sont numérotés de 1 à 9 en de en haut à gauche à en bas à droite
+    pour sliders tableau avec nom + valeur ex :[["mhz",50],["ghz",78],["am",89]]
+    pour selector ["style=\"top:55%; right: 11%\"",55,"#f3ebde"] il faut le positionnement, l'id de la destination et la couleur du pointeur
+
+    "code":"code unique qui correspond à la valeur du qr code qui ouvre l'étape",
+    "default":true/false si doit être ajouté au lancement du scénario,
+    "closed":false/true si le lieu doit être verrouillé quand il arrive en jeu,
+    "name":titre de l'étape,
+    "media":" nom de l'image à ajouter",
+    "description":"Texte de l'étape",
+    "toAdd":[] array contenant toutes les étapes qui doivent être ajoutée en même temps,
+    "toRemove":[] array contenant toutes les étapes qui doivent être retirée en même temps,
+    "needBefore":[] ids des étapes qui doivent avoir été consultée avant de pouvoir consulter celle-ci,
+    "toAssociate":null id de l'objet qui peut être associé à cette étape,
+    "replaceBy":"code de l'étape qui doit remplacer celle-ci quand on clique sur le lien ou quand on rescanne le qr code"
+  },

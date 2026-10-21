@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="fr">
+	<head>
+		<meta charset="utf-8">
+		<title>Enquête à la ferme</title>
+		<link id="favicon" rel="icon" type="image/x-icon" href="/medias/favicon.png">
+		<link rel="apple-touch-icon" href="/medias/apple-touch-icon.png">
+		<link rel="manifest" href="/manifest.json">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+		<meta name="theme-color" content="#dabd91">
+		<!-- iOS ne lit pas le manifest.json pour le mode "installé" : ces balises sont nécessaires en plus. -->
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+		<meta name="apple-mobile-web-app-title" content="Phoenix game">
+		<link rel="stylesheet" href="css/bootstrap.min.css">
+		<link rel="stylesheet" href="css/patternlock.css">
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=Amatic+SC:wght@400;700&display=swap" rel="stylesheet">
+		<link rel="stylesheet" href="css/main.css">
+	</head>
+	<body>
+		<div id="loadingScreen" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:#fff; z-index:1000; text-align:center; padding-top:20%;">
+		  <p>Chargement en cours...</p>
+		  <div id="loadingSpinner" class="spinner"></div>
+		</div>
+		<div id="updateBanner" class="update-banner" hidden>
+			<span>Une nouvelle version du jeu est disponible.</span>
+			<button id="updateReloadButton" type="button" class="btn btn-sm btn-primary">Recharger</button>
+		</div>
+		<div id="sessionLockedScreen" class="session-locked-screen" hidden>
+			<div class="session-locked-card">
+				<h2 id="sessionLockedTitle">Session terminée</h2>
+				<p id="sessionLockedMessage">L'animateur a clôturé cette session de jeu. Merci d'avoir joué !</p>
+				<p id="sessionLockedCustomMessage" class="session-locked-custom" hidden></p>
+				<button id="sessionLockedLeaderboardButton" type="button" class="btn btn-secondary" data-open-modal="leaderboardModal" hidden>Voir le classement</button>
+			</div>
+		</div>
+    <div class="container">
+      <div id="titleBar" class="row justify-content-between">
+				<!--align-self-center center-->
+				<div id='logoCol' class="col-2 text-start ">
+					<img id='logo' src="medias/logo.png">
+				</div>
+				<div id="titleContainer"  class="col-auto align-self-center">
+					<span id="titleText">Grand jeu d'enquête</span>
+					<span id='titleMenu' class='align-self-center justify-content-end' data-open-modal="menuModal">
+						<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-gear-fill" viewBox="0 0 16 16">
+							<path d="M9.405 1.05c-.413-1.4-2.397-1.4-2.81 0l-.1.34a1.464 1.464 0 0 1-2.105.872l-.31-.17c-1.283-.698-2.686.705-1.987 1.987l.169.311c.446.82.023 1.841-.872 2.105l-.34.1c-1.4.413-1.4 2.397 0 2.81l.34.1a1.464 1.464 0 0 1 .872 2.105l-.17.31c-.698 1.283.705 2.686 1.987 1.987l.311-.169a1.464 1.464 0 0 1 2.105.872l.1.34c.413 1.4 2.397 1.4 2.81 0l.1-.34a1.464 1.464 0 0 1 2.105-.872l.31.17c1.283.698 2.686-.705 1.987-1.987l-.169-.311a1.464 1.464 0 0 1 .872-2.105l.34-.1c1.4-.413 1.4-2.397 0-2.81l-.34-.1a1.464 1.464 0 0 1-.872-2.105l.17-.31c.698-1.283-.705-2.686-1.987-1.987l-.311.169a1.464 1.464 0 0 1-2.105-.872zM8 10.93a2.929 2.929 0 1 1 0-5.86 2.929 2.929 0 0 1 0 5.858z"/>
+						</svg>
+					</span>
+					<span id='rules' class='align-self-center justify-content-end'>
+						<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-question-diamond-fill" viewBox="0 0 16 16">
+						  <path d="M9.05.435c-.58-.58-1.52-.58-2.1 0L.436 6.95c-.58.58-.58 1.519 0 2.098l6.516 6.516c.58.58 1.519.58 2.098 0l6.516-6.516c.58-.58.58-1.519 0-2.098zM5.495 6.033a.237.237 0 0 1-.24-.247C5.35 4.091 6.737 3.5 8.005 3.5c1.396 0 2.672.73 2.672 2.24 0 1.08-.635 1.594-1.244 2.057-.737.559-1.01.768-1.01 1.486v.105a.25.25 0 0 1-.25.25h-.81a.25.25 0 0 1-.25-.246l-.004-.217c-.038-.927.495-1.498 1.168-1.987.59-.444.965-.736.965-1.371 0-.825-.628-1.168-1.314-1.168-.803 0-1.253.478-1.342 1.134-.018.137-.128.25-.266.25zm2.325 6.443c-.584 0-1.009-.394-1.009-.927 0-.552.425-.94 1.01-.94.609 0 1.028.388 1.028.94 0 .533-.42.927-1.029.927"/>
+						</svg>
+					</span>
+				</div>
+			</div>
+      <div class="row gx-5 gameInterface">
+        <div class="col p-3  card">
+					<div class="card-header">
+						<div id="headerTimerRow" class="d-flex justify-content-end">
+							<span id="timer" class="badge text-bg-secondary">Prêt ?</span>
+						</div>
+						<div class="row">
+						<div id="stepName"class="col-10">
+							<h4>Règles du jeu</h4>
+						</div>
+						<div class="btn-group col justify-content-star alignRight" role="group">
+							<button id="locationsButton" type="button" class="gameInterfaceButton btn btn-primary" data-open-modal="locationsModal">
+						 </button>
+						 <button id="itemsButton" type="button" class="gameInterfaceButton btn btn-primary" data-open-modal="itemsModal">
+						</button>
+							 <button id="qrCodeButton" type="button" class="gameInterfaceButton btn btn-primary">
+								 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-qr-code-scan" viewBox="0 0 16 16">
+								  <path d="M0 .5A.5.5 0 0 1 .5 0h3a.5.5 0 0 1 0 1H1v2.5a.5.5 0 0 1-1 0zm12 0a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 .5.5v3a.5.5 0 0 1-1 0V1h-2.5a.5.5 0 0 1-.5-.5M.5 12a.5.5 0 0 1 .5.5V15h2.5a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5v-3a.5.5 0 0 1 .5-.5m15 0a.5.5 0 0 1 .5.5v3a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1 0-1H15v-2.5a.5.5 0 0 1 .5-.5M4 4h1v1H4z"/>
+								  <path d="M7 2H2v5h5zM3 3h3v3H3zm2 8H4v1h1z"/>
+								  <path d="M7 9H2v5h5zm-4 1h3v3H3zm8-6h1v1h-1z"/>
+								  <path d="M9 2h5v5H9zm1 1v3h3V3zM8 8v2h1v1H8v1h2v-2h1v2h1v-1h2v-1h-3V8zm2 2H9V9h1zm4 2h-1v1h-2v1h3zm-4 2v-1H8v1z"/>
+								  <path d="M12 9h2V8h-2z"/>
+								</svg>
+							</button>
+							<button id="hintButton" type="button" class="gameInterfaceButton btn btn-primary" data-open-modal="hintModal">
+								<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="white" class="bi bi-info-circle-fill" viewBox="0 0 16 16">
+								  <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2"/>
+									<sup><span id="hintCountdown">0</span></sup>
+						 </button>
+						 <button id="mapButton" type="button" class="gameInterfaceButton btn btn-primary" data-open-modal="mapModal">
+							 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-map-fill" viewBox="0 0 16 16">
+								 <path fill-rule="evenodd" d="M16 .5a.5.5 0 0 0-.598-.49L10.5.99 5.598.01a.5.5 0 0 0-.196 0l-5 1A.5.5 0 0 0 0 1.5v14a.5.5 0 0 0 .598.49l4.902-.98 4.902.98a.5.5 0 0 0 .196 0l5-1A.5.5 0 0 0 16 14.5zM5 14.09V1.11l.5-.1.5.1v12.98l-.402-.08a.5.5 0 0 0-.196 0zm5 .8V1.91l.402.08a.5.5 0 0 0 .196 0L11 1.91v12.98l-.5.1z"/>
+							 </svg>
+						 </button>
+						 <button id="chatButton" type="button" class="gameInterfaceButton btn btn-primary" data-open-modal="chatModal" hidden>
+							 <span id="chatUnreadDot" hidden></span>
+							 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chat-dots-fill" viewBox="0 0 16 16">
+								 <path d="M16 8c0 3.866-3.582 7-8 7a9 9 0 0 1-2.347-.306c-.584.296-1.925.864-4.181 1.234-.2.032-.352-.176-.273-.362.354-.836.674-1.95.77-2.966C.744 11.37 0 9.76 0 8c0-3.866 3.582-7 8-7s8 3.134 8 7M5 8a1 1 0 1 0-2 0 1 1 0 0 0 2 0m4 0a1 1 0 1 0-2 0 1 1 0 0 0 2 0m3 1a1 1 0 1 0 0-2 1 1 0 0 0 0 2"/>
+							 </svg>
+						 </button>
+						</div>
+						</div>
+						<div id="myProgress" class="progress" role="progressbar" aria-label="Example with label" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">
+						  <div id="myBar" class="progress-bar"></div>
+						</div>
+					</div>
+					<div class="card-body">
+						<!-- <div id="debugData"></div> -->
+						<div id="contentImg"></div>
+						<div id="qrCodeReader"></div>
+						<div id="actualCode"></div>
+					</div>
+					<div id="stepFooter" class="card-footer">
+						<p id="stepDescription" class="card-text"><= Pour commencer à jouer, selectionner un lieu dans la colonne de gauche</p><p id="scoring"></p>
+					</div>
+				</div>
+				<div id="mobileFooter" class="row">
+					<div class="col-9 d-flex justify-content-start align-items-center"><img  id=mobileLogo src="medias/logo.png"></div>
+					<div id='mobileTitleMenu' class='col-auto align-self-center' data-open-modal="menuModal">
+						<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-gear-fill" viewBox="0 0 16 16">
+							<path d="M9.405 1.05c-.413-1.4-2.397-1.4-2.81 0l-.1.34a1.464 1.464 0 0 1-2.105.872l-.31-.17c-1.283-.698-2.686.705-1.987 1.987l.169.311c.446.82.023 1.841-.872 2.105l-.34.1c-1.4.413-1.4 2.397 0 2.81l.34.1a1.464 1.464 0 0 1 .872 2.105l-.17.31c-.698 1.283.705 2.686 1.987 1.987l.311-.169a1.464 1.464 0 0 1 2.105.872l.1.34c.413 1.4 2.397 1.4 2.81 0l.1-.34a1.464 1.464 0 0 1 2.105-.872l.31.17c1.283.698 2.686-.705 1.987-1.987l-.169-.311a1.464 1.464 0 0 1 .872-2.105l.34-.1c1.4-.413 1.4-2.397 0-2.81l-.34-.1a1.464 1.464 0 0 1-.872-2.105l.17-.31c.698-1.283-.705-2.686-1.987-1.987l-.311.169a1.464 1.464 0 0 1-2.105-.872zM8 10.93a2.929 2.929 0 1 1 0-5.86 2.929 2.929 0 0 1 0 5.858z"/>
+						</svg>
+					</div>
+					<div id='MobileRules' class='col-auto align-self-center'>
+							<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-question-diamond-fill" viewBox="0 0 16 16">
+							<path d="M9.05.435c-.58-.58-1.52-.58-2.1 0L.436 6.95c-.58.58-.58 1.519 0 2.098l6.516 6.516c.58.58 1.519.58 2.098 0l6.516-6.516c.58-.58.58-1.519 0-2.098zM5.495 6.033a.237.237 0 0 1-.24-.247C5.35 4.091 6.737 3.5 8.005 3.5c1.396 0 2.672.73 2.672 2.24 0 1.08-.635 1.594-1.244 2.057-.737.559-1.01.768-1.01 1.486v.105a.25.25 0 0 1-.25.25h-.81a.25.25 0 0 1-.25-.246l-.004-.217c-.038-.927.495-1.498 1.168-1.987.59-.444.965-.736.965-1.371 0-.825-.628-1.168-1.314-1.168-.803 0-1.253.478-1.342 1.134-.018.137-.128.25-.266.25zm2.325 6.443c-.584 0-1.009-.394-1.009-.927 0-.552.425-.94 1.01-.94.609 0 1.028.388 1.028.94 0 .533-.42.927-1.029.927"/>
+							</svg>
+					</div>
+				</div>
+    </div>
+</div>
+		<!-- modal contenant la carte -->
+		<dialog id="mapModal" class="app-dialog">
+		  <div class="modal-dialog modal-xl">
+		    <div class="modal-content">
+		      <div class="modal-header">
+		        <h5 class="modal-title">Plan des lieux</h5>
+		        <button type="button" class="btn-close" data-close-modal aria-label="Close"></button>
+		      </div>
+		      <div id="mapArea" class="modal-body">
+		      </div>
+		    </div>
+		  </div>
+		</dialog>
+		<!-- modal contenant le menu -->
+		<dialog id="menuModal" class="app-dialog">
+			<div class="modal-dialog modal-xl">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title">Réinitialisation du jeu</h5>
+						<button type="button" class="btn-close" data-close-modal aria-label="Close"></button>
+					</div>
+					<div class="modal-body">
+						<p id="sessionInfoLine" class="muted" hidden></p>
+						<p>Voulez-vous réinitialiser le jeu ? Toute votre progression sera perdue.</p>
+					</div>
+					<div class="modal-footer">
+						<button id="menuLeaderboardButton" type="button" class="btn btn-secondary me-auto" data-open-modal="leaderboardModal" hidden>Voir le classement</button>
+						<button id="resetGame" class="btn btn-danger">Réinitialiser</button>
+						<button class="btn btn-primary" data-close-modal aria-label="Close">Annuler</button>
+					</div>
+				</div>
+			</div>
+		</dialog>
+		<!-- modal contenant l'indice -->
+		<dialog id="hintModal" class="app-dialog">
+		  <div class="modal-dialog modal-lg">
+		    <div class="modal-content">
+		      <div class="modal-header">
+		        <h5 class="modal-title">Indice</h5>
+		        <button type="button" class="btn-close" data-close-modal aria-label="Close"></button>
+		      </div>
+		      <div id="hintZone" class="modal-body">
+		      </div>
+					<div id="hintCountZone" class=modal-footer></div>
+		    </div>
+		  </div>
+		</dialog>
+		<!-- modal liste d'objets -->
+		<dialog id="itemsModal" class="app-dialog">
+			<div class="modal-dialog modal-xl">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 id="itemListTitle" class="modal-title"></h5>
+						<button type="button" class="btn-close" data-close-modal aria-label="Close"></button>
+					</div>
+					<div id="objectList" class="modal-body">
+					</div>
+				</div>
+			</div>
+		</dialog>
+		<!-- modal liste de Lieux -->
+		<dialog id="locationsModal" class="app-dialog">
+			<div class="modal-dialog modal-xl">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 id="locationListTitle" class="modal-title"></h5>
+						<button type="button" class="btn-close" data-close-modal aria-label="Close"></button>
+					</div>
+					<div id="locationsList" class="modal-body">
+					</div>
+				</div>
+			</div>
+		</dialog>
+		<!-- modal code de session (obligatoire pour jouer) -->
+		<dialog id="sessionModal" class="app-dialog app-dialog-fullscreen">
+			<div class="modal-dialog	modal-fullscreen">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title">Bienvenue aux enquêtes du Phoenix.</h5>
+					</div>
+					<div class="modal-body">
+						<div class="text-center"><img  id=mobileLogo src="medias/logoComplet.png"></div>
+						<p>Un animateur vous a communiqué un code de session : entrez-le pour rejoindre la partie.</p>
+						<p>Code de session :</p>
+						<input required class="form-control" type="text" id="sessionCodeInput" name="lname">
+						<p>Nom de votre équipe :</p>
+						<input required class="form-control" type="text" id="teamNameInput" name="lname">
+						<span id="sessionErrorMessage"></span>
+					</div>
+					<div class="modal-footer">
+						<button id="sessionJoinButton" type="button" class="btn btn-primary">Rejoindre</button>
+					</div>
+				</div>
+			</div>
+		</dialog>
+		<!-- modal chat avec l'animateur -->
+		<dialog id="chatModal" class="app-dialog">
+			<div class="modal-dialog modal-lg">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title">Discussion avec l'animateur</h5>
+						<button type="button" class="btn-close" data-close-modal aria-label="Close"></button>
+					</div>
+					<div class="modal-body">
+						<div id="chatThread" class="chat-thread"><p class="chat-empty">Aucun message pour l'instant.</p></div>
+						<form id="chatForm" class="chat-form">
+							<input class="form-control" type="text" id="chatInput" placeholder="Votre message...">
+							<button type="submit" class="btn btn-primary">Envoyer</button>
+						</form>
+					</div>
+				</div>
+			</div>
+		</dialog>
+		<!-- modal classement -->
+		<dialog id="leaderboardModal" class="app-dialog">
+			<div class="modal-dialog modal-lg">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title">Classement</h5>
+						<button type="button" class="btn-close" data-close-modal aria-label="Close"></button>
+					</div>
+					<div id="leaderboardContent" class="modal-body"></div>
+				</div>
+			</div>
+		</dialog>
+		<!-- modal d'inscription -->
+		<dialog id="emailModal" class="app-dialog app-dialog-fullscreen">
+			<div class="modal-dialog	modal-fullscreen">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title">Inscription</h5>
+					</div>
+					<div class="modal-body">
+						<p>Nom de votre groupe:</p>
+						<input required class="form-control" type="text" id="groupName" name="lname">
+					</br>
+						<p>Email pour le groupe:</p>
+						<input required class="form-control" type="email" id="groupEmail" name="lname">
+					</br>
+					<br>
+					<span id="comment"><i>A l'issu de votre aventure, vous recevrez vos résultats via l'Email communiqué.</i></span>
+					<br>
+					<span id="emailErrorMessage"></span>
+					</div>
+					<div  class=modal-footer>
+						<button id="emailButton" type="button" class="btn btn-primary" aria-label="Close">Valider</button>
+					</div>
+				</div>
+			</div>
+		</dialog>
+		<!-- toast contenant le message d'erreur pour mauvaise combinaison -->
+		<div class="toast-container position-fixed top-50 start-50 translate-middle">
+			<div class="toast" id="myToast">
+				<div class="toast-header bg-danger-subtle">
+					<strong class="me-auto">Mauvaise combinaison</strong>
+					<button type="button" class="btn-close" data-close-toast></button>
+				</div>
+				<div class="toast-body">
+					Cela ne semble pas être la bonne combinaison. Veuillez en essayer une autre.
+				</div>
+			</div>
+		</div>
+		<script>
+			// L'enregistrement du service worker se fait dans scripts/core/serviceWorkerManager.js
+			// (importé par scripts/main.js) ; ce petit script n'affiche que le spinner initial.
+			document.getElementById('loadingScreen').style.display = 'block';
+			if (!('serviceWorker' in navigator)) {
+				document.getElementById('loadingScreen').style.display = 'none';
+				console.warn('Service workers non supportés par ce navigateur.');
+			}
+		</script>
+		<script src="scripts/qrCodeReader.js"></script>
+		<script src="scripts/patternlock.js" ></script>
+		<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+		<script src="scripts/main.js" type="module"></script>
+	</body>
+</html>

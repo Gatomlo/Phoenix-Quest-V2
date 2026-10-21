@@ -1,0 +1,29 @@
+{
+  "entries": [
+    {
+      "stepId": 0,
+      "note": "Test",
+      "location": "Dans la cabanne"
+    },
+    {
+      "stepId": 2,
+      "note": "",
+      "location": ""
+    },
+    {
+      "stepId": 3,
+      "note": "",
+      "location": ""
+    },
+    {
+      "stepId": 6,
+      "note": "",
+      "location": ""
+    },
+    {
+      "stepId": 54,
+      "note": "",
+      "location": ""
+    }
+  ]
+}
