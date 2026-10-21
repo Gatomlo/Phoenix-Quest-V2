@@ -1,5 +1,5 @@
 import { state, persistCurrentStep, persistProgressBar } from '../core/state.js';
-import { eyeIcon, handIcon, iconLockedHouse, iconOpenedHouse, iconLock } from './icons.js';
+import { eyeIcon, handIcon, chevronIcon, iconLockedHouse, iconOpenedHouse, iconLock } from './icons.js';
 
 export function scenarioImg(fileName) {
   return `scenarios/${state.scenario}/img/${fileName}`;
@@ -64,8 +64,15 @@ export function upProgressBar(step) {
 export function syncProgressBar() {
   const bar = document.getElementById('myBar');
   if (!bar) return;
-  bar.style.width = state.progressBarValue + '%';
-  bar.innerHTML = Math.round(state.progressBarValue) + '%';
+  // #myProgress est l'anneau de l'en-tête : --p pilote le remplissage (css/main.css),
+  // #myBar porte le pourcentage affiché au centre.
+  const value = Math.max(0, Math.min(100, state.progressBarValue));
+  const ring = document.getElementById('myProgress');
+  if (ring) {
+    ring.style.setProperty('--p', value);
+    ring.setAttribute('aria-valuenow', String(Math.round(value)));
+  }
+  bar.innerHTML = Math.round(value) + '%';
 }
 
 export function displayTime(ms) {
@@ -97,10 +104,11 @@ export function addLocationEntry(step) {
   const row = document.createElement('div');
   row.dataset.id = step.id;
   row.id = 'stepID' + step.id;
-  row.className = 'row oneLocation';
-  row.innerHTML = `<div class="locationStatus col-1"><span>${icon}</span></div>` +
-    `<div class="col-9">${step.name}</div>` +
-    `<div class="alignRight col"><div data-name="${step.name}" data-closed="${!isOpened}" data-id="${step.id}" data-close-modal class="oneLocationtoView badge text-bg-primary">${eyeIcon}</div></div>`;
+  row.className = 'item-row oneLocation';
+  // Toute la ligne est cliquable : .oneLocationtoView s'étire sur elle (css/main.css).
+  row.innerHTML = `<div class="locationStatus"><span>${icon}</span></div>` +
+    `<div class="item-name">${step.name}</div>` +
+    `<div data-name="${step.name}" data-closed="${!isOpened}" data-id="${step.id}" data-close-modal role="button" tabindex="0" aria-label="Ouvrir ${step.name}" class="oneLocationtoView badge">${chevronIcon}</div>`;
   document.getElementById('locationsList').appendChild(row);
   if (!state.actualLocations.includes(step.id)) state.actualLocations.push(step.id);
 }
@@ -110,11 +118,11 @@ export function addObjectEntry(step) {
   const row = document.createElement('div');
   row.id = 'stepID' + step.id;
   row.dataset.id = step.id;
-  row.className = 'row oneObjectLine';
-  row.innerHTML = `<div class="oneObject col">${step.name}</div>` +
-    `<div class="text-end col">` +
-    `<div data-id="${step.id}" data-close-modal class="oneObjectToView badge text-bg-primary">${eyeIcon}</div>` +
-    `<div data-id="${step.id}" data-close-modal class="oneObjectToUse badge text-bg-primary">${handIcon}</div></div>`;
+  row.className = 'item-row oneObjectLine';
+  row.innerHTML = `<div class="oneObject item-name">${step.name}</div>` +
+    `<div class="item-actions">` +
+    `<div data-id="${step.id}" data-close-modal role="button" tabindex="0" class="oneObjectToView badge">${eyeIcon}<span>Voir</span></div>` +
+    `<div data-id="${step.id}" data-close-modal role="button" tabindex="0" class="oneObjectToUse badge">${handIcon}<span>Utiliser</span></div></div>`;
   document.getElementById('objectList').appendChild(row);
   if (!state.actualObjects.includes(step.id)) {
     state.actualObjects.push(step.id);

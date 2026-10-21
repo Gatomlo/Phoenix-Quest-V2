@@ -4,17 +4,23 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>Guide de solution — Les Enquêtes du Phoenix</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amatic+SC:wght@400;700&family=Figtree:wght@400;500;600;700&display=swap">
+	<script src="shell.js"></script>
 	<link rel="stylesheet" href="admin.css">
 	<link rel="stylesheet" href="scenario-editor.css">
 	<link rel="stylesheet" href="solution-guide.css">
 </head>
 <body>
-	<header class="topbar">
-		<h1>Guide de solution — <span id="scenarioNameTitle"></span></h1>
-		<a href="./" class="btn btn-secondary">← Tableau de bord</a>
-	</header>
-
+	<div class="app-shell">
+	<aside id="appSide" class="side" data-active="scenarios"></aside>
+	<div class="app-main">
 	<main>
+		<div class="page-head">
+			<div><div class="crumb">Scénarios › Guide de solution</div><h1>Guide de solution — <span id="scenarioNameTitle"></span></h1></div>
+			<a href="scenario-editor.html" class="btn btn-ghost btn-sm" style="margin-left:auto">← Scénarios</a>
+		</div>
 		<p id="viewModeBanner" class="muted view-mode-banner" hidden>Mode lecture seule — pour modifier ce guide, ouvrez-le depuis l'éditeur de scénarios.</p>
 		<div class="card">
 			<div class="guide-add-row">
@@ -30,6 +36,8 @@
 			<span id="guideSaveStatus" class="muted"></span>
 		</div>
 	</main>
+	</div>
+	</div>
 
 	<dialog id="qrDialog" class="app-dialog">
 		<div class="modal-content">

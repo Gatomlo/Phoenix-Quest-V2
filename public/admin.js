@@ -147,6 +147,7 @@ function connectGlobalStream() {
   globalEventSource.addEventListener('new-message', (e) => {
     const { sessionId, teamName } = JSON.parse(e.data);
     if (sessionId === currentSessionId) return; // déjà visible en direct sur l'écran ouvert
+    window.PhoenixShell?.notify('message');
     unreadBySession.set(sessionId, (unreadBySession.get(sessionId) || 0) + 1);
     renderUnreadBadge(sessionId);
     showOtherSessionBanner(sessionId, teamName);
@@ -257,6 +258,7 @@ function renderStepOptionsForTeam(teamId) {
   const card = teamCardById.get(teamId);
   if (!card) return;
   const select = card.querySelector('.unlock-step-input');
+  if (!select) return;
   const previousValue = select.value;
   select.innerHTML = buildStepOptionsHtml(teamId);
   if (previousValue) select.value = previousValue;
@@ -288,7 +290,10 @@ loginForm.addEventListener('submit', async (event) => {
   }
 });
 
-document.getElementById('logoutButton').addEventListener('click', async () => {
+// Le bouton vit dans la barre latérale, construite par shell.js après le
+// chargement : délégation plutôt qu'un écouteur posé trop tôt.
+document.addEventListener('click', async (event) => {
+  if (!event.target.closest('#logoutButton')) return;
   await apiFetch('/logout', { method: 'POST' }).catch(() => {});
   showLogin();
 });
@@ -389,13 +394,24 @@ createSessionForm.addEventListener('submit', async (event) => {
 // --- Détail d'une session ------------------------------------------------
 const teamsGrid = document.getElementById('teamsGrid');
 const teamCardTemplate = document.getElementById('teamCardTemplate');
+const teamPanelTemplate = document.getElementById('teamPanelTemplate');
+const teamPanel = document.getElementById('teamPanel');
 let currentSessionId = null;
 let currentScenarioCode = null;
+let currentSessionStatus = 'active';
 let currentEventSource = null;
+// teamId -> entrée { summary, detail, dataset, querySelector }. La carte
+// compacte (summary) vit dans la grille, le détail (discussion, historique,
+// actions) dans le panneau latéral ; querySelector cherche dans les deux pour
+// que le reste du code continue d'adresser « la carte » d'une équipe.
 const teamCardById = new Map();
+const teamDataById = new Map(); // dernières données reçues par équipe (indicateurs)
+let selectedTeamId = null;
+let activeFilter = 'all';
 
 document.getElementById('backToListButton').addEventListener('click', () => {
   closeSessionStream();
+  closeTeamPanel();
   sessionDetailView.hidden = true;
   sessionListView.hidden = false;
   loadSessions();
@@ -449,7 +465,12 @@ async function openSession(sessionId) {
   sessionListView.hidden = true;
   sessionDetailView.hidden = false;
   teamsGrid.innerHTML = '';
+  teamPanel.querySelectorAll('.tp').forEach((el) => el.remove());
   teamCardById.clear();
+  teamDataById.clear();
+  selectedTeamId = null;
+  closeTeamPanel();
+  setTeamFilter('all');
 
   unreadBySession.delete(sessionId);
   const banner = document.getElementById('otherSessionBanner');
@@ -459,8 +480,13 @@ async function openSession(sessionId) {
 
   const { session, teams } = await apiFetch(`/sessions/${sessionId}`);
   currentScenarioCode = session.scenario_code;
-  document.getElementById('sessionTitle').textContent = `${session.name || 'Session'} — ${session.code}`;
-  document.getElementById('sessionMeta').textContent = `Scénario : ${session.scenario_code}`;
+  currentSessionStatus = session.status;
+  document.getElementById('sessionTitle').textContent = session.name || 'Partie';
+  document.getElementById('sessionCode').textContent = session.code;
+  document.getElementById('sessionMeta').textContent = `Parties › ${session.scenario_code}`;
+  const statusPill = document.getElementById('sessionStatusPill');
+  statusPill.textContent = SESSION_STATUS_LABELS[session.status] || session.status;
+  statusPill.className = `badge ${session.status}`;
   document.getElementById('leaderboardLink').href = `${APP_BASE}/admin/leaderboard.html?code=${session.code}`;
   document.getElementById('solutionGuideLink').href = `${APP_BASE}/admin/solution-guide.html?scenario=${encodeURIComponent(session.scenario_code)}&mode=view`;
   document.getElementById('pauseSessionButton').hidden = session.status !== 'active';
@@ -473,7 +499,10 @@ async function openSession(sessionId) {
   teams.forEach(renderTeamCard);
   teams.forEach(loadTeamDetail);
   await loadScenarioSaves();
-
+  // Grand écran : le panneau est toujours visible, on y affiche d'emblée la
+  // première équipe. Petit écran : il couvre la page, on attend un appui.
+  if (teams.length && window.matchMedia('(min-width: 1101px)').matches) selectTeam(teams[0].id);
+  refreshIndicators();
   currentEventSource = new EventSource(`${API}/sessions/${sessionId}/stream`, { withCredentials: true });
   currentEventSource.addEventListener('team-joined', (e) => renderTeamCard(JSON.parse(e.data)));
   currentEventSource.addEventListener('team-update', (e) => updateTeamCard(JSON.parse(e.data)));
@@ -653,14 +682,151 @@ function formatRelativeTime(isoString) {
   return `il y a ${Math.floor(seconds / 3600)} h`;
 }
 
+function makeTeamEntry(summary, detail) {
+  return {
+    summary,
+    detail,
+    dataset: summary.dataset,
+    querySelector: (selector) => summary.querySelector(selector) || detail.querySelector(selector)
+  };
+}
+
+function setUnread(card, count) {
+  const dot = card.summary.querySelector('.team-unread-dot');
+  const tabDot = card.detail.querySelector('.chat-summary-unread-dot');
+  card.dataset.unread = String(count);
+  dot.textContent = count > 0 ? String(count) : '';
+  dot.hidden = count === 0;
+  tabDot.hidden = count === 0;
+  applyTeamFilter();
+}
+
+function activePanelTab(card) {
+  return card.detail.querySelector('.tb.on')?.dataset.tab;
+}
+
+// Le fil est « sous les yeux » de l'animateur quand l'équipe est sélectionnée
+// et l'onglet Discussion ouvert (sur petit écran, le panneau doit aussi l'être).
+function isChatVisible(card, teamId) {
+  return teamId === selectedTeamId && activePanelTab(card) === 'chat' &&
+    (document.body.classList.contains('panel-open') || window.matchMedia('(min-width: 1101px)').matches);
+}
+
+function showPanelTab(card, tab) {
+  card.detail.querySelectorAll('.tb').forEach((b) => b.classList.toggle('on', b.dataset.tab === tab));
+  card.detail.querySelectorAll('.pane').forEach((p) => { p.hidden = p.dataset.pane !== tab; });
+  if (tab === 'chat') {
+    setUnread(card, 0);
+    const thread = card.detail.querySelector('.chat-thread');
+    thread.scrollTop = thread.scrollHeight;
+  }
+}
+
+function selectTeam(teamId) {
+  const card = teamCardById.get(teamId);
+  if (!card) return;
+  selectedTeamId = teamId;
+  teamCardById.forEach((entry, id) => {
+    entry.summary.classList.toggle('sel', id === teamId);
+    entry.detail.hidden = id !== teamId;
+  });
+  document.getElementById('teamPanelEmpty').hidden = true;
+  document.body.classList.add('panel-open');
+  if (activePanelTab(card) === 'chat') setUnread(card, 0);
+}
+
+function closeTeamPanel() {
+  document.body.classList.remove('panel-open');
+}
+
+teamPanel.addEventListener('click', (event) => {
+  if (event.target.closest('.panel-close')) {
+    closeTeamPanel();
+    return;
+  }
+  const tabButton = event.target.closest('.tb');
+  if (tabButton) {
+    const card = teamCardById.get(selectedTeamId);
+    if (card) showPanelTab(card, tabButton.dataset.tab);
+  }
+});
+
+// --- Filtres de la grille -----------------------------------------------------
+function teamIsOffline(card) {
+  return card.dataset.presence === 'offline';
+}
+
+function applyTeamFilter() {
+  let visible = 0;
+  teamCardById.forEach((card) => {
+    const show = activeFilter === 'all' ||
+      (activeFilter === 'offline' && teamIsOffline(card)) ||
+      (activeFilter === 'unread' && Number(card.dataset.unread) > 0);
+    card.summary.hidden = !show;
+    if (show) visible++;
+  });
+  document.getElementById('teamsEmpty').hidden = visible > 0 || teamCardById.size === 0;
+}
+
+function setTeamFilter(filter) {
+  activeFilter = filter;
+  document.querySelectorAll('#teamFilters .fl').forEach((b) => b.classList.toggle('on', b.dataset.filter === filter));
+  applyTeamFilter();
+}
+
+document.getElementById('teamFilters').addEventListener('click', (event) => {
+  const button = event.target.closest('[data-filter]');
+  if (button) setTeamFilter(button.dataset.filter);
+});
+
+// --- Indicateurs et bandeau d'alerte ------------------------------------------
+function refreshIndicators() {
+  const teams = [...teamDataById.values()];
+  const running = teams.filter((t) => !t.finishedAt);
+  const offline = [...teamCardById.values()].filter(teamIsOffline);
+  const maxElapsed = teams.reduce((max, t) => Math.max(max, t.elapsedMs || 0), 0);
+  const avgProgress = teams.length ? teams.reduce((sum, t) => sum + Math.min(100, t.progressPercent || 0), 0) / teams.length : 0;
+  document.getElementById('kpiElapsed').textContent = formatDuration(maxElapsed);
+  document.getElementById('kpiTeams').textContent = String(teams.length);
+  document.getElementById('kpiProgress').textContent = `${Math.round(avgProgress)} %`;
+  document.getElementById('kpiOffline').textContent = String(offline.length);
+  document.getElementById('kpiOfflineBox').classList.toggle('warn', offline.length > 0);
+  document.getElementById('kpiHints').textContent = String(teams.reduce((sum, t) => sum + (t.hintsUsed || 0), 0));
+
+  const alertBar = document.getElementById('alertBar');
+  const alertTeam = offline.find((card) => running.some((t) => t.id === Number(card.dataset.teamId)));
+  if (!alertTeam) {
+    alertBar.hidden = true;
+    return;
+  }
+  const name = alertTeam.querySelector('.team-name').textContent;
+  const since = formatRelativeTime(alertTeam.dataset.lastSeenAt).replace(/^il y a /, '');
+  document.getElementById('alertText').textContent = offline.length > 1
+    ? `${offline.length} équipes ne donnent plus signe de vie (dont « ${name} »).`
+    : `« ${name} » n'a plus donné signe de vie depuis ${since}.`;
+  document.getElementById('alertGo').onclick = () => selectTeam(Number(alertTeam.dataset.teamId));
+  alertBar.hidden = false;
+}
+
 function renderTeamCard(team) {
   let card = teamCardById.get(team.id);
   if (!card) {
-    card = teamCardTemplate.content.firstElementChild.cloneNode(true);
-    card.dataset.teamId = team.id;
-    teamsGrid.appendChild(card);
+    const summary = teamCardTemplate.content.firstElementChild.cloneNode(true);
+    const detail = teamPanelTemplate.content.firstElementChild.cloneNode(true);
+    summary.dataset.teamId = team.id;
+    teamsGrid.appendChild(summary);
+    teamPanel.appendChild(detail);
+    card = makeTeamEntry(summary, detail);
     teamCardById.set(team.id, card);
     renderStepOptionsForTeam(team.id);
+
+    summary.addEventListener('click', () => selectTeam(team.id));
+    summary.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        selectTeam(team.id);
+      }
+    });
 
     const renderUnlockStepPreview = () => {
       const preview = card.querySelector('.unlock-step-preview');
@@ -730,16 +896,11 @@ function renderTeamCard(team) {
       input.value = '';
     });
 
-    // Consulter le fil de discussion (ou y répondre, ou simplement déplier
-    // l'accordéon "Messagerie") marque l'équipe comme lue.
-    const markTeamRead = () => {
-      card.querySelector('.team-unread-dot').hidden = true;
-      card.querySelector('.chat-summary-unread-dot').hidden = true;
-    };
-    const chatSection = card.querySelector('.chat-section');
-    card.querySelector('.chat-thread').addEventListener('click', markTeamRead);
-    card.querySelector('.chat-input').addEventListener('focus', markTeamRead);
-    chatSection.addEventListener('toggle', () => { if (chatSection.open) markTeamRead(); });
+    // Répondre (ou simplement viser la saisie) marque l'équipe comme lue.
+    card.querySelector('.chat-thread').addEventListener('click', () => setUnread(card, 0));
+    card.querySelector('.chat-input').addEventListener('focus', () => setUnread(card, 0));
+    card.detail.hidden = true;
+    card.dataset.unread = '0';
   }
   updateTeamCard(team);
   return card;
@@ -748,7 +909,9 @@ function renderTeamCard(team) {
 function updateTeamCard(team) {
   const card = teamCardById.get(team.id);
   if (!card) return;
+  teamDataById.set(team.id, team);
   card.querySelector('.team-name').textContent = team.name;
+  card.querySelector('.panel-team-name').textContent = team.name;
   const status = card.querySelector('.team-status');
   if (!team.finishedAt) {
     status.textContent = 'En cours';
@@ -764,14 +927,16 @@ function updateTeamCard(team) {
     status.className = 'team-status badge closed';
   }
   card.querySelector('.progress-bar-fill').style.width = `${Math.min(100, team.progressPercent || 0)}%`;
-  card.querySelector('.stat-progress').textContent = `${Math.round(team.progressPercent || 0)}%`;
+  card.querySelector('.stat-progress').textContent = `${Math.round(team.progressPercent || 0)} %`;
   card.querySelector('.stat-time').textContent = formatDuration(team.elapsedMs);
   card.querySelector('.stat-hints').textContent = team.hintsUsed ?? 0;
+  card.querySelector('.panel-hints').textContent = team.hintsUsed ?? 0;
   card.querySelector('.stat-step').textContent = team.currentStepId ?? '—';
   card.querySelector('.stat-lastseen').textContent = formatRelativeTime(team.lastSeenAt);
   card.dataset.lastSeenAt = team.lastSeenAt || '';
   card.dataset.finished = team.finishedAt ? '1' : '';
   updatePresenceDot(card);
+  refreshIndicators();
 }
 
 // Équipe considérée hors ligne si aucun signal (heartbeat toutes les 20s,
@@ -780,34 +945,38 @@ function updateTeamCard(team) {
 const PRESENCE_OFFLINE_AFTER_MS = 50000;
 
 function updatePresenceDot(card) {
-  const dot = card.querySelector('.presence-dot');
-  if (!dot) return;
+  const dots = [card.summary.querySelector('.presence-dot'), card.detail.querySelector('.panel-dot')];
+  const previous = card.dataset.presence;
+  let presence;
+  let title = '';
   if (card.dataset.finished) {
-    dot.className = 'presence-dot presence-na';
-    dot.title = '';
-    return;
-  }
-  const lastSeenAt = card.dataset.lastSeenAt;
-  if (!lastSeenAt) {
-    dot.className = 'presence-dot presence-na';
-    dot.title = 'Aucun signal reçu';
-    return;
-  }
-  const ageMs = Date.now() - toDate(lastSeenAt).getTime();
-  if (ageMs <= PRESENCE_OFFLINE_AFTER_MS) {
-    dot.className = 'presence-dot presence-online';
-    dot.title = 'En ligne';
+    presence = 'na';
+  } else if (!card.dataset.lastSeenAt) {
+    presence = 'na';
+    title = 'Aucun signal reçu';
   } else {
-    dot.className = 'presence-dot presence-offline';
-    dot.title = 'Hors ligne (dernier signal ' + formatRelativeTime(lastSeenAt) + ')';
+    const ageMs = Date.now() - toDate(card.dataset.lastSeenAt).getTime();
+    presence = ageMs <= PRESENCE_OFFLINE_AFTER_MS ? 'online' : 'offline';
+    title = presence === 'online' ? 'En ligne' : 'Hors ligne (dernier signal ' + formatRelativeTime(card.dataset.lastSeenAt) + ')';
   }
+  dots.forEach((dot) => {
+    dot.className = `presence-dot ${dot.classList.contains('panel-dot') ? 'panel-dot ' : ''}presence-${presence}`;
+    dot.title = title;
+  });
+  card.dataset.presence = presence;
+  card.querySelector('.stat-lastseen').textContent = formatRelativeTime(card.dataset.lastSeenAt);
+  card.summary.classList.toggle('is-offline', presence === 'offline');
+  if (presence === 'offline' && previous === 'online') window.PhoenixShell?.notify('offline');
+  if (previous !== presence) applyTeamFilter();
 }
 
-// Un badge peut passer "hors ligne" sans qu'aucun événement n'arrive (c'est
+// Une équipe peut passer « hors ligne » sans qu'aucun événement n'arrive (c'est
 // justement l'absence de signal qu'on veut détecter) : un simple rafraîchissement
-// périodique de tous les badges, indépendant du flux SSE, est nécessaire.
+// périodique, indépendant du flux SSE, est nécessaire.
 setInterval(() => {
+  if (!currentSessionId) return;
   teamCardById.forEach((card) => updatePresenceDot(card));
+  refreshIndicators();
 }, 5000);
 
 async function loadTeamDetail(team) {
@@ -959,9 +1128,9 @@ function appendMessageToCard(message) {
   appendMessageBubble(card.querySelector('.chat-thread'), message);
   if (message.sender !== 'team') return;
   // Pas besoin de notifier si l'admin a déjà la messagerie ouverte sous les yeux.
-  if (card.querySelector('.chat-section').open) return;
-  card.querySelector('.team-unread-dot').hidden = false;
-  card.querySelector('.chat-summary-unread-dot').hidden = false;
+  if (isChatVisible(card, message.team_id)) return;
+  setUnread(card, Number(card.dataset.unread || 0) + 1);
+  window.PhoenixShell?.notify('message');
 }
 
 function flashUnlockConfirmation(card, stepId) {

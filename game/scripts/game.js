@@ -557,6 +557,13 @@ function wireEmailModal() {
 // ---------------------------------------------------------------------------
 // Démarrage / chargement du scénario
 // ---------------------------------------------------------------------------
+// Icône personnalisée d'un scénario : elle remplace seulement le pictogramme du bouton,
+// pas son libellé (les icônes par défaut sont déjà dans index.html).
+function setTabIcon(buttonId, svgMarkup) {
+  const slot = document.querySelector(`#${buttonId} .tab-ico`);
+  if (slot) slot.innerHTML = svgMarkup;
+}
+
 function applyScenarioChrome(data) {
   document.title = data.nameStory;
   document.getElementById('titleText').innerHTML = data.nameStory;
@@ -579,19 +586,13 @@ function applyScenarioChrome(data) {
   if (!data.locationList) {
     document.getElementById('locationsButton')?.remove();
   } else if (data.locationIcon != null) {
-    document.getElementById('locationsButton').innerHTML = data.locationIcon;
-  } else {
-    document.getElementById('locationsButton').innerHTML =
-      '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-geo-alt-fill" viewBox="0 0 16 16"><path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10m0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6"/></svg>';
+    setTabIcon('locationsButton', data.locationIcon);
   }
   if (!data.qrCodeReader) document.getElementById('qrCodeButton')?.remove();
   if (!data.itemList) {
     document.getElementById('itemsButton')?.remove();
   } else if (data.itemIcon != null) {
-    document.getElementById('itemsButton').innerHTML = data.itemIcon;
-  } else {
-    document.getElementById('itemsButton').innerHTML =
-      '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-backpack-fill" viewBox="0 0 16 16"><path d="M5 13v-3h4v.5a.5.5 0 0 0 1 0V10h1v3z"/><path d="M6 2v.341C3.67 3.165 2 5.388 2 8v5.5A2.5 2.5 0 0 0 4.5 16h7a2.5 2.5 0 0 0 2.5-2.5V8a6 6 0 0 0-4-5.659V2a2 2 0 1 0-4 0m2-1a1 1 0 0 1 1 1v.083a6 6 0 0 0-2 0V2a1 1 0 0 1 1-1m0 3a4 4 0 0 1 3.96 3.43.5.5 0 1 1-.99.14 3 3 0 0 0-5.94 0 .5.5 0 1 1-.99-.14A4 4 0 0 1 8 4M4.5 9h7a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-.5.5h-7a.5.5 0 0 1-.5-.5v-4a.5.5 0 0 1 .5-.5"/></svg>';
+    setTabIcon('itemsButton', data.itemIcon);
   }
   if (data.map) {
     document.getElementById('mapArea').innerHTML =
