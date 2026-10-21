@@ -60,7 +60,8 @@
     play: '<path d="M7 5l12 7-12 7V5z"/>',
     map: '<path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/>',
     bell: '<path d="M6 17V11a6 6 0 0112 0v6l2 2H4l2-2zM10 21h4"/>',
-    logout: '<path d="M10 5H5v14h5M15 8l4 4-4 4M19 12H9"/>'
+    logout: '<path d="M10 5H5v14h5M15 8l4 4-4 4M19 12H9"/>',
+    expand: '<path d="M4 9V5a1 1 0 011-1h4M15 4h4a1 1 0 011 1v4M20 15v4a1 1 0 01-1 1h-4M9 20H5a1 1 0 01-1-1v-4"/>'
   };
   function icon(name) {
     return '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true">' + ICONS[name] + '</svg>';
@@ -91,6 +92,7 @@
           }).join('') +
         '</div>' +
         '<button type="button" class="snd" data-sound-toggle>' + icon('bell') + '<span class="nv-label">Son des alertes</span><span class="sw"></span></button>' +
+        '<button type="button" class="snd" data-fullscreen-toggle hidden>' + icon('expand') + '<span class="nv-label">Plein écran</span><span class="sw"></span></button>' +
       '</div>' +
       '<button type="button" id="logoutButton" class="nv dim">' + icon('logout') + '<span class="nv-label">Déconnexion</span></button>';
     syncPrefs();
@@ -103,6 +105,11 @@
     }
     var snd = document.querySelectorAll('[data-sound-toggle]');
     for (var j = 0; j < snd.length; j++) snd[j].classList.toggle('on', state.sound);
+    var fs = document.querySelectorAll('[data-fullscreen-toggle]');
+    for (var k = 0; k < fs.length; k++) {
+      fs[k].hidden = !document.fullscreenEnabled;
+      fs[k].classList.toggle('on', !!document.fullscreenElement);
+    }
   }
 
   document.addEventListener('click', function (event) {
@@ -112,6 +119,12 @@
       write(THEME_KEY, state.theme);
       applyTheme();
       syncPrefs();
+      return;
+    }
+    if (event.target.closest('[data-fullscreen-toggle]')) {
+      // Plein écran : masque la barre d'adresse du navigateur (geste requis par l'API).
+      if (document.fullscreenElement) document.exitFullscreen();
+      else document.documentElement.requestFullscreen({ navigationUI: 'hide' }).catch(function () {});
       return;
     }
     if (event.target.closest('[data-sound-toggle]')) {
@@ -132,6 +145,8 @@
       .catch(function () {})
       .then(function () { location.href = 'index.html'; });
   });
+
+  document.addEventListener('fullscreenchange', syncPrefs);
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', buildSidebar);
   else buildSidebar();
