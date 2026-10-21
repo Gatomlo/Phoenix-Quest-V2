@@ -425,7 +425,7 @@ input[type=range]::-moz-range-thumb { background-color: var(--accent); border: n
 .oneDigit { width: 52px; }
 .oneDigitFromTrying { font-size: 2.5em; }
 .digit {
-  width: 76px; font-size: 42px; margin-top: 5px; min-height: 56px; line-height: 1.1;
+  width: 100%; max-width: 76px; font-size: 42px; margin-top: 5px; min-height: 56px; line-height: 1.1;
   border-radius: 16px; font-family: var(--font-display); font-weight: 700;
 }
 /* Touches chiffrées / flèches : tuiles claires, le texte garde toujours le contraste du thème. */
@@ -435,6 +435,11 @@ input[type=range]::-moz-range-thumb { background-color: var(--accent); border: n
 .btn.digit.btn-primary:not(.colorButton):hover, .btn.digit.btn-primary:not(.colorButton):active, .btn.digit.btn-warning:hover {
   background-color: var(--chip) !important;
 }
+/* Les pictogrammes de ces boutons sont dimensionnés en em (2em, 1em) : avec la police de 42px des chiffres,
+   ils débordaient du bouton. On les fixe en pixels et on ramène la police à une taille neutre. */
+.btn.digit.orientationButton, .btn.digit.switch, #reset, #resetDirectionnal, #resetSwitch, .btn.digit.btn-success, .btn.digit.btn-warning { font-size: 1rem; }
+.orientationButton svg, .digit.switch svg { width: 34px; height: 34px; }
+#reset svg, #resetDirectionnal svg, #resetSwitch svg, .digit.btn-success svg, .digit.btn-warning svg { width: 28px; height: 28px; }
 .btn.digit.colorButton { border: 2px solid var(--line) !important; }
 #reset, #resetDirectionnal, #resetSwitch { background-color: var(--accent) !important; color: var(--on-accent) !important; border: 0 !important; }
 #reset:hover, #resetDirectionnal:hover, #resetSwitch:hover { background-color: var(--accent-d) !important; }
