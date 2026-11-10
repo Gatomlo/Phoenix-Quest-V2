@@ -42,7 +42,7 @@
     },
     {
       "stepId": 12,
-      "note": "Trousseau : ouvre la cuisine (52), le laboratoire (71) et le vestiaire (42).",
+      "note": "Trousseau : ouvre la cuisine (52), le bureau d'Aude (71) et le vestiaire (42).",
       "location": ""
     },
     {
@@ -57,7 +57,7 @@
     },
     {
       "stepId": 6,
-      "note": "Mika envoie chercher la caisse de câbles dans la cuisine du personnel.",
+      "note": "Mika envoie chercher la caisse de matériel dans la cuisine du personnel.",
       "location": ""
     },
     {
@@ -82,12 +82,12 @@
     },
     {
       "stepId": 54,
-      "note": "CADENAS COULEURS : rose, rose, vert, vert, vert, jaune, orange, bleu, bleu, violet (F06292, F06292, 0c9411, 0c9411, 0c9411, fafa1e, ff8d0d, 0b30d9, 0b30d9, 7B1FA2). Logique : affiche de câblage (13) × ordre de la tournée du post-it (205).",
+      "note": "CADENAS COULEURS : rose, rose, vert, vert, vert, jaune, orange, bleu, bleu, violet (F06292, F06292, 0c9411, 0c9411, 0c9411, fafa1e, ff8d0d, 0b30d9, 0b30d9, 7B1FA2). Logique : affiche du matériel de rechange (13) × ordre de la tournée du post-it (205).",
       "location": ""
     },
     {
       "stepId": 55,
-      "note": "Dans la réserve : scanner la caisse de câbles (44) et la caisse de chips (17).",
+      "note": "Dans la réserve : scanner la caisse de matériel (44) et la caisse de chips (17).",
       "location": ""
     },
     {
@@ -192,22 +192,22 @@
     },
     {
       "stepId": 26,
-      "note": "Chemin vers le vestiaire : associer Ruf (chien-robot) (15).",
+      "note": "Chemin vers le vestiaire : associer Ruf (chien) (15).",
       "location": ""
     },
     {
       "stepId": 28,
-      "note": "Labyrinthe-1 : rescanner Ruf (chien-robot).",
+      "note": "Labyrinthe-1 : rescanner Ruf (chien).",
       "location": ""
     },
     {
       "stepId": 34,
-      "note": "Labyrinthe-2 : rescanner Ruf (chien-robot).",
+      "note": "Labyrinthe-2 : rescanner Ruf (chien).",
       "location": ""
     },
     {
       "stepId": 40,
-      "note": "Labyrinthe-3 : rescanner Ruf (chien-robot).",
+      "note": "Labyrinthe-3 : rescanner Ruf (chien).",
       "location": ""
     },
     {

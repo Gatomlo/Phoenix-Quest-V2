@@ -42,7 +42,7 @@
     },
     {
       "stepId": 12,
-      "note": "Trousseau : ouvre la cuisine (52), la serre (71) et le vestiaire (42).",
+      "note": "Trousseau : ouvre la cuisine (52), le bureau d'Aude (71) et le vestiaire (42).",
       "location": ""
     },
     {
@@ -57,7 +57,7 @@
     },
     {
       "stepId": 6,
-      "note": "Mika envoie chercher la nourriture pour animaux dans la cuisine de la cafétéria.",
+      "note": "Mika envoie chercher la caisse de matériel dans la cuisine de la cafétéria.",
       "location": ""
     },
     {
@@ -82,12 +82,12 @@
     },
     {
       "stepId": 54,
-      "note": "CADENAS COULEURS : rose, rose, vert, vert, vert, jaune, orange, bleu, bleu, violet (F06292, F06292, 0c9411, 0c9411, 0c9411, fafa1e, ff8d0d, 0b30d9, 0b30d9, 7B1FA2). Logique : affiche des rations (13) × ordre de la tournée du post-it (205).",
+      "note": "CADENAS COULEURS : rose, rose, vert, vert, vert, jaune, orange, bleu, bleu, violet (F06292, F06292, 0c9411, 0c9411, 0c9411, fafa1e, ff8d0d, 0b30d9, 0b30d9, 7B1FA2). Logique : affiche du matériel de rechange (13) × ordre de la tournée du post-it (205).",
       "location": ""
     },
     {
       "stepId": 55,
-      "note": "Dans la réserve : scanner la nourriture pour animaux (44) et la caisse de chips (17).",
+      "note": "Dans la réserve : scanner la caisse de matériel (44) et la caisse de chips (17).",
       "location": ""
     },
     {
@@ -152,7 +152,7 @@
     },
     {
       "stepId": 83,
-      "note": "Lieu à fouiller : calendrier de plantations (27) et journal d'Aude (35).",
+      "note": "Lieu à fouiller : calendrier des événements (27) et journal d'Aude (35).",
       "location": ""
     },
     {
@@ -167,7 +167,7 @@
     },
     {
       "stepId": 8,
-      "note": "CADENAS DATE : 04/04/2019 (format mm/jj/aaaa). Le journal (35) donne le jour (04) et l'année (2019) du premier légume planté (pommes de terre) ; le calendrier (27) place les pommes de terre en avril.",
+      "note": "CADENAS DATE : 04/04/2019 (format mm/jj/aaaa). Le journal (35) donne le jour (04) et l'année (2019) du premier événement d'Aude (Semaine de la science) ; le calendrier (27) place la Semaine de la science en avril.",
       "location": ""
     },
     {
