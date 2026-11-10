@@ -219,8 +219,10 @@ const guideToolbar = document.getElementById('guideToolbar');
 const guideFilterButtons = guideToolbar.querySelectorAll('[data-filter]');
 const guideFilterInfo = document.getElementById('guideFilterInfo');
 
-// Une étape « facultative » est une étape qui ne fait pas avancer la barre de
-// progression (progressBar: false), comme dans le jeu. Sans barre de
+// Une étape « non comptée » ne fait pas avancer la barre de progression
+// (progressBar: false), comme dans le jeu. Attention : ce n'est PAS la même
+// chose qu'une étape facultative — un lieu de passage ou un cadenas peut ne pas
+// compter tout en étant indispensable pour continuer. Sans barre de
 // progression au niveau du scénario, la notion n'a plus de sens.
 function isOptionalStep(step) {
   return Boolean(scenario.progressBar) && Boolean(step) && !step.progressBar;
@@ -247,7 +249,7 @@ function adjacentVisibleIndex(index, direction) {
 
 function updateToolbar() {
   const optionalCount = guide.entries.filter((e) => isOptionalStep(findStep(e.stepId))).length;
-  // Barre masquée si le scénario n'a pas de progression ou aucune étape facultative dans le guide.
+  // Barre masquée si le scénario n'a pas de progression ou aucune étape non comptée dans le guide.
   guideToolbar.hidden = !scenario.progressBar || optionalCount === 0;
   if (guideToolbar.hidden) guideFilter = 'all';
   const total = guide.entries.length;
@@ -257,7 +259,7 @@ function updateToolbar() {
     button.setAttribute('aria-pressed', String(on));
     button.querySelector('.count').textContent = button.dataset.filter === 'all' ? total : total - optionalCount;
   });
-  guideFilterInfo.textContent = `${optionalCount} étape${optionalCount > 1 ? 's' : ''} facultative${optionalCount > 1 ? 's' : ''} (ne comptent pas dans la progression)`;
+  guideFilterInfo.textContent = `${optionalCount} étape${optionalCount > 1 ? 's' : ''} ne compte${optionalCount > 1 ? 'nt' : ''} pas dans la progression (elles peuvent rester nécessaires pour avancer)`;
 }
 
 guideToolbar.addEventListener('click', (event) => {
@@ -341,7 +343,7 @@ function renderGuideList() {
     const noQr = !step?.code;
     const optional = isOptionalStep(step);
     return `<li class="guide-entry card${optional ? ' guide-entry-optional' : ''}" data-index="${index}">
-      ${optional ? '<div class="guide-entry-ribbon" title="Cette étape ne fait pas avancer la barre de progression (progressBar: false)">Facultative · ne compte pas dans la progression</div>' : ''}
+      ${optional ? '<div class="guide-entry-ribbon" title="Cette étape ne fait pas avancer la barre de progression (progressBar: false). Elle peut quand même être nécessaire pour continuer.">Ne compte pas dans la progression</div>' : ''}
       <div class="guide-entry-header">
         <span class="guide-entry-index">${rank}</span>
         ${imgTag(stepImageSrc(step), 'guide-entry-thumb')}
@@ -417,7 +419,7 @@ if (!isViewMode) {
     renderAddSelect();
     renderGuideList();
     if (!isEntryVisible(guide.entries[guide.entries.length - 1])) {
-      saveStatus.textContent = 'Étape facultative ajoutée (masquée par le filtre actuel).';
+      saveStatus.textContent = 'Étape non comptée ajoutée (masquée par le filtre actuel).';
       setTimeout(() => { saveStatus.textContent = ''; }, 4000);
     }
   });
