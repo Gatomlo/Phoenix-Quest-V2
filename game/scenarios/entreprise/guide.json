@@ -1,0 +1,384 @@
+{
+  "entries": [
+    {
+      "stepId": 0,
+      "note": "Départ. Scanner le QR du organigramme (2) pour ouvrir les lieux.",
+      "location": ""
+    },
+    {
+      "stepId": 2,
+      "note": "Ajoute les lieux 1, 3, 5, 7, 8, 11, 20.",
+      "location": ""
+    },
+    {
+      "stepId": 1,
+      "note": "Lieu à fouiller : 4 objets à scanner sur place — livre (10), polaroïd de Jack (18), badge de Julian (48), empreintes (97).",
+      "location": ""
+    },
+    {
+      "stepId": 10,
+      "note": "Roman d'amour. Sert à confronter Josette (avec la collection de livres 19).",
+      "location": ""
+    },
+    {
+      "stepId": 18,
+      "note": "Année de la photo = 1978 : code du carnet de Jack (76).",
+      "location": ""
+    },
+    {
+      "stepId": 48,
+      "note": "Badge de Julian. À lui rendre (9) : il est innocent.",
+      "location": ""
+    },
+    {
+      "stepId": 97,
+      "note": "Empreintes de bottes de cow-boy. À montrer à Mika (144) : il est innocent.",
+      "location": ""
+    },
+    {
+      "stepId": 11,
+      "note": "Lieu de départ de Jack (4) ; le trousseau de clés (12) s'y trouve.",
+      "location": ""
+    },
+    {
+      "stepId": 12,
+      "note": "Trousseau : ouvre la cuisine (52), le bureau d'Aude (71) et le vestiaire (42).",
+      "location": ""
+    },
+    {
+      "stepId": 4,
+      "note": "Jack se retire après avoir donné le trousseau (il revient via le casier 38).",
+      "location": ""
+    },
+    {
+      "stepId": 3,
+      "note": "Lieu de Mika (6).",
+      "location": ""
+    },
+    {
+      "stepId": 6,
+      "note": "Mika envoie chercher la caisse de matériel dans la cuisine du personnel.",
+      "location": ""
+    },
+    {
+      "stepId": 52,
+      "note": "Cadenas « avec objet » : associer le trousseau (12).",
+      "location": ""
+    },
+    {
+      "stepId": 53,
+      "note": "Débloque la réserve (54).",
+      "location": ""
+    },
+    {
+      "stepId": 13,
+      "note": "Indice du cadenas de couleurs.",
+      "location": ""
+    },
+    {
+      "stepId": 205,
+      "note": "Indice du cadenas de couleurs (ordre de la tournée).",
+      "location": ""
+    },
+    {
+      "stepId": 54,
+      "note": "CADENAS COULEURS : rose, rose, vert, vert, vert, jaune, orange, bleu, bleu, violet (F06292, F06292, 0c9411, 0c9411, 0c9411, fafa1e, ff8d0d, 0b30d9, 0b30d9, 7B1FA2). Logique : affiche du matériel de rechange (13) × ordre de la tournée du post-it (205).",
+      "location": ""
+    },
+    {
+      "stepId": 55,
+      "note": "Dans la réserve : scanner la caisse de matériel (44) et la caisse de chips (17).",
+      "location": ""
+    },
+    {
+      "stepId": 44,
+      "note": "À associer à Mika (6) pour débloquer son vrai dialogue (144).",
+      "location": ""
+    },
+    {
+      "stepId": 144,
+      "note": "Mika : innocent. Associer les empreintes (97) pour le dialogue final (47).",
+      "location": ""
+    },
+    {
+      "stepId": 47,
+      "note": "Mika sincère : piste suivante.",
+      "location": ""
+    },
+    {
+      "stepId": 20,
+      "note": "Lieu de Gérard (23).",
+      "location": ""
+    },
+    {
+      "stepId": 23,
+      "note": "Gérard refuse de parler sans ses chips : associer la caisse (17).",
+      "location": ""
+    },
+    {
+      "stepId": 17,
+      "note": "Chips à rapporter à Gérard.",
+      "location": ""
+    },
+    {
+      "stepId": 21,
+      "note": "Gérard remercie. Associer l'affiche du spectacle (14) pour qu'il parle (24).",
+      "location": ""
+    },
+    {
+      "stepId": 24,
+      "note": "Gérard clame son innocence ; ouvre le point de rassemblement (25) et le chemin vers le vestiaire (26). Lettre de refus dans son casier (31).",
+      "location": ""
+    },
+    {
+      "stepId": 7,
+      "note": "Lieu de Julian (9).",
+      "location": ""
+    },
+    {
+      "stepId": 9,
+      "note": "Julian donne l'indice du code (date) et ouvre 71. Lui associer le badge (48) pour 56.",
+      "location": ""
+    },
+    {
+      "stepId": 56,
+      "note": "Julian sincère : piste suivante.",
+      "location": ""
+    },
+    {
+      "stepId": 71,
+      "note": "Cadenas « avec objet » : associer le trousseau (12).",
+      "location": ""
+    },
+    {
+      "stepId": 83,
+      "note": "Lieu à fouiller : calendrier des salons (27) et cahier d'Aude (35).",
+      "location": ""
+    },
+    {
+      "stepId": 27,
+      "note": "Indice du mois.",
+      "location": ""
+    },
+    {
+      "stepId": 35,
+      "note": "Indice du jour et de l'année.",
+      "location": ""
+    },
+    {
+      "stepId": 8,
+      "note": "CADENAS DATE : 04/04/2019 (format mm/jj/aaaa). Le cahier (35) donne le jour (04) et l'année (2019) du premier prototype présenté au salon Innov'Expo ; le calendrier des salons (27) place Innov'Expo en avril.",
+      "location": ""
+    },
+    {
+      "stepId": 79,
+      "note": "Débloque Aude (80).",
+      "location": ""
+    },
+    {
+      "stepId": 80,
+      "note": "Aude donne l'affiche du spectacle/pitch (14) et renvoie vers Gérard.",
+      "location": ""
+    },
+    {
+      "stepId": 14,
+      "note": "À montrer à Gérard (21).",
+      "location": ""
+    },
+    {
+      "stepId": 15,
+      "note": "Compagnon de Mika, à scanner dans son lieu (3). Il guide dans le dédale : le rescanner à chaque étape.",
+      "location": ""
+    },
+    {
+      "stepId": 26,
+      "note": "Chemin vers le vestiaire : associer Ruf (chien) (15).",
+      "location": ""
+    },
+    {
+      "stepId": 28,
+      "note": "Labyrinthe-1 : rescanner Ruf (chien).",
+      "location": ""
+    },
+    {
+      "stepId": 34,
+      "note": "Labyrinthe-2 : rescanner Ruf (chien).",
+      "location": ""
+    },
+    {
+      "stepId": 40,
+      "note": "Labyrinthe-3 : rescanner Ruf (chien).",
+      "location": ""
+    },
+    {
+      "stepId": 41,
+      "note": "CADENAS DIRECTIONNEL : Nord, Est, Ouest, Est, Nord, Ouest, Ouest (n, e, o, e, n, o, o) — c'est le chemin parcouru avec Ruf.",
+      "location": ""
+    },
+    {
+      "stepId": 42,
+      "note": "Vestiaire verrouillé : associer le trousseau (12).",
+      "location": ""
+    },
+    {
+      "stepId": 43,
+      "note": "CADENAS SÉLECTEUR : cliquer sur un casier pour le fouiller (31 Gérard, 38 Jack, 39 Mika, 45 Josette).",
+      "location": ""
+    },
+    {
+      "stepId": 31,
+      "note": "Lettre de refus : confirme l'innocence de Gérard.",
+      "location": ""
+    },
+    {
+      "stepId": 39,
+      "note": "Chapeau et bottes de cow-boy : explique les empreintes de Mika.",
+      "location": ""
+    },
+    {
+      "stepId": 38,
+      "note": "Carnet de Jack (76) ; retire Jack (4).",
+      "location": ""
+    },
+    {
+      "stepId": 76,
+      "note": "CADENAS CHIFFRES : 1978 (année de la photo 18). Donne la facture de location (72).",
+      "location": ""
+    },
+    {
+      "stepId": 72,
+      "note": "Preuve : facture de location d'un van. Débloque le lieu de Jack (73).",
+      "location": ""
+    },
+    {
+      "stepId": 73,
+      "note": "Lieu secret de Jack (74).",
+      "location": ""
+    },
+    {
+      "stepId": 74,
+      "note": "Associer la facture (72) pour obtenir son explication (75).",
+      "location": ""
+    },
+    {
+      "stepId": 75,
+      "note": "Jack : c'est Josette qui lui a demandé de louer le van.",
+      "location": ""
+    },
+    {
+      "stepId": 45,
+      "note": "Casier de Josette : photo de Mika (91) et collection de livres (19).",
+      "location": ""
+    },
+    {
+      "stepId": 91,
+      "note": "Josette est amoureuse de Mika.",
+      "location": ""
+    },
+    {
+      "stepId": 19,
+      "note": "À associer à Josette avec le livre (10).",
+      "location": ""
+    },
+    {
+      "stepId": 5,
+      "note": "Lieu de Josette (16).",
+      "location": ""
+    },
+    {
+      "stepId": 16,
+      "note": "Josette : associer le livre (10) ou la collection (19) ET la facture (72) pour obtenir les aveux (58).",
+      "location": ""
+    },
+    {
+      "stepId": 57,
+      "note": "Premier aveu partiel : associer la facture (72).",
+      "location": ""
+    },
+    {
+      "stepId": 59,
+      "note": "Réaction à la facture : associer le livre/la collection (10, 19).",
+      "location": ""
+    },
+    {
+      "stepId": 58,
+      "note": "AVEUX de Josette : il est temps d'aller voir le policier.",
+      "location": ""
+    },
+    {
+      "stepId": 25,
+      "note": "Point de rassemblement : le policier.",
+      "location": ""
+    },
+    {
+      "stepId": 149,
+      "note": "CADENAS SÉLECTEUR : cliquer sur le visage de Josette.",
+      "location": ""
+    },
+    {
+      "stepId": 151,
+      "note": "Accuser Josette : associer la facture (72) comme preuve.",
+      "location": ""
+    },
+    {
+      "stepId": 150,
+      "note": "Fausse piste : accuser Aude, Julian, Gérard, Jack ou Mika (150, 152-155) ne mène à rien.",
+      "location": ""
+    },
+    {
+      "stepId": 156,
+      "note": "Josette arrêtée ; la partie repart avec : plan (81), smartphone (82), clé (90), agenda (77).",
+      "location": ""
+    },
+    {
+      "stepId": 81,
+      "note": "Plan : les 9 lieux forment une figure = code du smartphone.",
+      "location": ""
+    },
+    {
+      "stepId": 77,
+      "note": "Agenda de Josette : indice sur son trajet (confirme le parking).",
+      "location": ""
+    },
+    {
+      "stepId": 82,
+      "note": "CADENAS SCHÉMA (diagramme) : 1-4-7-8-9-6-2-3 (points numérotés de 1 en haut à gauche à 9 en bas à droite).",
+      "location": ""
+    },
+    {
+      "stepId": 84,
+      "note": "Smartphone déverrouillé : localisation du van = parking (92).",
+      "location": ""
+    },
+    {
+      "stepId": 90,
+      "note": "Clé du van, à associer au parking (92).",
+      "location": ""
+    },
+    {
+      "stepId": 92,
+      "note": "Parking : associer la clé (90).",
+      "location": ""
+    },
+    {
+      "stepId": 93,
+      "note": "La clé grille les fusibles : scanner le boîtier (94) et le mode d'emploi (98).",
+      "location": ""
+    },
+    {
+      "stepId": 98,
+      "note": "Mode d'emploi : combiner Manuel + Ouvert + Passerelle/Hayon arrière.",
+      "location": ""
+    },
+    {
+      "stepId": 94,
+      "note": "CADENAS FUSIBLES (grille 4×4, ligne par ligne) : ON ON OFF OFF / OFF ON ON ON / ON ON OFF OFF / OFF ON OFF OFF = Manuel + Ouvert + arrière.",
+      "location": ""
+    },
+    {
+      "stepId": 99,
+      "note": "FIN : le disque Hamlet est retrouvé.",
+      "location": ""
+    }
+  ]
+}
