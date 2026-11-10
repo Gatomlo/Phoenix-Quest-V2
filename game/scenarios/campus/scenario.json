@@ -1,6 +1,6 @@
 {
   "nameStory": "Mystère sur le campus",
-  "storyIntroduction": "Bienvenue sur le Campus du Phoenix. Nous vous avons fait venir car Pégase, la mascotte de notre université, a disparu à la veille du Gala de rentrée. Nous ne savons pas ce qui s'est passé. S'agit-il d'un canular d'étudiants ? D'un enlèvement ? Nous comptons sur vos talents de détective pour faire la lumière sur cette affaire avant l'arrivée de la police.",
+  "storyIntroduction": "Bienvenue sur le Campus du Phoenix. Nous vous avons fait venir car Pégase, la mascotte de notre université, a disparu à la veille de la rentrée académique. Nous ne savons pas ce qui s'est passé. S'agit-il d'un canular d'étudiants ? D'un enlèvement ? Nous comptons sur vos talents de détective pour faire la lumière sur cette affaire avant l'arrivée de la police.",
   "map": true,
   "mapMedia": "map.png",
   "locationList": true,
@@ -32,7 +32,7 @@
       "closed": false,
       "name": "Accueil",
       "media": "img0.png",
-      "description": "Bienvenue sur le Campus du Phoenix ! </br></br> La direction vous a fait venir car Pégase, la mascotte de l'université, a disparu à la veille du Gala de rentrée. Personne ne sait ce qui s'est passé. Simple canular d'étudiants ? Enlèvement ? Elle compte sur vos talents de détectives pour faire la lumière sur cette affaire avant l'arrivée de la police (et avant la session de rattrapage). Vous devriez commencer par interroger le personnel. Voici le trombinoscope du campus pour vous aider à identifier les membres de l'équipe.</br></br><i>Trouvez et scannez le qr code du trombinoscope pour l'ajouter à votre Inventaire.</i>",
+      "description": "Bienvenue sur le Campus du Phoenix ! </br></br> La direction vous a fait venir car Pégase, la mascotte de l'université, a disparu à la veille de la rentrée académique. Personne ne sait ce qui s'est passé. Simple canular d'étudiants ? Enlèvement ? Elle compte sur vos talents de détectives pour faire la lumière sur cette affaire avant l'arrivée de la police (et avant la session de rattrapage). Vous devriez commencer par interroger le personnel. Voici le trombinoscope du campus pour vous aider à identifier les membres de l'équipe.</br></br><i>Trouvez et scannez le qr code du trombinoscope pour l'ajouter à votre Inventaire.</i>",
       "hint": null,
       "toAdd": [],
       "toRemove": [],
