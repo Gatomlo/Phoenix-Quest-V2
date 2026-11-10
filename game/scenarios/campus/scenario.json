@@ -40,7 +40,8 @@
       "toAssociate": null,
       "definitiveReplace": true,
       "replaceBy": null,
-      "progressBar": false
+      "progressBar": true,
+      "role": "mecanique"
     },
     {
       "id": 1,
@@ -60,7 +61,8 @@
       "toAssociate": null,
       "definitiveReplace": true,
       "replaceBy": null,
-      "progressBar": true
+      "progressBar": true,
+      "role": "mecanique"
     },
     {
       "id": 2,
@@ -88,7 +90,8 @@
       "toAssociate": null,
       "definitiveReplace": true,
       "replaceBy": null,
-      "progressBar": true
+      "progressBar": true,
+      "role": "mecanique"
     },
     {
       "id": 3,
@@ -108,7 +111,8 @@
       "toAssociate": null,
       "definitiveReplace": true,
       "replaceBy": null,
-      "progressBar": false
+      "progressBar": true,
+      "role": "mecanique"
     },
     {
       "id": 4,
@@ -128,7 +132,8 @@
       "toAssociate": null,
       "definitiveReplace": true,
       "replaceBy": null,
-      "progressBar": false
+      "progressBar": true,
+      "role": "narration"
     },
     {
       "id": 5,
@@ -148,7 +153,8 @@
       "toAssociate": null,
       "definitiveReplace": true,
       "replaceBy": null,
-      "progressBar": false
+      "progressBar": true,
+      "role": "narration"
     },
     {
       "id": 6,
@@ -170,7 +176,8 @@
       "toAssociate": 44,
       "definitiveReplace": true,
       "replaceBy": "AC8976-2",
-      "progressBar": true
+      "progressBar": true,
+      "role": "mecanique"
     },
     {
       "id": 7,
@@ -190,7 +197,8 @@
       "toAssociate": null,
       "definitiveReplace": true,
       "replaceBy": null,
-      "progressBar": false
+      "progressBar": true,
+      "role": "mecanique"
     },
     {
       "id": 8,
@@ -210,7 +218,8 @@
       "toAssociate": null,
       "definitiveReplace": true,
       "replaceBy": "DF9799-2",
-      "progressBar": false
+      "progressBar": true,
+      "role": "mecanique"
     },
     {
       "id": 9,
@@ -232,7 +241,8 @@
       "toAssociate": 48,
       "definitiveReplace": true,
       "replaceBy": "AB2792-2",
-      "progressBar": true
+      "progressBar": true,
+      "role": "mecanique"
     },
     {
       "id": 10,
@@ -252,7 +262,8 @@
       "toAssociate": null,
       "definitiveReplace": true,
       "replaceBy": null,
-      "progressBar": false
+      "progressBar": true,
+      "role": "narration"
     },
     {
       "id": 11,
@@ -272,7 +283,8 @@
       "toAssociate": null,
       "definitiveReplace": true,
       "replaceBy": null,
-      "progressBar": false
+      "progressBar": true,
+      "role": "mecanique"
     },
     {
       "id": 12,
@@ -292,7 +304,8 @@
       "toAssociate": null,
       "definitiveReplace": true,
       "replaceBy": null,
-      "progressBar": true
+      "progressBar": true,
+      "role": "mecanique"
     },
     {
       "id": 13,
@@ -312,7 +325,8 @@
       "toAssociate": null,
       "definitiveReplace": true,
       "replaceBy": null,
-      "progressBar": true
+      "progressBar": true,
+      "role": "mecanique"
     },
     {
       "id": 14,
@@ -332,7 +346,8 @@
       "toAssociate": null,
       "definitiveReplace": true,
       "replaceBy": null,
-      "progressBar": true
+      "progressBar": true,
+      "role": "mecanique"
     },
     {
       "id": 15,
@@ -352,7 +367,8 @@
       "toAssociate": 22,
       "definitiveReplace": false,
       "replaceBy": null,
-      "progressBar": true
+      "progressBar": true,
+      "role": "mecanique"
     },
     {
       "id": 16,
@@ -380,7 +396,8 @@
         "AB2799-2",
         "AB2799-4"
       ],
-      "progressBar": false
+      "progressBar": true,
+      "role": "narration"
     },
     {
       "id": 17,
@@ -400,7 +417,8 @@
       "toAssociate": null,
       "definitiveReplace": true,
       "replaceBy": null,
-      "progressBar": true
+      "progressBar": true,
+      "role": "mecanique"
     },
     {
       "id": 18,
@@ -420,7 +438,8 @@
       "toAssociate": null,
       "definitiveReplace": true,
       "replaceBy": null,
-      "progressBar": true
+      "progressBar": true,
+      "role": "mecanique"
     },
     {
       "id": 19,
@@ -442,7 +461,8 @@
       "toAssociate": null,
       "definitiveReplace": true,
       "replaceBy": null,
-      "progressBar": false
+      "progressBar": true,
+      "role": "narration"
     },
     {
       "id": 20,
@@ -462,7 +482,8 @@
       "toAssociate": null,
       "definitiveReplace": true,
       "replaceBy": null,
-      "progressBar": false
+      "progressBar": true,
+      "role": "mecanique"
     },
     {
       "id": 21,
@@ -484,7 +505,8 @@
       "toAssociate": 14,
       "definitiveReplace": true,
       "replaceBy": "AC8983-3",
-      "progressBar": true
+      "progressBar": true,
+      "role": "mecanique"
     },
     {
       "id": 23,
@@ -504,7 +526,8 @@
       "toAssociate": 17,
       "definitiveReplace": true,
       "replaceBy": "AC8983-2",
-      "progressBar": false
+      "progressBar": true,
+      "role": "mecanique"
     },
     {
       "id": 24,
@@ -529,7 +552,8 @@
       "toAssociate": null,
       "definitiveReplace": false,
       "replaceBy": null,
-      "progressBar": true
+      "progressBar": true,
+      "role": "mecanique"
     },
     {
       "id": 25,
@@ -549,7 +573,8 @@
       "toAssociate": null,
       "definitiveReplace": false,
       "replaceBy": null,
-      "progressBar": false
+      "progressBar": true,
+      "role": "mecanique"
     },
     {
       "id": 26,
@@ -569,7 +594,8 @@
       "toAssociate": 15,
       "definitiveReplace": false,
       "replaceBy": "AB2798-2",
-      "progressBar": false
+      "progressBar": true,
+      "role": "mecanique"
     },
     {
       "id": 27,
@@ -589,7 +615,8 @@
       "toAssociate": null,
       "definitiveReplace": false,
       "replaceBy": null,
-      "progressBar": true
+      "progressBar": true,
+      "role": "mecanique"
     },
     {
       "id": 28,
@@ -609,7 +636,8 @@
       "toAssociate": 15,
       "definitiveReplace": false,
       "replaceBy": "AB2798-3",
-      "progressBar": true
+      "progressBar": true,
+      "role": "mecanique"
     },
     {
       "id": 31,
@@ -629,7 +657,8 @@
       "toAssociate": null,
       "definitiveReplace": false,
       "replaceBy": "",
-      "progressBar": false
+      "progressBar": false,
+      "role": "facultative"
     },
     {
       "id": 34,
@@ -651,7 +680,8 @@
       "toAssociate": 15,
       "definitiveReplace": false,
       "replaceBy": "AB2798-4",
-      "progressBar": true
+      "progressBar": true,
+      "role": "mecanique"
     },
     {
       "id": 35,
@@ -671,7 +701,8 @@
       "toAssociate": null,
       "definitiveReplace": true,
       "replaceBy": null,
-      "progressBar": true
+      "progressBar": true,
+      "role": "mecanique"
     },
     {
       "id": 38,
@@ -695,7 +726,8 @@
       "toAssociate": null,
       "definitiveReplace": false,
       "replaceBy": "",
-      "progressBar": true
+      "progressBar": true,
+      "role": "mecanique"
     },
     {
       "id": 39,
@@ -715,7 +747,8 @@
       "toAssociate": null,
       "definitiveReplace": false,
       "replaceBy": "",
-      "progressBar": false
+      "progressBar": false,
+      "role": "facultative"
     },
     {
       "id": 40,
@@ -737,7 +770,8 @@
       "toAssociate": 15,
       "definitiveReplace": false,
       "replaceBy": "AB2798-5",
-      "progressBar": true
+      "progressBar": true,
+      "role": "mecanique"
     },
     {
       "id": 41,
@@ -767,7 +801,8 @@
       "toAssociate": null,
       "definitiveReplace": true,
       "replaceBy": "AB2798-6",
-      "progressBar": true
+      "progressBar": true,
+      "role": "mecanique"
     },
     {
       "id": 42,
@@ -796,7 +831,8 @@
       "toAssociate": 12,
       "definitiveReplace": true,
       "replaceBy": "AB2798-7",
-      "progressBar": false
+      "progressBar": true,
+      "role": "mecanique"
     },
     {
       "id": 43,
@@ -841,7 +877,8 @@
       "toAssociate": null,
       "definitiveReplace": false,
       "replaceBy": null,
-      "progressBar": true
+      "progressBar": true,
+      "role": "mecanique"
     },
     {
       "id": 44,
@@ -861,7 +898,8 @@
       "toAssociate": null,
       "definitiveReplace": true,
       "replaceBy": null,
-      "progressBar": false
+      "progressBar": false,
+      "role": "facultative"
     },
     {
       "id": 45,
@@ -884,7 +922,8 @@
       "toAssociate": null,
       "definitiveReplace": false,
       "replaceBy": "",
-      "progressBar": false
+      "progressBar": true,
+      "role": "narration"
     },
     {
       "id": 47,
@@ -906,7 +945,8 @@
       "toAssociate": null,
       "definitiveReplace": false,
       "replaceBy": null,
-      "progressBar": false
+      "progressBar": false,
+      "role": "facultative"
     },
     {
       "id": 48,
@@ -926,7 +966,8 @@
       "toAssociate": null,
       "definitiveReplace": true,
       "replaceBy": null,
-      "progressBar": false
+      "progressBar": false,
+      "role": "facultative"
     },
     {
       "id": 52,
@@ -946,7 +987,8 @@
       "toAssociate": 12,
       "definitiveReplace": true,
       "replaceBy": "DF9789-2",
-      "progressBar": true
+      "progressBar": true,
+      "role": "mecanique"
     },
     {
       "id": 53,
@@ -968,7 +1010,8 @@
       "toAssociate": null,
       "definitiveReplace": true,
       "replaceBy": null,
-      "progressBar": false
+      "progressBar": true,
+      "role": "mecanique"
     },
     {
       "id": 54,
@@ -999,7 +1042,8 @@
       "toAssociate": null,
       "definitiveReplace": true,
       "replaceBy": "TR6499-2",
-      "progressBar": false
+      "progressBar": true,
+      "role": "mecanique"
     },
     {
       "id": 55,
@@ -1024,7 +1068,8 @@
       "toAssociate": null,
       "definitiveReplace": true,
       "replaceBy": null,
-      "progressBar": true
+      "progressBar": true,
+      "role": "mecanique"
     },
     {
       "id": 56,
@@ -1046,7 +1091,8 @@
       "toAssociate": null,
       "definitiveReplace": true,
       "replaceBy": null,
-      "progressBar": false
+      "progressBar": false,
+      "role": "facultative"
     },
     {
       "id": 57,
@@ -1072,7 +1118,8 @@
       "toAssociate": 72,
       "definitiveReplace": true,
       "replaceBy": "AB2799-3",
-      "progressBar": false
+      "progressBar": false,
+      "role": "narration"
     },
     {
       "id": 58,
@@ -1094,7 +1141,8 @@
       "toAssociate": null,
       "definitiveReplace": true,
       "replaceBy": null,
-      "progressBar": true
+      "progressBar": true,
+      "role": "narration"
     },
     {
       "id": 59,
@@ -1124,7 +1172,8 @@
         "AB2799-3",
         "AB2799-3"
       ],
-      "progressBar": false
+      "progressBar": false,
+      "role": "narration"
     },
     {
       "id": 205,
@@ -1144,7 +1193,8 @@
       "toAssociate": null,
       "definitiveReplace": true,
       "replaceBy": null,
-      "progressBar": true
+      "progressBar": true,
+      "role": "mecanique"
     },
     {
       "id": 71,
@@ -1164,7 +1214,8 @@
       "toAssociate": 12,
       "definitiveReplace": true,
       "replaceBy": "AC8978-2",
-      "progressBar": false
+      "progressBar": true,
+      "role": "mecanique"
     },
     {
       "id": 72,
@@ -1188,7 +1239,8 @@
       "toAssociate": null,
       "definitiveReplace": null,
       "replaceBy": null,
-      "progressBar": true
+      "progressBar": true,
+      "role": "mecanique"
     },
     {
       "id": 73,
@@ -1208,7 +1260,8 @@
       "toAssociate": null,
       "definitiveReplace": null,
       "replaceBy": null,
-      "progressBar": true
+      "progressBar": true,
+      "role": "narration"
     },
     {
       "id": 74,
@@ -1228,7 +1281,8 @@
       "toAssociate": 72,
       "definitiveReplace": true,
       "replaceBy": "TR6509-2",
-      "progressBar": false
+      "progressBar": true,
+      "role": "narration"
     },
     {
       "id": 75,
@@ -1248,7 +1302,8 @@
       "toAssociate": null,
       "definitiveReplace": false,
       "replaceBy": null,
-      "progressBar": true
+      "progressBar": true,
+      "role": "narration"
     },
     {
       "id": 76,
@@ -1275,7 +1330,8 @@
       "toAssociate": null,
       "definitiveReplace": true,
       "replaceBy": "DF9798-2",
-      "progressBar": false
+      "progressBar": true,
+      "role": "mecanique"
     },
     {
       "id": 77,
@@ -1295,7 +1351,8 @@
       "toAssociate": null,
       "definitiveReplace": true,
       "replaceBy": null,
-      "progressBar": false
+      "progressBar": true,
+      "role": "mecanique"
     },
     {
       "id": 79,
@@ -1320,7 +1377,8 @@
       "toAssociate": null,
       "definitiveReplace": true,
       "replaceBy": null,
-      "progressBar": false
+      "progressBar": true,
+      "role": "mecanique"
     },
     {
       "id": 80,
@@ -1342,7 +1400,8 @@
       "toAssociate": null,
       "definitiveReplace": true,
       "replaceBy": null,
-      "progressBar": true
+      "progressBar": true,
+      "role": "mecanique"
     },
     {
       "id": 81,
@@ -1362,7 +1421,8 @@
       "toAssociate": null,
       "definitiveReplace": true,
       "replaceBy": null,
-      "progressBar": true
+      "progressBar": true,
+      "role": "mecanique"
     },
     {
       "id": 82,
@@ -1382,7 +1442,8 @@
       "toAssociate": null,
       "definitiveReplace": true,
       "replaceBy": "AB2791-2",
-      "progressBar": true
+      "progressBar": true,
+      "role": "mecanique"
     },
     {
       "id": 83,
@@ -1402,7 +1463,8 @@
       "toAssociate": null,
       "definitiveReplace": false,
       "replaceBy": null,
-      "progressBar": true
+      "progressBar": true,
+      "role": "mecanique"
     },
     {
       "id": 84,
@@ -1428,7 +1490,8 @@
       "toAssociate": null,
       "definitiveReplace": true,
       "replaceBy": null,
-      "progressBar": true
+      "progressBar": true,
+      "role": "mecanique"
     },
     {
       "id": 90,
@@ -1448,7 +1511,8 @@
       "toAssociate": null,
       "definitiveReplace": true,
       "replaceBy": null,
-      "progressBar": false
+      "progressBar": true,
+      "role": "mecanique"
     },
     {
       "id": 91,
@@ -1468,7 +1532,8 @@
       "toAssociate": null,
       "definitiveReplace": true,
       "replaceBy": null,
-      "progressBar": false
+      "progressBar": true,
+      "role": "narration"
     },
     {
       "id": 92,
@@ -1491,7 +1556,8 @@
       "toAssociate": 90,
       "definitiveReplace": true,
       "replaceBy": "TR6501-3",
-      "progressBar": true
+      "progressBar": true,
+      "role": "mecanique"
     },
     {
       "id": 93,
@@ -1515,7 +1581,8 @@
       "toAssociate": null,
       "definitiveReplace": false,
       "replaceBy": null,
-      "progressBar": true
+      "progressBar": true,
+      "role": "mecanique"
     },
     {
       "id": 94,
@@ -1552,7 +1619,8 @@
       "toAssociate": null,
       "definitiveReplace": true,
       "replaceBy": "AC8977-2",
-      "progressBar": true
+      "progressBar": true,
+      "role": "mecanique"
     },
     {
       "id": 97,
@@ -1572,7 +1640,8 @@
       "toAssociate": null,
       "definitiveReplace": true,
       "replaceBy": null,
-      "progressBar": false
+      "progressBar": false,
+      "role": "facultative"
     },
     {
       "id": 98,
@@ -1592,7 +1661,8 @@
       "toAssociate": null,
       "definitiveReplace": false,
       "replaceBy": null,
-      "progressBar": true
+      "progressBar": true,
+      "role": "mecanique"
     },
     {
       "id": 99,
@@ -1615,7 +1685,8 @@
       "toAssociate": null,
       "definitiveReplace": false,
       "replaceBy": null,
-      "progressBar": true
+      "progressBar": true,
+      "role": "mecanique"
     },
     {
       "id": 144,
@@ -1639,7 +1710,8 @@
       "toAssociate": 97,
       "definitiveReplace": true,
       "replaceBy": "AC8976-3",
-      "progressBar": false
+      "progressBar": false,
+      "role": "facultative"
     },
     {
       "id": 149,
@@ -1696,7 +1768,8 @@
       "toAssociate": null,
       "definitiveReplace": true,
       "replaceBy": null,
-      "progressBar": true
+      "progressBar": true,
+      "role": "mecanique"
     },
     {
       "id": 150,
@@ -1716,7 +1789,8 @@
       "toAssociate": null,
       "definitiveReplace": false,
       "replaceBy": null,
-      "progressBar": false
+      "progressBar": false,
+      "role": "facultative"
     },
     {
       "id": 151,
@@ -1736,7 +1810,8 @@
       "toAssociate": 72,
       "definitiveReplace": true,
       "replaceBy": "AB2801",
-      "progressBar": false
+      "progressBar": true,
+      "role": "mecanique"
     },
     {
       "id": 152,
@@ -1756,7 +1831,8 @@
       "toAssociate": null,
       "definitiveReplace": false,
       "replaceBy": null,
-      "progressBar": false
+      "progressBar": false,
+      "role": "facultative"
     },
     {
       "id": 153,
@@ -1776,7 +1852,8 @@
       "toAssociate": null,
       "definitiveReplace": false,
       "replaceBy": null,
-      "progressBar": false
+      "progressBar": false,
+      "role": "facultative"
     },
     {
       "id": 154,
@@ -1796,7 +1873,8 @@
       "toAssociate": null,
       "definitiveReplace": false,
       "replaceBy": null,
-      "progressBar": false
+      "progressBar": false,
+      "role": "facultative"
     },
     {
       "id": 155,
@@ -1816,7 +1894,8 @@
       "toAssociate": null,
       "definitiveReplace": false,
       "replaceBy": null,
-      "progressBar": false
+      "progressBar": false,
+      "role": "facultative"
     },
     {
       "id": 156,
@@ -1845,7 +1924,8 @@
       "toAssociate": null,
       "definitiveReplace": false,
       "replaceBy": null,
-      "progressBar": true
+      "progressBar": true,
+      "role": "mecanique"
     }
   ]
 }
