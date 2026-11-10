@@ -215,6 +215,58 @@ const addStepSelect = document.getElementById('addStepSelect');
 const guideList = document.getElementById('guideList');
 const guideEmpty = document.getElementById('guideEmpty');
 const saveStatus = document.getElementById('guideSaveStatus');
+const guideToolbar = document.getElementById('guideToolbar');
+const guideFilterButtons = guideToolbar.querySelectorAll('[data-filter]');
+const guideFilterInfo = document.getElementById('guideFilterInfo');
+
+// Une étape « facultative » est une étape qui ne fait pas avancer la barre de
+// progression (progressBar: false), comme dans le jeu. Sans barre de
+// progression au niveau du scénario, la notion n'a plus de sens.
+function isOptionalStep(step) {
+  return Boolean(scenario.progressBar) && Boolean(step) && !step.progressBar;
+}
+
+const FILTER_STORAGE_KEY = 'phoenixGuideFilter';
+let guideFilter = 'all';
+try {
+  if (localStorage.getItem(FILTER_STORAGE_KEY) === 'counted') guideFilter = 'counted';
+} catch { /* stockage indisponible : filtre par défaut */ }
+
+function isEntryVisible(entry) {
+  return guideFilter === 'all' || !isOptionalStep(findStep(entry.stepId));
+}
+
+// Les flèches Monter/Descendre échangent avec l'entrée VISIBLE voisine, pour
+// ne pas faire « sauter » une entrée masquée par le filtre.
+function adjacentVisibleIndex(index, direction) {
+  for (let i = index + direction; i >= 0 && i < guide.entries.length; i += direction) {
+    if (isEntryVisible(guide.entries[i])) return i;
+  }
+  return -1;
+}
+
+function updateToolbar() {
+  const optionalCount = guide.entries.filter((e) => isOptionalStep(findStep(e.stepId))).length;
+  // Barre masquée si le scénario n'a pas de progression ou aucune étape facultative dans le guide.
+  guideToolbar.hidden = !scenario.progressBar || optionalCount === 0;
+  if (guideToolbar.hidden) guideFilter = 'all';
+  const total = guide.entries.length;
+  guideFilterButtons.forEach((button) => {
+    const on = button.dataset.filter === guideFilter;
+    button.classList.toggle('on', on);
+    button.setAttribute('aria-pressed', String(on));
+    button.querySelector('.count').textContent = button.dataset.filter === 'all' ? total : total - optionalCount;
+  });
+  guideFilterInfo.textContent = `${optionalCount} étape${optionalCount > 1 ? 's' : ''} facultative${optionalCount > 1 ? 's' : ''} (ne comptent pas dans la progression)`;
+}
+
+guideToolbar.addEventListener('click', (event) => {
+  const button = event.target.closest('[data-filter]');
+  if (!button) return;
+  guideFilter = button.dataset.filter;
+  try { localStorage.setItem(FILTER_STORAGE_KEY, guideFilter); } catch { /* non bloquant */ }
+  renderGuideList();
+});
 
 if (isViewMode) {
   guideEmpty.textContent = 'Aucune étape dans ce guide pour l\'instant.';
@@ -262,22 +314,36 @@ function entryActionsHtml(index, noQr) {
     return `<div class="guide-entry-actions">${qrBtn}</div>`;
   }
   return `<div class="guide-entry-actions">
-    <button type="button" class="btn btn-secondary btn-sm guide-move-up" title="Monter" ${index === 0 ? 'disabled' : ''}>↑</button>
-    <button type="button" class="btn btn-secondary btn-sm guide-move-down" title="Descendre" ${index === guide.entries.length - 1 ? 'disabled' : ''}>↓</button>
+    <button type="button" class="btn btn-secondary btn-sm guide-move-up" title="Monter" ${adjacentVisibleIndex(index, -1) === -1 ? 'disabled' : ''}>↑</button>
+    <button type="button" class="btn btn-secondary btn-sm guide-move-down" title="Descendre" ${adjacentVisibleIndex(index, 1) === -1 ? 'disabled' : ''}>↓</button>
     ${qrBtn}
     <button type="button" class="btn btn-danger btn-sm guide-remove">Retirer</button>
   </div>`;
 }
 
 function renderGuideList() {
-  guideEmpty.hidden = guide.entries.length > 0;
+  updateToolbar();
+  const visibleCount = guide.entries.filter(isEntryVisible).length;
+  guideEmpty.hidden = visibleCount > 0;
+  if (guide.entries.length > 0 && visibleCount === 0) {
+    guideEmpty.textContent = 'Aucune étape à afficher avec ce filtre.';
+  } else {
+    guideEmpty.textContent = isViewMode
+      ? 'Aucune étape dans ce guide pour l\'instant.'
+      : 'Aucune étape dans ce guide pour l\'instant. Ajoutez-en une ci-dessus pour commencer le parcours.';
+  }
 
+  let rank = 0;
   guideList.innerHTML = guide.entries.map((entry, index) => {
+    if (!isEntryVisible(entry)) return '';
+    rank += 1;
     const step = findStep(entry.stepId);
     const noQr = !step?.code;
-    return `<li class="guide-entry card" data-index="${index}">
+    const optional = isOptionalStep(step);
+    return `<li class="guide-entry card${optional ? ' guide-entry-optional' : ''}" data-index="${index}">
+      ${optional ? '<div class="guide-entry-ribbon" title="Cette étape ne fait pas avancer la barre de progression (progressBar: false)">Facultative · ne compte pas dans la progression</div>' : ''}
       <div class="guide-entry-header">
-        <span class="guide-entry-index">${index + 1}</span>
+        <span class="guide-entry-index">${rank}</span>
         ${imgTag(stepImageSrc(step), 'guide-entry-thumb')}
         <div class="guide-entry-title">
           <strong class="guide-entry-name">${step ? escapeHtml(step.name || '(sans nom)') : '(étape introuvable — supprimée du scénario ?)'}</strong>
@@ -319,13 +385,17 @@ guideList.addEventListener('click', async (event) => {
 
   if (isViewMode) return;
 
-  if (event.target.classList.contains('guide-move-up') && index > 0) {
-    [guide.entries[index - 1], guide.entries[index]] = [guide.entries[index], guide.entries[index - 1]];
+  if (event.target.classList.contains('guide-move-up')) {
+    const other = adjacentVisibleIndex(index, -1);
+    if (other === -1) return;
+    [guide.entries[other], guide.entries[index]] = [guide.entries[index], guide.entries[other]];
     renderGuideList();
     return;
   }
-  if (event.target.classList.contains('guide-move-down') && index < guide.entries.length - 1) {
-    [guide.entries[index + 1], guide.entries[index]] = [guide.entries[index], guide.entries[index + 1]];
+  if (event.target.classList.contains('guide-move-down')) {
+    const other = adjacentVisibleIndex(index, 1);
+    if (other === -1) return;
+    [guide.entries[other], guide.entries[index]] = [guide.entries[index], guide.entries[other]];
     renderGuideList();
     return;
   }
@@ -346,6 +416,10 @@ if (!isViewMode) {
     guide.entries.push({ stepId, note: '', location: '' });
     renderAddSelect();
     renderGuideList();
+    if (!isEntryVisible(guide.entries[guide.entries.length - 1])) {
+      saveStatus.textContent = 'Étape facultative ajoutée (masquée par le filtre actuel).';
+      setTimeout(() => { saveStatus.textContent = ''; }, 4000);
+    }
   });
 
   document.getElementById('saveGuideButton').addEventListener('click', async () => {
