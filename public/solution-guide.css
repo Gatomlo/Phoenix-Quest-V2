@@ -1,6 +1,28 @@
 .guide-add-row { display: flex; gap: .5rem; margin-bottom: .75rem; }
 .guide-add-row select { flex: 1; }
 
+.guide-toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: .6rem .9rem; margin-bottom: .9rem; font-size: .85rem; }
+.guide-filter { display: inline-flex; background: var(--soft); border-radius: .65rem; padding: 3px; }
+.guide-filter button { font: inherit; font-size: .82rem; font-weight: 600; border: 0; background: none; color: var(--muted); border-radius: .45rem; padding: .35rem .8rem; cursor: pointer; }
+.guide-filter button.on { background: var(--primary); color: var(--on-primary); }
+.guide-filter .count { opacity: .75; font-weight: 500; margin-left: .15rem; }
+.guide-filter .count::before { content: "("; }
+.guide-filter .count::after { content: ")"; }
+
+.guide-entry-optional { border-left: 4px solid var(--primary); overflow: hidden; }
+.guide-entry-ribbon {
+  margin: -.9rem -1rem .7rem;
+  padding: .3rem 1rem;
+  background: var(--alert-bg);
+  border-bottom: 1px solid var(--alert-border);
+  color: var(--primary-dark);
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+.guide-entry-optional .guide-entry-index { background: var(--soft-2); color: var(--text); }
+
 .guide-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: .75rem; }
 
 .guide-entry { padding: .9rem 1rem; }
