@@ -219,26 +219,63 @@ const guideList = document.getElementById('guideList');
 const guideEmpty = document.getElementById('guideEmpty');
 const saveStatus = document.getElementById('guideSaveStatus');
 const guideToolbar = document.getElementById('guideToolbar');
-const guideFilterButtons = guideToolbar.querySelectorAll('[data-filter]');
+const guideFilterGroup = document.getElementById('guideFilterGroup');
 const guideFilterInfo = document.getElementById('guideFilterInfo');
 
-// Une étape « non comptée » ne fait pas avancer la barre de progression
-// (progressBar: false), comme dans le jeu. Attention : ce n'est PAS la même
-// chose qu'une étape facultative — un lieu de passage ou un cadenas peut ne pas
-// compter tout en étant indispensable pour continuer. Sans barre de
-// progression au niveau du scénario, la notion n'a plus de sens.
-function isOptionalStep(step) {
-  return Boolean(scenario.progressBar) && Boolean(step) && !step.progressBar;
+// Rôle d'une étape dans l'histoire (champ `role` du scénario, informatif : le
+// jeu ne lit que `progressBar`) :
+//  - mecanique   : obligatoire, fait avancer le scénario ;
+//  - narration   : bonus narratif, fait avancer l'histoire sans bloquer ;
+//  - facultative : fausse piste.
+// Un scénario sans `role` retombe sur la seule information progressBar, qui
+// n'est PAS un synonyme de « facultative » (un lieu de passage peut ne pas
+// compter tout en étant indispensable).
+const ROLE_LABELS = { mecanique: 'Obligatoire', narration: 'Bonus narratif', facultative: 'Facultative' };
+const hasRoles = scenario.steps.some((s) => ROLE_LABELS[s.role]);
+
+function stepRole(step) {
+  return step && ROLE_LABELS[step.role] ? step.role : null;
 }
+
+// Bandeau à afficher sur une étape (null = aucun).
+function ribbonFor(step) {
+  const role = stepRole(step);
+  if (role === 'facultative') {
+    return { kind: 'facultative', text: 'Facultative · fausse piste, ne compte pas dans la progression', title: 'Cette étape peut être ignorée sans bloquer la résolution (progressBar: false).' };
+  }
+  if (role === 'narration') {
+    return step.progressBar
+      ? { kind: 'narration', text: 'Bonus narratif', title: 'Ne bloque pas le scénario mais fait avancer l\'histoire ; compte dans la progression.' }
+      : { kind: 'narration', text: 'Bonus narratif · ne compte pas dans la progression', title: 'Chemin alternatif : un seul de ces chemins est joué, il n\'est donc pas compté.' };
+  }
+  if (!role && scenario.progressBar && step && !step.progressBar) {
+    return { kind: 'uncounted', text: 'Ne compte pas dans la progression', title: 'Cette étape ne fait pas avancer la barre de progression (progressBar: false). Elle peut quand même être nécessaire pour continuer.' };
+  }
+  return null;
+}
+
+const FILTERS = hasRoles
+  ? [
+      { id: 'all', label: 'Toutes', test: () => true },
+      { id: 'story', label: 'Sans les facultatives', test: (step) => stepRole(step) !== 'facultative' },
+      { id: 'required', label: 'Obligatoires', test: (step) => stepRole(step) === 'mecanique' }
+    ]
+  : [
+      { id: 'all', label: 'Toutes les étapes', test: () => true },
+      { id: 'counted', label: 'Étapes comptées', test: (step) => !scenario.progressBar || Boolean(step?.progressBar) }
+    ];
 
 const FILTER_STORAGE_KEY = 'phoenixGuideFilter';
 let guideFilter = 'all';
 try {
-  if (localStorage.getItem(FILTER_STORAGE_KEY) === 'counted') guideFilter = 'counted';
+  const saved = localStorage.getItem(FILTER_STORAGE_KEY);
+  if (FILTERS.some((f) => f.id === saved)) guideFilter = saved;
 } catch { /* stockage indisponible : filtre par défaut */ }
 
 function isEntryVisible(entry) {
-  return guideFilter === 'all' || !isOptionalStep(findStep(entry.stepId));
+  const step = findStep(entry.stepId);
+  if (!step) return true; // étape introuvable : on la garde visible pour la signaler
+  return FILTERS.find((f) => f.id === guideFilter).test(step);
 }
 
 // Les flèches Monter/Descendre échangent avec l'entrée VISIBLE voisine, pour
@@ -251,21 +288,27 @@ function adjacentVisibleIndex(index, direction) {
 }
 
 function updateToolbar() {
-  const optionalCount = guide.entries.filter((e) => isOptionalStep(findStep(e.stepId))).length;
-  // Barre masquée si le scénario n'a pas de progression ou aucune étape non comptée dans le guide.
-  guideToolbar.hidden = !scenario.progressBar || optionalCount === 0;
+  const flagged = guide.entries.filter((e) => ribbonFor(findStep(e.stepId))).length;
+  // Rien à filtrer : on masque la barre.
+  guideToolbar.hidden = flagged === 0;
   if (guideToolbar.hidden) guideFilter = 'all';
-  const total = guide.entries.length;
-  guideFilterButtons.forEach((button) => {
-    const on = button.dataset.filter === guideFilter;
-    button.classList.toggle('on', on);
-    button.setAttribute('aria-pressed', String(on));
-    button.querySelector('.count').textContent = button.dataset.filter === 'all' ? total : total - optionalCount;
-  });
-  guideFilterInfo.textContent = `${optionalCount} étape${optionalCount > 1 ? 's' : ''} ne compte${optionalCount > 1 ? 'nt' : ''} pas dans la progression (elles peuvent rester nécessaires pour avancer)`;
+  guideFilterGroup.innerHTML = FILTERS.map((f) => {
+    const count = guide.entries.filter((e) => {
+      const step = findStep(e.stepId);
+      return !step || f.test(step);
+    }).length;
+    const on = f.id === guideFilter;
+    return `<button type="button" data-filter="${f.id}" class="${on ? 'on' : ''}" aria-pressed="${on}">${f.label} <span class="count">${count}</span></button>`;
+  }).join('');
+  if (hasRoles) {
+    const byRole = (role) => guide.entries.filter((e) => stepRole(findStep(e.stepId)) === role).length;
+    guideFilterInfo.textContent = `${byRole('mecanique')} obligatoires · ${byRole('narration')} bonus narratifs · ${byRole('facultative')} facultatives`;
+  } else {
+    guideFilterInfo.textContent = `${flagged} étape${flagged > 1 ? 's' : ''} ne compte${flagged > 1 ? 'nt' : ''} pas dans la progression (elles peuvent rester nécessaires pour avancer)`;
+  }
 }
 
-guideToolbar.addEventListener('click', (event) => {
+guideFilterGroup.addEventListener('click', (event) => {
   const button = event.target.closest('[data-filter]');
   if (!button) return;
   guideFilter = button.dataset.filter;
@@ -344,9 +387,9 @@ function renderGuideList() {
     rank += 1;
     const step = findStep(entry.stepId);
     const noQr = !step?.code;
-    const optional = isOptionalStep(step);
-    return `<li class="guide-entry card${optional ? ' guide-entry-optional' : ''}" data-index="${index}">
-      ${optional ? '<div class="guide-entry-ribbon" title="Cette étape ne fait pas avancer la barre de progression (progressBar: false). Elle peut quand même être nécessaire pour continuer.">Ne compte pas dans la progression</div>' : ''}
+    const ribbon = ribbonFor(step);
+    return `<li class="guide-entry card${ribbon ? ` guide-entry-${ribbon.kind}` : ''}" data-index="${index}">
+      ${ribbon ? `<div class="guide-entry-ribbon" title="${escapeHtml(ribbon.title)}">${escapeHtml(ribbon.text)}</div>` : ''}
       <div class="guide-entry-header">
         <span class="guide-entry-index">${rank}</span>
         ${imgTag(stepImageSrc(step), 'guide-entry-thumb')}
@@ -422,7 +465,7 @@ if (!isViewMode) {
     renderAddSelect();
     renderGuideList();
     if (!isEntryVisible(guide.entries[guide.entries.length - 1])) {
-      saveStatus.textContent = 'Étape non comptée ajoutée (masquée par le filtre actuel).';
+      saveStatus.textContent = 'Étape ajoutée (masquée par le filtre actuel).';
       setTimeout(() => { saveStatus.textContent = ''; }, 4000);
     }
   });

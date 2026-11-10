@@ -853,6 +853,7 @@ function selectStep(index) {
   document.getElementById('stepDefault').checked = !!step.default;
   document.getElementById('stepClosed').checked = !!step.closed;
   document.getElementById('stepProgressBar').checked = !!step.progressBar;
+  document.getElementById('stepRole').value = ['mecanique', 'narration', 'facultative'].includes(step.role) ? step.role : '';
   document.getElementById('stepDefinitiveReplace').checked = !!step.definitiveReplace;
   document.getElementById('stepDescription').value = step.description || '';
   document.getElementById('stepHint').value = step.hint || '';
@@ -941,6 +942,7 @@ stepForm.addEventListener('submit', (event) => {
     default: document.getElementById('stepDefault').checked,
     closed: document.getElementById('stepClosed').checked,
     progressBar: document.getElementById('stepProgressBar').checked,
+    ...(document.getElementById('stepRole').value ? { role: document.getElementById('stepRole').value } : {}),
     definitiveReplace: document.getElementById('stepDefinitiveReplace').checked,
     description: document.getElementById('stepDescription').value,
     hint: document.getElementById('stepHint').value,
@@ -1105,3 +1107,10 @@ document.getElementById('deleteScenarioButton').addEventListener('click', async 
 });
 
 loadScenarioList();
+
+// Choisir un rôle propose la valeur habituelle de « Compte dans la progression »
+// (obligatoire et bonus comptent, facultative non) ; la case reste modifiable,
+// par exemple pour deux chemins alternatifs dont un seul est joué.
+document.getElementById('stepRole')?.addEventListener('change', (event) => {
+  if (event.target.value) document.getElementById('stepProgressBar').checked = event.target.value !== 'facultative';
+});

@@ -39,6 +39,18 @@ Mobile des aveux de Josette : campus = « un cheval blanc pour enlever l'amour d
 
 Les lieux et métiers sont volontairement génériques pour qu'on puisse jouer sur n'importe quel campus ou dans n'importe quelle entreprise : accueil, hall central, bureau de la direction, cafétéria et cuisine, local technique, bibliothèque ou archives, vestiaire et casiers, parking, coin tranquille. Pas de jardin, de serre, d'animalerie, de salle serveurs ni de toit-terrasse. Chaque lieu du scénario correspond à un endroit réel du site, avec un QR code collé dessus ; le choix des endroits est libre tant que l'enchaînement reste le même.
 
+## Rôle des étapes et progression
+
+Chaque étape porte un champ `role` (informatif, lu seulement par le guide de solution) :
+
+| Rôle | Étapes | Compte dans la barre (`progressBar`) |
+|---|---|---|
+| `mecanique` : obligatoire, fait avancer le scénario | 54 | oui |
+| `narration` : bonus narratif, fait avancer l'histoire sans bloquer | 13 | oui, sauf 57 et 59 |
+| `facultative` : fausse piste (Julian, Mika, Gérard, fausses accusations) | 13 | non |
+
+Les étapes 57 et 59 (Josette, « par les livres » ou « par la facture ») sont deux chemins alternatifs : un seul est joué, aucun n'est compté, l'aveu (58) compte. La barre compte donc **65 étapes** (chacune vaut environ 1,5 %).
+
 ## Solutions des cadenas (identiques dans les deux versions)
 
 | Étape | Type | Solution |

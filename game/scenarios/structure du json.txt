@@ -25,6 +25,11 @@
     "toAdd":[] array contenant toutes les étapes qui doivent être ajoutée en même temps,
     "toRemove":[] array contenant toutes les étapes qui doivent être retirée en même temps,
     "needBefore":[] ids des étapes qui doivent avoir été consultée avant de pouvoir consulter celle-ci,
+    "progressBar":true/false si l'étape fait avancer la barre de progression (et donc le score),
+    "role":"mecanique/narration/facultative" (optionnel, informatif : n'est lu que par le guide de solution)
+      mecanique = obligatoire, fait avancer le scénario (progressBar true)
+      narration = bonus narratif, fait avancer l'histoire sans bloquer (progressBar true ; false si c'est l'un de deux chemins alternatifs dont un seul est joué)
+      facultative = fausse piste (progressBar false),
     "toAssociate":null id de l'objet qui peut être associé à cette étape,
     "replaceBy":"code de l'étape qui doit remplacer celle-ci quand on clique sur le lien ou quand on rescanne le qr code"
   },

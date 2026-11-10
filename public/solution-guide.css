@@ -9,7 +9,9 @@
 .guide-filter .count::before { content: "("; }
 .guide-filter .count::after { content: ")"; }
 
-.guide-entry-optional { border-left: 4px solid var(--primary); overflow: hidden; }
+.guide-entry-facultative, .guide-entry-narration, .guide-entry-uncounted { border-left: 4px solid var(--primary); overflow: hidden; }
+.guide-entry-narration { border-left-color: var(--success); }
+.guide-entry-uncounted { border-left-color: var(--soft-2); }
 .guide-entry-ribbon {
   margin: -.9rem -1rem .7rem;
   padding: .3rem 1rem;
@@ -21,7 +23,9 @@
   letter-spacing: .04em;
   text-transform: uppercase;
 }
-.guide-entry-optional .guide-entry-index { background: var(--soft-2); color: var(--text); }
+.guide-entry-narration .guide-entry-ribbon { background: rgba(75, 150, 125, .14); border-bottom-color: rgba(75, 150, 125, .35); color: var(--success-text); }
+.guide-entry-uncounted .guide-entry-ribbon { background: var(--soft); border-bottom-color: var(--border); color: var(--muted); }
+.guide-entry-facultative .guide-entry-index, .guide-entry-uncounted .guide-entry-index { background: var(--soft-2); color: var(--text); }
 
 .guide-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: .75rem; }
 
