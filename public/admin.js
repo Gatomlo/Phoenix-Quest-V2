@@ -60,6 +60,36 @@ document.getElementById('moreActionsSavesItem').addEventListener('click', () => 
 // "Empêcher cette page de créer d'autres boîtes de dialogue", ce qui rend
 // confirm() muet (annule silencieusement) pour le reste de la page — une
 // boîte de dialogue maison ne peut pas être désactivée de cette façon.
+// Echappement HTML : tout ce qui vient d'un joueur (nom d'equipe, code saisi) ou d'un scenario importe doit passer
+// par la avant d'entrer dans un innerHTML.
+function escapeHtml(str) {
+  return String(str ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+// HTML riche d'un scenario (descriptions d'etapes) : liste blanche de balises simples, aucun attribut dangereux,
+// liens http(s)/mailto seulement. Evite qu'un scenario importe n'execute du code dans le tableau de bord.
+const SAFE_TAGS = new Set(['P', 'BR', 'STRONG', 'B', 'EM', 'I', 'U', 'UL', 'OL', 'LI', 'H1', 'H2', 'H3', 'H4', 'SPAN', 'DIV', 'BLOCKQUOTE', 'A', 'IMG']);
+function sanitizeHtml(html) {
+  const doc = new DOMParser().parseFromString(String(html), 'text/html');
+  const walk = (node) => {
+    for (const child of [...node.childNodes]) {
+      if (child.nodeType === 8) { child.remove(); continue; }
+      if (child.nodeType !== 1) continue;
+      if (!SAFE_TAGS.has(child.tagName)) { child.replaceWith(document.createTextNode(child.textContent)); continue; }
+      for (const attr of [...child.attributes]) {
+        const name = attr.name.toLowerCase();
+        const okHref = name === 'href' && /^(https?:|mailto:)/i.test(attr.value.trim());
+        const okSrc = name === 'src' && child.tagName === 'IMG' && /^(https?:\/\/|[\w./-]+$)/i.test(attr.value.trim());
+        if (!(okHref || okSrc || name === 'alt' || name === 'title')) child.removeAttribute(attr.name);
+      }
+      if (child.tagName === 'A') { child.setAttribute('rel', 'noopener noreferrer'); child.setAttribute('target', '_blank'); }
+      walk(child);
+    }
+  };
+  walk(doc.body);
+  return doc.body.innerHTML;
+}
+
 function confirmAction(message, { confirmLabel = 'Confirmer' } = {}) {
   return new Promise((resolve) => {
     const dialog = document.getElementById('confirmDialog');
@@ -200,7 +230,7 @@ async function loadScenarioOptions() {
   try {
     const { scenarios } = await apiFetch('/scenarios');
     select.innerHTML = scenarios.length
-      ? scenarios.map((s) => `<option value="${s.code}">${s.name} (${s.code})</option>`).join('')
+      ? scenarios.map((s) => `<option value="${escapeHtml(s.code)}">${escapeHtml(s.name)} (${escapeHtml(s.code)})</option>`).join('')
       : '<option value="" disabled selected>Aucun scénario trouvé</option>';
     updateGlobalLeaderboardLink();
     select.addEventListener('change', updateGlobalLeaderboardLink);
@@ -243,7 +273,7 @@ function buildStepOptionsHtml(teamId) {
     const label = s.name || 'Étape ' + s.id;
     const lockIcon = s.lockType != null ? '🔒 ' : '';
     const visitedStyle = visited.has(String(s.id)) ? ' style="text-decoration: line-through;"' : '';
-    return `<option value="${s.id}"${visitedStyle}>${lockIcon}${label}${s.code ? ` (${s.code})` : ''}</option>`;
+    return `<option value="${escapeHtml(s.id)}"${visitedStyle}>${lockIcon}${escapeHtml(label)}${s.code ? ` (${escapeHtml(s.code)})` : ''}</option>`;
   };
   // Non vues d'abord (ce qui reste à faire, le plus utile pour suivre une
   // équipe en direct), étapes déjà vues barrées et reléguées à la fin.
@@ -310,7 +340,7 @@ function sessionRow(session) {
   const li = document.createElement('li');
   li.dataset.sessionId = session.id;
   li.innerHTML = `
-    <span><strong>${session.code}</strong> — ${session.scenario_code}${session.name ? ' · ' + session.name : ''}
+    <span><strong>${escapeHtml(session.code)}</strong> — ${escapeHtml(session.scenario_code)}${session.name ? ' · ' + escapeHtml(session.name) : ''}
       <span class="badge ${session.status}">${SESSION_STATUS_LABELS[session.status] || session.status}</span>
       <span class="unread-badge" hidden></span>
     </span>
@@ -528,10 +558,10 @@ async function loadScenarioSaves() {
   saves.forEach((save) => {
     const li = document.createElement('li');
     const teamOptions = [...teamCardById.keys()]
-      .map((teamId) => `<option value="${teamId}">${teamCardById.get(teamId).querySelector('.team-name').textContent}</option>`)
+      .map((teamId) => `<option value="${escapeHtml(teamId)}">${escapeHtml(teamCardById.get(teamId).querySelector('.team-name').textContent)}</option>`)
       .join('');
     li.innerHTML = `
-      <span class="save-name">${save.name}</span>
+      <span class="save-name">${escapeHtml(save.name)}</span>
       <span class="save-date">${new Date(save.created_at).toLocaleString('fr-FR')}</span>
       <select class="save-target-team">${teamOptions || '<option value="">Aucune équipe</option>'}</select>
       <button type="button" class="btn btn-sm btn-secondary save-load-btn">Charger</button>
@@ -839,8 +869,8 @@ function renderTeamCard(team) {
       const imgSrc = step.media ? scenarioImageUrl(currentScenarioCode, step.media) : '';
       const description = (step.description || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 100);
       preview.innerHTML = `<div class="unlock-step-preview-item">
-        ${imgSrc ? `<img src="${imgSrc}" alt="" onerror="this.remove()">` : ''}
-        <div><strong>${step.name || '(sans nom)'}</strong>${description ? `<p>${description}${description.length >= 100 ? '…' : ''}</p>` : ''}</div>
+        ${imgSrc ? `<img src="${escapeHtml(imgSrc)}" alt="" onerror="this.remove()">` : ''}
+        <div><strong>${escapeHtml(step.name || '(sans nom)')}</strong>${description ? `<p>${escapeHtml(description)}${description.length >= 100 ? '…' : ''}</p>` : ''}</div>
       </div>`;
     };
     card.querySelector('.unlock-step-input').addEventListener('change', renderUnlockStepPreview);
@@ -1035,7 +1065,8 @@ function historyRow(event) {
   const step = stepId != null ? getStepSync(stepId) : null;
   const lockIcon = step && step.lockType != null ? '🔒 ' : '';
 
-  li.innerHTML = `<span>${lockIcon}${label}</span><span class="history-time"></span>`;
+  // `label` contient le code saisi par le joueur (payload.code) : toujours echappe.
+  li.innerHTML = `<span>${lockIcon}${escapeHtml(label)}</span><span class="history-time"></span>`;
   li.querySelector('.history-time').textContent = toDate(event.created_at).toLocaleTimeString('fr-FR');
   if (stepId != null) {
     li.addEventListener('click', () => openStepPreview(stepId, event));
@@ -1092,9 +1123,9 @@ async function openStepPreview(stepId, event) {
     title.textContent = step.name || `Étape ${step.id}`;
     meta.textContent = event ? `Vu le ${toDate(event.created_at).toLocaleString('fr-FR')}` : '';
     if (step.media) {
-      image.innerHTML = `<img src="${scenarioImageUrl(currentScenarioCode, step.media)}" alt="">`;
+      image.innerHTML = `<img src="${escapeHtml(scenarioImageUrl(currentScenarioCode, step.media))}" alt="">`;
     }
-    description.innerHTML = step.description || '<em>Pas de description.</em>';
+    description.innerHTML = step.description ? sanitizeHtml(step.description) : '<em>Pas de description.</em>';
 
     if (event?.team_id && isStepUnlockable(step)) {
       unlockButton.hidden = false;

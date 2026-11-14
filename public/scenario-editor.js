@@ -21,6 +21,12 @@ document.addEventListener('click', (event) => {
   if (closer) closer.closest('dialog')?.close();
 });
 
+// Echappement HTML : tout ce qui vient d'un joueur (nom d'equipe, code saisi) ou d'un scenario importe doit passer
+// par la avant d'entrer dans un innerHTML.
+function escapeHtml(str) {
+  return String(str ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
 function confirmAction(message, { confirmLabel = 'Confirmer' } = {}) {
   return new Promise((resolve) => {
     const dialog = document.getElementById('confirmDialog');
@@ -72,7 +78,7 @@ async function loadScenarioList() {
   scenarios.forEach((s) => {
     const li = document.createElement('li');
     li.innerHTML = `
-      <span><strong>${s.code}</strong> — ${s.name}</span>
+      <span><strong>${escapeHtml(s.code)}</strong> — ${escapeHtml(s.name)}</span>
       <span class="session-row-meta">
         <button type="button" class="btn btn-secondary btn-sm scenario-export-btn">Télécharger</button>
         <button type="button" class="btn btn-danger btn-sm scenario-delete-btn">Supprimer</button>
@@ -234,7 +240,7 @@ function renderLastStepSelect() {
   const select = document.getElementById('fieldLastStepId');
   const sorted = [...currentScenario.steps].sort((a, b) => (a.name || '').localeCompare(b.name || '', 'fr', { sensitivity: 'base' }));
   select.innerHTML = '<option value="">Aucune</option>' +
-    sorted.map((s) => `<option value="${s.id}">${s.name || '(sans nom)'} #${s.id}</option>`).join('');
+    sorted.map((s) => `<option value="${escapeHtml(s.id)}">${escapeHtml(s.name || '(sans nom)')} #${s.id}</option>`).join('');
   select.value = currentScenario.lastStepId ?? '';
 }
 
@@ -298,7 +304,7 @@ function renderStepList() {
       li.className = 'step-list-item';
       if (index === editingStepIndex) li.classList.add('active');
       const lockIcon = step.lockType ? '🔒 ' : '';
-      li.innerHTML = `<span>${lockIcon}${step.name || '(sans nom)'} <span class="muted">#${step.id}</span></span>`;
+      li.innerHTML = `<span>${lockIcon}${escapeHtml(step.name || '(sans nom)')} <span class="muted">#${step.id}</span></span>`;
       li.addEventListener('click', () => selectStep(index));
       stepList.appendChild(li);
     });
@@ -338,7 +344,7 @@ function renderReferenceSelects(excludeId) {
     .filter((s) => s.id !== excludeId)
     .sort((a, b) => (a.name || '').localeCompare(b.name || '', 'fr', { sensitivity: 'base' }));
 
-  const byIdOptions = sorted.map((s) => `<option value="${s.id}">${s.name || '(sans nom)'} #${s.id}</option>`).join('');
+  const byIdOptions = sorted.map((s) => `<option value="${escapeHtml(s.id)}">${escapeHtml(s.name || '(sans nom)')} #${s.id}</option>`).join('');
 
   document.getElementById('stepNeedBefore').innerHTML = '<option value="">Aucune</option>' + byIdOptions;
   document.getElementById('stepToAdd').innerHTML = byIdOptions;
@@ -347,10 +353,10 @@ function renderReferenceSelects(excludeId) {
   const toAssociate = document.getElementById('stepToAssociate');
   const objects = sorted.filter((s) => s.type === 'object');
   toAssociate.innerHTML = '<option value="">Aucun</option>' +
-    objects.map((s) => `<option value="${s.id}">${s.name || '(sans nom)'} #${s.id}</option>`).join('');
+    objects.map((s) => `<option value="${escapeHtml(s.id)}">${escapeHtml(s.name || '(sans nom)')} #${s.id}</option>`).join('');
 
   const replaceBy = document.getElementById('stepReplaceBy');
-  replaceBy.innerHTML = sorted.map((s) => `<option value="${s.code || ''}">${s.name || '(sans nom)'} #${s.id}${s.code ? ` (${s.code})` : ''}</option>`).join('');
+  replaceBy.innerHTML = sorted.map((s) => `<option value="${escapeHtml(s.code || '')}">${escapeHtml(s.name || '(sans nom)')} #${s.id}${s.code ? ` (${escapeHtml(s.code)})` : ''}</option>`).join('');
 }
 
 // Miniature + début de la description de la (ou des) étape(s) sélectionnée
@@ -373,8 +379,8 @@ function renderReferencePreview(selectId, previewId, { byCode = false } = {}) {
     const imgSrc = step.media ? scenarioImageUrl(currentScenarioCode, step.media) : '';
     const description = (step.description || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 90);
     return `<div class="reference-preview-item">
-      ${imgSrc ? `<img src="${imgSrc}" alt="" onerror="this.remove()">` : ''}
-      <div><strong>${step.name || '(sans nom)'}</strong>${description ? `<p>${description}${description.length >= 90 ? '…' : ''}</p>` : ''}</div>
+      ${imgSrc ? `<img src="${escapeHtml(imgSrc)}" alt="" onerror="this.remove()">` : ''}
+      <div><strong>${escapeHtml(step.name || '(sans nom)')}</strong>${description ? `<p>${escapeHtml(description)}${description.length >= 90 ? '…' : ''}</p>` : ''}</div>
     </div>`;
   }).join('');
 }
@@ -744,7 +750,7 @@ function renderSelectorLockWidget(container, initial) {
 
   const stepOptions = () => [...currentScenario.steps]
     .sort((a, b) => (a.name || '').localeCompare(b.name || '', 'fr', { sensitivity: 'base' }))
-    .map((s) => `<option value="${s.id}">${s.name || '(sans nom)'} #${s.id}</option>`).join('');
+    .map((s) => `<option value="${escapeHtml(s.id)}">${escapeHtml(s.name || '(sans nom)')} #${s.id}</option>`).join('');
 
   function serialize() {
     setLockCode(hotspots.map((h) => [h.style, h.targetId, h.color, h.size]));

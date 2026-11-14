@@ -12,25 +12,51 @@ const { computeScore } = require('../scoring');
 const router = express.Router();
 const uploadMapImage = multer({ storage: multer.memoryStorage(), limits: { fileSize: 20 * 1024 * 1024 } });
 
-const COOKIE_OPTIONS = {
-  httpOnly: true,
-  sameSite: 'lax',
-  maxAge: 12 * 60 * 60 * 1000
-};
+// IP du client derriere le proxy de l'hebergeur : derniere entree de X-Forwarded-For (ajoutee par le proxy le plus
+// proche, non falsifiable par le client), sinon l'adresse de la socket.
+function clientIp(req) {
+  const xff = String(req.headers['x-forwarded-for'] || '').split(',').map((x) => x.trim()).filter(Boolean);
+  return xff.length ? xff[xff.length - 1] : (req.socket && req.socket.remoteAddress) || '?';
+}
+const isHttps = (req) => req.secure || String(req.headers['x-forwarded-proto'] || '').split(',')[0].trim() === 'https';
+
+// Cookie de session admin : limite au chemin de montage (/Phoenix-Quest-V2/ sous la passerelle, / seul) pour ne pas
+// etre envoye aux autres outils, et Secure des que la connexion est en HTTPS.
+function cookieOptions(req) {
+  const mount = req.app && typeof req.app.mountpath === 'string' && req.app.mountpath !== '/' ? req.app.mountpath : '';
+  return { httpOnly: true, sameSite: 'lax', maxAge: 12 * 60 * 60 * 1000, secure: isHttps(req), path: mount + '/' };
+}
+
+// Limitation des essais de mot de passe : 8 echecs par IP sur 15 minutes, puis blocage (bcrypt seul ne suffit pas
+// contre une attaque par dictionnaire).
+const LOGIN_WINDOW_MS = 15 * 60 * 1000;
+const LOGIN_MAX_FAILURES = 8;
+const loginFailures = new Map(); // ip -> [horodatages]
+function recentFailures(ip) {
+  const list = (loginFailures.get(ip) || []).filter((t) => Date.now() - t < LOGIN_WINDOW_MS);
+  if (list.length) loginFailures.set(ip, list); else loginFailures.delete(ip);
+  return list;
+}
 
 router.post('/login', (req, res) => {
+  const ip = clientIp(req);
+  if (recentFailures(ip).length >= LOGIN_MAX_FAILURES) {
+    return res.status(429).json({ error: 'Trop de tentatives. Réessayez dans quelques minutes.' });
+  }
   const { password } = req.body || {};
-  if (!password || !auth.verifyPassword(password)) {
+  if (typeof password !== 'string' || !password || password.length > 200 || !auth.verifyPassword(password)) {
+    loginFailures.set(ip, [...recentFailures(ip), Date.now()]);
     return res.status(401).json({ error: 'Mot de passe incorrect' });
   }
+  loginFailures.delete(ip);
   const token = auth.createSession();
-  res.cookie(auth.COOKIE_NAME, token, COOKIE_OPTIONS);
+  res.cookie(auth.COOKIE_NAME, token, cookieOptions(req));
   res.json({ ok: true });
 });
 
 router.post('/logout', (req, res) => {
   auth.destroySession(req.cookies?.[auth.COOKIE_NAME]);
-  res.clearCookie(auth.COOKIE_NAME);
+  res.clearCookie(auth.COOKIE_NAME, { path: cookieOptions(req).path });
   res.json({ ok: true });
 });
 
