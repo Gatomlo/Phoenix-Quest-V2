@@ -35,3 +35,5 @@ https://github.com/Gatomlo/Phoenix-Quest-V2 (public). Branche `main` = site auto
 
 ## Méthode
 Réponses en français et concises ; diagnostiquer par mesure (taille réelle, requêtes réseau) avant de corriger ; tester à 360 px de large.
+
+- Connexion centralisée (node-gateway) : `src/gateway-bridge.js` (copie de `node-gateway/docs/gateway-bridge.js`) + `requireAdmin` dans `src/auth.js`. **Branche `gateway` uniquement** (la branche `main` est le site autonome). Si la passerelle fournit `req.gateway` avec le droit **admin** sur cet outil, la requête est authentifiée comme administrateur, sans session : la passerelle est interrogée à chaque requête, donc un accès retiré ou une déconnexion là-bas coupe l'accès aussitôt. Un simple « membre » n'obtient rien. Le mot de passe local reste valable. Hors passerelle : sans effet. Test : `test/gateway-bridge.test.js` (`npm test`). Droit à donner dans la passerelle : le nom de route de l'outil (ici le nom du dossier `Phoenix-Quest-V2`).

@@ -1,6 +1,7 @@
 const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const db = require('./db');
+const gatewayBridge = require('./gateway-bridge');
 
 const COOKIE_NAME = 'phoenix_admin_session';
 const SESSION_TTL_MS = 12 * 60 * 60 * 1000; // 12h
@@ -65,7 +66,12 @@ function isValidSession(token) {
   return true;
 }
 
+// Connexion centralisee de node-gateway : si la passerelle fournit req.gateway avec le droit « admin » sur cet
+// outil, la requete est authentifiee comme administrateur. Aucune session n'est creee : la passerelle est
+// interrogee a chaque requete (deconnexion ou droit retire la-bas => acces coupe aussitot). Un simple « membre »
+// n'obtient rien. Le mot de passe local reste valable. Hors passerelle : sans effet.
 function requireAdmin(req, res, next) {
+  if (gatewayBridge.identity(req, 'admin')) return next();
   const token = req.cookies?.[COOKIE_NAME];
   if (token && isValidSession(token)) return next();
   res.status(401).json({ error: 'Authentification admin requise' });
